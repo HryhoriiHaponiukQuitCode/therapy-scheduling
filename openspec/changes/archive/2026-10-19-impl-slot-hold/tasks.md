@@ -32,6 +32,6 @@
 
 ## 5. Розклад терапевта
 
-- [ ] 5.1 Політика select `holds`/`clients` для терапевта (лише власні); сторінка `/my-schedule` на 7 днів; тест;
+- [x] 5.1 Політика select `holds`/`clients` для терапевта (лише власні); сторінка `/my-schedule` на 7 днів; тест;
   запис екрана 1–2 хв на прод-URL у PR; `npx openspec archive impl-slot-hold -y` до merge.
   Done when: AC-HOLD-09; `npm run ac:coverage` — OK, усі AC зрізу «реалізовано» або «відкладено (причина)».
