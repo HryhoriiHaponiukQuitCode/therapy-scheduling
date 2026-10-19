@@ -106,7 +106,8 @@ export type DaySlot = {
   clientName: string | null;
   heldUntil: Date | null;
   canHold: boolean;
-  holdId: string | null; // утримання «Held», яке можна підтвердити (AC-HOLD-12)
+  holdId: string | null; // утримання зі статусом «Held»
+  canConfirm: boolean; // «Held» і слот ще не почався (AC-HOLD-12, AC-HOLD-22, AC-HOLD-23)
 };
 
 export type AvailabilityWindow = { start_hour: number; end_hour: number };
@@ -142,8 +143,28 @@ export function buildDaySlots(input: {
         heldUntil: active && active.status === "Held" ? heldUntil(active.hold) : null,
         canHold: status === "Free" && start.getTime() > input.now.getTime(),
         holdId: active && active.status === "Held" ? active.hold.id : null,
+        canConfirm: active?.status === "Held" && start.getTime() > input.now.getTime(),
       };
     });
+}
+
+export type ExpiredHold = { id: string; clientName: string; slotStart: Date };
+
+// AC-HOLD-20: прострочені утримання (статус «Expired») для планувальника й адміністратора; їхні слоти вільні.
+// Лише слоти, що ще не почалися й не зайняті іншим активним утриманням чи сеансом: їх можна утримати знову.
+export function expiredHolds(holds: HoldRecord[], now: Date): ExpiredHold[] {
+  const occupied = new Set(
+    holds.filter((hold) => holdStatus(hold, now) !== "Expired").map((hold) => hold.slotStart.getTime()),
+  );
+  return holds
+    .filter(
+      (hold) =>
+        holdStatus(hold, now) === "Expired" &&
+        hold.slotStart.getTime() > now.getTime() &&
+        !occupied.has(hold.slotStart.getTime()),
+    )
+    .sort((a, b) => a.slotStart.getTime() - b.slotStart.getTime())
+    .map((hold) => ({ id: hold.id, clientName: hold.clientName, slotStart: hold.slotStart }));
 }
 
 // AC-HOLD-18: повідомлення, коли в дні немає жодного вільного слоту.

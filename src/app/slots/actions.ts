@@ -67,8 +67,15 @@ export async function confirmHold(
     redirect("/login");
   }
 
-  const holdId = String(formData.get("hold_id") ?? "");
-  const code = checkConfirmRequest({ isStaff: isStaff(user.role), holdId });
+  // Кнопка Confirm передає «id утримання|початок слоту».
+  const [holdId = "", slotStartRaw = ""] = String(formData.get("hold_id") ?? "").split("|");
+  const slotStart = slotStartRaw ? new Date(slotStartRaw) : null;
+  const code = checkConfirmRequest({
+    isStaff: isStaff(user.role),
+    holdId,
+    slotStart: slotStart && !Number.isNaN(slotStart.getTime()) ? slotStart : null,
+    now: new Date(),
+  });
   if (code) {
     return { status: "error", message: CONFIRM_MESSAGES[code] };
   }

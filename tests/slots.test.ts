@@ -94,10 +94,13 @@ describe("slot-holds: слоти дня й прострочення", () => {
       ],
       now,
     });
-    const noAvailability = buildDaySlots({ date: "2026-11-04", availability: [], holds: [], now });
 
     expect(hasFreeSlots(allTaken)).toBe(false);
-    expect(hasFreeSlots(noAvailability)).toBe(false);
+    // Під повідомленням — обидва слоти з їхніми статусами (змінений AC-HOLD-18, відповідь PM на Q2).
+    expect(allTaken.map((s) => [s.time, s.status])).toEqual([
+      ["10:00", "Held"],
+      ["11:00", "Confirmed"],
+    ]);
     expect(NO_FREE_SLOTS_MESSAGE).toBe("No free slots on this day.");
   });
 

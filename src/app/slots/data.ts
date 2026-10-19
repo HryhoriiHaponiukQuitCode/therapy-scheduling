@@ -2,11 +2,14 @@ import type { createClient } from "@/lib/supabase/server";
 import {
   addDays,
   buildDaySlots,
+  expiredHolds,
   isoWeekday,
   isPracticeDate,
   practiceDate,
   practiceTimeToUtc,
   type DaySlot,
+  type ExpiredHold,
+  type HoldRecord,
 } from "@/lib/slots";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -19,18 +22,37 @@ export function toClientOptions(rows: { id: string; full_name: string }[]): Clie
   return rows.map((row) => ({ id: row.id, name: row.full_name }));
 }
 
+type HoldRow = {
+  id: string;
+  slot_start: string;
+  created_at: string;
+  confirmed_at: string | null;
+  clients: { full_name: string } | null;
+};
+
+function toHoldRecord(h: HoldRow): HoldRecord {
+  return {
+    id: h.id,
+    slotStart: new Date(h.slot_start),
+    createdAt: new Date(h.created_at),
+    confirmedAt: h.confirmed_at ? new Date(h.confirmed_at) : null,
+    clientName: h.clients?.full_name ?? "—",
+  };
+}
+
 export type DayView = {
   therapists: Therapist[];
   therapist: Therapist | null;
   date: string;
   slots: DaySlot[];
+  expired: ExpiredHold[];
   clients: ClientOption[];
   clientsError: boolean;
   error: boolean;
 };
 
 // Дані сторінки /slots: терапевти, доступність вибраного дня, утримання цього дня й клієнти для утримання
-// (AC-HOLD-01, 05, 06, 18; AC-HOLD-10 — вибір клієнта).
+// (AC-HOLD-01, 05, 06, 18, 24; AC-HOLD-10 — вибір клієнта; AC-HOLD-20 — прострочені утримання).
 // RLS: admin і scheduler бачать профілі терапевтів і всі утримання.
 export async function loadDayView(
   supabase: ServerClient,
@@ -53,13 +75,13 @@ export async function loadDayView(
   const therapist = therapists.find((t) => t.id === params.therapist) ?? therapists[0] ?? null;
 
   if (profilesError || !therapist) {
-    return { therapists, therapist, date, slots: [], clients: [], clientsError: false, error: Boolean(profilesError) };
+    return { therapists, therapist, date, slots: [], expired: [], clients: [], clientsError: false, error: Boolean(profilesError) };
   }
 
   const dayStart = practiceTimeToUtc(date, 0).toISOString();
   const dayEnd = practiceTimeToUtc(addDays(date, 1), 0).toISOString();
 
-  const [availability, holds, clients] = await Promise.all([
+  const [availability, holds, clients, upcoming] = await Promise.all([
     supabase
       .from("therapist_availability")
       .select("start_hour, end_hour")
@@ -72,31 +94,30 @@ export async function loadDayView(
       .gte("slot_start", dayStart)
       .lt("slot_start", dayEnd),
     supabase.from("clients").select("id, full_name").order("full_name"),
+    // AC-HOLD-20: огляд прострочених утримань терапевта на майбутні слоти, незалежно від вибраного дня.
+    supabase
+      .from("holds")
+      .select("id, slot_start, created_at, confirmed_at, clients(full_name)")
+      .eq("therapist_id", therapist.id)
+      .gt("slot_start", now.toISOString())
+      .order("slot_start")
+      .limit(200),
   ]);
 
   // Без клієнтів не працює лише вибір для утримання — статуси слотів однаково показуємо.
   if (availability.error || holds.error) {
-    return { therapists, therapist, date, slots: [], clients: [], clientsError: false, error: true };
+    return { therapists, therapist, date, slots: [], expired: [], clients: [], clientsError: false, error: true };
   }
 
-  const slots = buildDaySlots({
-    date,
-    availability: availability.data,
-    holds: holds.data.map((h) => ({
-      id: h.id,
-      slotStart: new Date(h.slot_start),
-      createdAt: new Date(h.created_at),
-      confirmedAt: h.confirmed_at ? new Date(h.confirmed_at) : null,
-      clientName: h.clients?.full_name ?? "—",
-    })),
-    now,
-  });
+  const records: HoldRecord[] = holds.data.map(toHoldRecord);
+  const slots = buildDaySlots({ date, availability: availability.data, holds: records, now });
 
   return {
     therapists,
     therapist,
     date,
     slots,
+    expired: upcoming.error ? [] : expiredHolds(upcoming.data.map(toHoldRecord), now),
     clients: clients.error ? [] : toClientOptions(clients.data),
     clientsError: Boolean(clients.error),
     error: false,
