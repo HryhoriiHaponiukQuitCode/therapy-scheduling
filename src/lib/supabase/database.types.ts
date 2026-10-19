@@ -146,7 +146,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      hold_slot: {
+        Args: {
+          p_therapist_id: string;
+          p_slot_start: string;
+          p_client_id: string;
+        };
+        Returns: Database["public"]["Tables"]["holds"]["Row"];
+      };
     };
     Enums: {
       [_ in never]: never;

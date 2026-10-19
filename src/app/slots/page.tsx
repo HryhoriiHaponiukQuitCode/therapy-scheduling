@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, isStaff } from "@/lib/roles";
 import { formatPracticeTime, hasFreeSlots, NO_FREE_SLOTS_MESSAGE, type SlotStatus } from "@/lib/slots";
 import { loadDayView } from "./data";
+import { HoldSlotForm } from "./hold-slot-form";
 
 const STATUS_STYLE: Record<SlotStatus, string> = {
   Free: "border-green-600 text-green-700 dark:text-green-400",
@@ -109,6 +110,20 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                         {slot.status}
                       </span>
                     </span>
+                    {slot.canHold && view.therapist ? (
+                      view.clients.length > 0 ? (
+                        <HoldSlotForm
+                          therapistId={view.therapist.id}
+                          slotStart={slot.start.toISOString()}
+                          time={slot.time}
+                          clients={view.clients}
+                        />
+                      ) : (
+                        <Link href="/clients" className="w-full text-sm underline">
+                          Create a client to hold this slot
+                        </Link>
+                      )
+                    ) : null}
                   </li>
                 ))}
               </ul>

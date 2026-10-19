@@ -12,16 +12,26 @@ import {
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export type Therapist = { id: string; name: string; email: string };
+export type ClientOption = { id: string; name: string };
+
+// Клієнти для вибору під час утримання, за іменем (AC-HOLD-10).
+export function toClientOptions(rows: { id: string; full_name: string }[]): ClientOption[] {
+  return rows
+    .map((row) => ({ id: row.id, name: row.full_name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
 
 export type DayView = {
   therapists: Therapist[];
   therapist: Therapist | null;
   date: string;
   slots: DaySlot[];
+  clients: ClientOption[];
   error: boolean;
 };
 
-// Дані сторінки /slots: терапевти, доступність вибраного дня й утримання цього дня (AC-HOLD-01, 05, 06, 18).
+// Дані сторінки /slots: терапевти, доступність вибраного дня, утримання цього дня й клієнти для утримання
+// (AC-HOLD-01, 05, 06, 18; AC-HOLD-10 — вибір клієнта).
 // RLS: admin і scheduler бачать профілі терапевтів і всі утримання.
 export async function loadDayView(
   supabase: ServerClient,
@@ -44,13 +54,13 @@ export async function loadDayView(
   const therapist = therapists.find((t) => t.id === params.therapist) ?? therapists[0] ?? null;
 
   if (profilesError || !therapist) {
-    return { therapists, therapist, date, slots: [], error: Boolean(profilesError) };
+    return { therapists, therapist, date, slots: [], clients: [], error: Boolean(profilesError) };
   }
 
   const dayStart = practiceTimeToUtc(date, 0).toISOString();
   const dayEnd = practiceTimeToUtc(addDays(date, 1), 0).toISOString();
 
-  const [availability, holds] = await Promise.all([
+  const [availability, holds, clients] = await Promise.all([
     supabase
       .from("therapist_availability")
       .select("start_hour, end_hour")
@@ -62,10 +72,11 @@ export async function loadDayView(
       .eq("therapist_id", therapist.id)
       .gte("slot_start", dayStart)
       .lt("slot_start", dayEnd),
+    supabase.from("clients").select("id, full_name"),
   ]);
 
-  if (availability.error || holds.error) {
-    return { therapists, therapist, date, slots: [], error: true };
+  if (availability.error || holds.error || clients.error) {
+    return { therapists, therapist, date, slots: [], clients: [], error: true };
   }
 
   const slots = buildDaySlots({
@@ -81,5 +92,5 @@ export async function loadDayView(
     now,
   });
 
-  return { therapists, therapist, date, slots, error: false };
+  return { therapists, therapist, date, slots, clients: toClientOptions(clients.data), error: false };
 }
