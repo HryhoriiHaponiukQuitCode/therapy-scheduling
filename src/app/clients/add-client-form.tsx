@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { ActionMessage } from "@/components/action-message";
 import { CLIENT_EMAIL_MAX, CLIENT_NAME_MAX } from "@/lib/clients";
 import { addClient, type AddClientState } from "./actions";
 
@@ -35,13 +36,7 @@ export function AddClientForm() {
           className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
         />
       </label>
-      <p
-        role={state.status === "error" ? "alert" : "status"}
-        aria-live="polite"
-        className={state.status === "error" ? "min-h-5 text-sm text-red-600" : "min-h-5 text-sm text-green-700"}
-      >
-        {state.status === "idle" ? "" : state.message}
-      </p>
+      <ActionMessage state={state} />
       <button
         type="submit"
         disabled={pending}

@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, isStaff } from "@/lib/roles";
 import { formatPracticeTime, hasFreeSlots, NO_FREE_SLOTS_MESSAGE, type SlotStatus } from "@/lib/slots";
 import { loadDayView } from "./data";
+import { HOLD_FORM_ID } from "@/lib/holds";
+import { HoldSlotForm } from "./hold-slot-form";
 
 const STATUS_STYLE: Record<SlotStatus, string> = {
   Free: "border-green-600 text-green-700 dark:text-green-400",
@@ -95,10 +97,31 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                 {NO_FREE_SLOTS_MESSAGE}
               </p>
             ) : null}
+            {view.therapist && view.slots.some((slot) => slot.canHold) ? (
+              view.clientsError ? (
+                <p role="alert" className="text-sm text-red-600">
+                  Could not load clients, so slots cannot be held right now.
+                </p>
+              ) : view.clients.length > 0 ? (
+                // key: новий терапевт чи день — новий стан форми (без чужого повідомлення).
+                <HoldSlotForm
+                  key={`${view.therapist.id}-${view.date}`}
+                  therapistId={view.therapist.id}
+                  clients={view.clients}
+                />
+              ) : (
+                <Link href="/clients" className="text-sm underline">
+                  Create a client to hold a slot
+                </Link>
+              )
+            ) : null}
             {view.slots.length > 0 ? (
               <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800" data-testid="slot-list">
                 {view.slots.map((slot) => (
-                  <li key={slot.time} className="flex flex-wrap items-center justify-between gap-2 py-3">
+                  <li
+                    key={`${view.therapist?.id}-${slot.start.toISOString()}`}
+                    className="flex flex-wrap items-center justify-between gap-2 py-3"
+                  >
                     <span className="font-mono">{slot.time}</span>
                     <span className="flex flex-wrap items-center gap-3">
                       {slot.clientName ? <span>{slot.clientName}</span> : null}
@@ -109,6 +132,17 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                         {slot.status}
                       </span>
                     </span>
+                    {slot.canHold && view.clients.length > 0 ? (
+                      <button
+                        type="submit"
+                        form={HOLD_FORM_ID}
+                        name="slot_start"
+                        value={slot.start.toISOString()}
+                        className="min-h-11 rounded bg-foreground px-3 py-1 text-sm font-medium text-background"
+                      >
+                        Hold {slot.time}
+                      </button>
+                    ) : null}
                   </li>
                 ))}
               </ul>
