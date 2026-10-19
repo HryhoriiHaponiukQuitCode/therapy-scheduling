@@ -1,7 +1,12 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, isStaff } from "@/lib/roles";
+import { ActionMessage } from "@/components/action-message";
+import { AppShell } from "@/components/app-shell";
+import { Card } from "@/components/card";
+import { EmptyState } from "@/components/empty-state";
+import { UserIcon, UsersIcon } from "@/components/icons";
+import { PageHeader } from "@/components/page-header";
 import { AddClientForm } from "./add-client-form";
 
 // Клієнти практики: список і створення картки (admin, scheduler). AC-HOLD-10 … AC-HOLD-16.
@@ -14,13 +19,10 @@ export default async function ClientsPage() {
 
   if (!isStaff(user.role)) {
     return (
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-6 py-16">
-        <h1 className="text-2xl font-semibold">Clients</h1>
-        <p className="text-sm">Only schedulers and admins can manage clients.</p>
-        <Link href="/" className="text-sm underline">
-          Back
-        </Link>
-      </main>
+      <AppShell user={user}>
+        <PageHeader title="Clients" />
+        <p className="m-0">Only schedulers and admins can manage clients.</p>
+      </AppShell>
     );
   }
 
@@ -30,43 +32,47 @@ export default async function ClientsPage() {
     .select("id, full_name, email")
     .order("full_name");
 
+  const th = "border-b border-border px-3 py-2.5 text-left text-xs leading-4 font-semibold text-muted";
+  const td = "border-b border-border px-3 py-3 align-middle";
+
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-6 py-16">
-      <div className="flex items-baseline justify-between">
-        <h1 className="text-2xl font-semibold">Clients</h1>
-        <Link href="/" className="text-sm underline">
-          Home
-        </Link>
-      </div>
+    <AppShell user={user}>
+      <PageHeader title="Clients" />
 
-      <section aria-labelledby="new-client" className="flex flex-col gap-4">
-        <h2 id="new-client" className="text-lg font-medium">
-          New client
-        </h2>
+      <Card id="new-client" title="New client" icon={<UserIcon />}>
         <AddClientForm />
-      </section>
+      </Card>
 
-      <section aria-labelledby="all-clients" className="flex flex-col gap-2">
-        <h2 id="all-clients" className="text-lg font-medium">
-          All clients
-        </h2>
+      <Card id="all-clients" title="All clients" icon={<UsersIcon />}>
         {error ? (
-          <p role="alert" className="text-sm text-red-600">
-            Could not load clients. Try again later.
-          </p>
+          <ActionMessage state={{ status: "error", message: "Could not load clients. Try again later." }} />
         ) : clients && clients.length > 0 ? (
-          <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800" data-testid="client-list">
-            {clients.map((client) => (
-              <li key={client.id} className="flex justify-between gap-4 py-2">
-                <span>{client.full_name}</span>
-                <span className="text-zinc-500">{client.email}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse" data-testid="client-list">
+              <thead>
+                <tr>
+                  <th scope="col" className={th}>
+                    Name
+                  </th>
+                  <th scope="col" className={th}>
+                    Email
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="[&>tr:last-child>td]:border-b-0">
+                {clients.map((client) => (
+                  <tr key={client.id}>
+                    <td className={td}>{client.full_name}</td>
+                    <td className={`${td} break-all text-muted`}>{client.email}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p className="text-sm text-zinc-500">No clients yet.</p>
+          <EmptyState icon={<UsersIcon />}>No clients yet.</EmptyState>
         )}
-      </section>
-    </main>
+      </Card>
+    </AppShell>
   );
 }

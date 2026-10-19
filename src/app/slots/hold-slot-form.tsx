@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { ActionMessage } from "@/components/action-message";
+import { Field } from "@/components/field";
+import { Select } from "@/components/select";
 import { HOLD_FORM_ID } from "@/lib/holds";
 import { holdSlot, type HoldSlotState } from "./actions";
 import type { ClientOption } from "./data";
@@ -11,31 +13,25 @@ const initialState: HoldSlotState = { status: "idle" };
 // Одна форма утримання на сторінку: клієнт вибирається один раз, а кнопки Hold у рядках вільних слотів
 // надсилають цю форму з атрибутом form і передають slot_start як значення кнопки (AC-HOLD-02, AC-HOLD-10).
 // Форма лишається змонтованою після утримання, тож повідомлення про успіх видно.
+// Вигляд — смуга subtle з власним Select (design-system.md, розділ 5); client_id — прихованим полем Select.
 export function HoldSlotForm(props: { therapistId: string; clients: ClientOption[] }) {
   const [state, formAction, pending] = useActionState(holdSlot, initialState);
 
   return (
-    <form id={HOLD_FORM_ID} action={formAction} className="flex flex-col gap-2" aria-busy={pending}>
+    <form id={HOLD_FORM_ID} action={formAction} className="flex flex-col gap-3" aria-busy={pending}>
       <input type="hidden" name="therapist_id" value={props.therapistId} />
-      <label className="flex flex-col gap-1 text-sm">
-        Client to hold a slot for
-        <select
-          name="client_id"
-          defaultValue=""
-          className="min-h-11 rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-        >
-          <option value="" disabled>
-            Choose a client
-          </option>
-          {props.clients.map((client) => (
-            <option key={client.id} value={client.id}>
-              {client.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="flex flex-wrap items-end gap-4 rounded-md bg-subtle p-4">
+        <Field label="Client to hold a slot for" htmlFor="hold-client" className="min-w-0 flex-1 basis-60">
+          <Select
+            id="hold-client"
+            name="client_id"
+            placeholder="Choose a client"
+            options={props.clients.map((client) => ({ value: client.id, label: client.name }))}
+          />
+        </Field>
+      </div>
       {/* ActionMessage не демонтуємо під час pending: інакше результат дії не оголошується. */}
-      {pending ? <p className="text-sm text-zinc-500">Holding…</p> : null}
+      {pending ? <p className="m-0 text-sm text-muted">Holding…</p> : null}
       <ActionMessage state={state} />
     </form>
   );

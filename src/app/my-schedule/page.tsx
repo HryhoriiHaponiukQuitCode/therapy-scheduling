@@ -1,11 +1,18 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/roles";
 import { formatPracticeTime } from "@/lib/slots";
+import { ActionMessage } from "@/components/action-message";
+import { AppShell } from "@/components/app-shell";
+import { Card } from "@/components/card";
+import { EmptyState } from "@/components/empty-state";
+import { CalendarIcon } from "@/components/icons";
+import { PageHeader } from "@/components/page-header";
+import { SlotTable } from "@/components/slot-table";
 import { loadMySchedule } from "./data";
 
 // Розклад терапевта: власні слоти, утримання й сеанси на 7 днів (AC-HOLD-09, AC-HOLD-21).
+// Вигляд — картка на кожен день із SlotTable без колонки дії (design-system.md, розділ 5).
 export default async function MySchedulePage() {
   const supabase = await createClient();
   const user = await getCurrentUser(supabase);
@@ -15,58 +22,39 @@ export default async function MySchedulePage() {
 
   if (user.role !== "therapist" || !user.email) {
     return (
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-6 py-16">
-        <h1 className="text-2xl font-semibold">My schedule</h1>
-        <p className="text-sm">Only therapists have a personal schedule.</p>
-        <Link href="/" className="text-sm underline">
-          Back
-        </Link>
-      </main>
+      <AppShell user={user}>
+        <PageHeader title="My schedule" />
+        <p className="m-0">Only therapists have a personal schedule.</p>
+      </AppShell>
     );
   }
 
   const { days, error } = await loadMySchedule(supabase, { id: user.id, email: user.email }, new Date());
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-6 py-16">
-      <div className="flex items-baseline justify-between">
-        <h1 className="text-2xl font-semibold">My schedule</h1>
-        <Link href="/" className="text-sm underline">
-          Home
-        </Link>
-      </div>
-      <p className="text-xs text-zinc-500">Next 7 days, times in America/Los_Angeles.</p>
+    <AppShell user={user}>
+      <PageHeader title="My schedule" description="Next 7 days, times in America/Los_Angeles." />
       {error ? (
-        <p role="alert" className="text-sm text-red-600">
-          Could not load your schedule. Try again later.
-        </p>
+        <ActionMessage state={{ status: "error", message: "Could not load your schedule. Try again later." }} />
       ) : (
         days.map((day) => (
-          <section key={day.date} aria-labelledby={`day-${day.date}`} className="flex flex-col gap-2">
-            <h2 id={`day-${day.date}`} className="text-lg font-medium">
-              {day.date}
-            </h2>
+          <Card key={day.date} id={`day-${day.date}`} title={day.date} icon={<CalendarIcon />}>
             {day.slots.length === 0 ? (
-              <p className="text-sm text-zinc-500">No slots on this day.</p>
+              <EmptyState>No slots on this day.</EmptyState>
             ) : (
-              <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
-                {day.slots.map((slot) => (
-                  <li key={slot.start.toISOString()} className="flex flex-wrap justify-between gap-2 py-2">
-                    <span className="font-mono">{slot.time}</span>
-                    <span className="flex flex-wrap items-center gap-3">
-                      {slot.clientName ? <span>{slot.clientName}</span> : null}
-                      {slot.heldUntil ? (
-                        <span className="text-zinc-500">Held until {formatPracticeTime(slot.heldUntil)}</span>
-                      ) : null}
-                      <span className="rounded border px-2 py-0.5 text-xs">{slot.status}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <SlotTable
+                rows={day.slots.map((slot) => ({
+                  key: slot.start.toISOString(),
+                  time: slot.time,
+                  status: slot.status,
+                  client: slot.clientName,
+                  heldUntil: slot.heldUntil ? `Held until ${formatPracticeTime(slot.heldUntil)}` : null,
+                }))}
+              />
             )}
-          </section>
+          </Card>
         ))
       )}
-    </main>
+    </AppShell>
   );
 }
