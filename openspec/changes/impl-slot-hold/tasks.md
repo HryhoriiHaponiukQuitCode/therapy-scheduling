@@ -5,11 +5,11 @@
 
 ## 1. Ролі й картка клієнта
 
-- [x] 1.1 Міграція: ролі `admin`/`scheduler`/`therapist` (дані → default → constraint), хелпер `private.is_staff`,
+- [ ] 1.1 Міграція: ролі `admin`/`scheduler`/`therapist` (дані → default → constraint), хелпер `private.is_staff`,
   таблиця `clients` з унікальним `lower(email)`, RLS і GRANT; `supabase/demo-users.json` (admin, scheduler1, scheduler2,
-  therapist1, therapist2); `validateClient`; сторінка `/clients` і `createClientAction`; тести.
-  Done when: AC-HOLD-10, AC-HOLD-11, AC-HOLD-15, AC-HOLD-16 — тести зелені, після merge `db-deploy` і `users:demo`
-  планувальник створює клієнта на проді.
+  therapist1, therapist2); `validateClient`; сторінка `/clients` і `addClient`; тести.
+  Done when: AC-HOLD-11, AC-HOLD-15, AC-HOLD-16 і створення картки з AC-HOLD-10 — тести зелені, після merge `db-deploy`
+  і `users:demo` планувальник створює клієнта на проді.
 
 ## 2. Слоти дня й прострочення
 
@@ -21,8 +21,9 @@
 ## 3. Утримання слоту
 
 - [ ] 3.1 Міграція: функція `hold_slot` (роль, advisory lock, початок слоту, активне утримання, insert); мапінг кодів
-  помилок; `holdSlotAction` і кнопка Hold на `/slots`; тести.
-  Done when: AC-HOLD-02, AC-HOLD-03, AC-HOLD-04, AC-HOLD-07, AC-HOLD-08, AC-HOLD-17.
+  помилок; `holdSlotAction` і кнопка Hold на `/slots` з вибором клієнта; тести.
+  Done when: AC-HOLD-02, AC-HOLD-03, AC-HOLD-04, AC-HOLD-07, AC-HOLD-08, AC-HOLD-17; AC-HOLD-10 — створеного клієнта
+  можна вибрати під час утримання.
 
 ## 4. Підтвердження утримання
 

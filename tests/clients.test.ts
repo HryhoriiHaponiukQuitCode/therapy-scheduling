@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   CLIENT_DUPLICATE_MESSAGE,
+  CLIENT_FORBIDDEN_MESSAGE,
   CLIENT_INVALID_MESSAGE,
   validateClient,
 } from "@/lib/clients";
@@ -104,5 +105,21 @@ describe("clients", () => {
       values: { fullName: "Client One Again", email: "client1@example.test" },
     });
     expect(CLIENT_DUPLICATE_MESSAGE).toBe("A client with this email already exists.");
+  });
+
+  // Окремого AC немає: матриця прав requirements/product.md — терапевт не створює клієнтів.
+  it("терапевт не може створити клієнта — insert не викликано, повідомлення про права", async () => {
+    supabaseMock.profile.mockResolvedValue({
+      data: { email: "therapist1@example.test", full_name: "Therapist One", role: "therapist" },
+    });
+
+    const state = await addClient({ status: "idle" }, form("Client Three", "client3@example.test"));
+
+    expect(supabaseMock.insert).not.toHaveBeenCalled();
+    expect(state).toEqual({
+      status: "error",
+      message: CLIENT_FORBIDDEN_MESSAGE,
+      values: { fullName: "Client Three", email: "client3@example.test" },
+    });
   });
 });
