@@ -37,15 +37,15 @@
 | AC-HOLD-11 | порожнє ім'я — клієнта не створено, повідомлення | `src/lib/clients.ts` (validateClient) | `tests/clients.test.ts` | реалізовано |
 | AC-HOLD-15 | email без @ — клієнта не створено, повідомлення | `src/lib/clients.ts` (validateClient) | `tests/clients.test.ts` | реалізовано |
 | AC-HOLD-16 | дублікат email — клієнта не створено, повідомлення | `src/lib/clients.ts` (clientInsertErrorMessage), `supabase/migrations/20261019102511_roles_and_clients.sql` | `tests/clients.test.ts` | реалізовано |
-| AC-HOLD-01 | слоти дня зі статусами, утримати можна лише вільний | — | — | відкладено (чекає реалізації) |
-| AC-HOLD-18 | день без вільних слотів — повідомлення | — | — | відкладено (чекаю відповідь PM на Q2, Sofiia-pm/therapy-scheduling-spec#4) |
+| AC-HOLD-01 | слоти дня зі статусами, утримати можна лише вільний | `src/lib/slots.ts` (buildDaySlots), `src/app/slots/page.tsx` | `tests/slots.test.ts` | реалізовано |
+| AC-HOLD-18 | день без вільних слотів — повідомлення | `src/lib/slots.ts` (hasFreeSlots), `src/app/slots/page.tsx` | `tests/slots.test.ts` | реалізовано |
 | AC-HOLD-02 | утримання вільного слоту на 24 години з «Held until» | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-03 | слот уже утримано — нове утримання не створюється | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-04 | одночасне утримання — рівно одне утримання | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-17 | повторне утримання за тим самим клієнтом не змінює «Held until» | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-07 | слот, що вже почався, утримати не можна | — | — | відкладено (чекає реалізації) |
-| AC-HOLD-05 | за хвилину до спливу 24 годин — досі «Held» | — | — | відкладено (чекає реалізації) |
-| AC-HOLD-06 | після 24 годин — «Expired», слот вільний | — | — | відкладено (чекаю відповідь PM на Q3, Sofiia-pm/therapy-scheduling-spec#5) |
+| AC-HOLD-05 | за хвилину до спливу 24 годин — досі «Held» | `src/lib/slots.ts` (holdStatus) | `tests/slots.test.ts` | реалізовано |
+| AC-HOLD-06 | після 24 годин — «Expired», слот вільний | `src/lib/slots.ts` (holdStatus, buildDaySlots) | `tests/slots.test.ts` | реалізовано |
 | AC-HOLD-12 | підтвердження непростроченого утримання — «Confirmed» | — | — | відкладено (чекаю відповідь PM на Q1, Sofiia-pm/therapy-scheduling-spec#3) |
 | AC-HOLD-13 | прострочене утримання не підтверджується | — | — | відкладено (чекаю відповідь PM на Q1, Sofiia-pm/therapy-scheduling-spec#3) |
 | AC-HOLD-08 | терапевт не може утримати слот | — | — | відкладено (чекає реалізації) |
