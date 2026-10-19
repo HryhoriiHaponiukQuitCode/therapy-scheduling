@@ -169,7 +169,8 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
         )}
       </section>
 
-      {view.expired.length > 0 ? (
+      {/* AC-HOLD-24: у дні без жодного слоту — лише повідомлення, без інших розділів. */}
+      {view.slots.length > 0 && view.expired.length > 0 ? (
         <section aria-labelledby="expired-holds" className="flex flex-col gap-2">
           <h2 id="expired-holds" className="text-lg font-medium">
             Expired holds
