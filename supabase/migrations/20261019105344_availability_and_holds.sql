@@ -24,11 +24,33 @@ revoke all on table public.therapist_availability from anon, authenticated;
 grant select on table public.therapist_availability to authenticated;
 grant select, insert, update, delete on table public.therapist_availability to service_role;
 
-create policy therapist_availability_select_all
+-- Email поточного користувача з його профілю (не з JWT): прив'язка доступності — за email.
+-- security definer: читає profiles в обхід RLS, тож політики не зациклюються (42P17).
+create or replace function private.current_profile_email()
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select lower(p.email) from public.profiles as p where p.id = (select auth.uid());
+$$;
+
+revoke execute on function private.current_profile_email() from public, anon;
+grant execute on function private.current_profile_email() to authenticated;
+
+-- Матриця прав: admin і scheduler бачать слоти всіх терапевтів, терапевт — лише власні.
+create policy therapist_availability_select_staff
   on public.therapist_availability
   for select
   to authenticated
-  using (true);
+  using ((select private.is_staff()));
+
+create policy therapist_availability_select_own_therapist
+  on public.therapist_availability
+  for select
+  to authenticated
+  using (lower(therapist_email) = (select private.current_profile_email()));
 
 -- therapist1: пн, вт, чт, пт 09:00–17:00 (середа без слотів); therapist2: пн–пт 10:00–16:00.
 insert into public.therapist_availability (therapist_email, weekday, start_hour, end_hour)
