@@ -154,6 +154,12 @@ export type Database = {
         };
         Returns: Database["public"]["Tables"]["holds"]["Row"];
       };
+      confirm_hold: {
+        Args: {
+          p_hold_id: string;
+        };
+        Returns: Database["public"]["Tables"]["holds"]["Row"];
+      };
     };
     Enums: {
       [_ in never]: never;

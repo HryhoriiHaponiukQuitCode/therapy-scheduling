@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, isStaff } from "@/lib/roles";
 import { formatPracticeTime, hasFreeSlots, NO_FREE_SLOTS_MESSAGE, type SlotStatus } from "@/lib/slots";
 import { loadDayView } from "./data";
-import { HOLD_FORM_ID } from "@/lib/holds";
+import { CONFIRM_FORM_ID, HOLD_FORM_ID } from "@/lib/holds";
+import { ConfirmHoldForm } from "./confirm-hold-form";
 import { HoldSlotForm } from "./hold-slot-form";
 
 const STATUS_STYLE: Record<SlotStatus, string> = {
@@ -115,6 +116,10 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                 </Link>
               )
             ) : null}
+            {view.therapist && view.slots.some((slot) => slot.holdId) ? (
+              // key: новий терапевт чи день — новий стан форми (без чужого повідомлення).
+              <ConfirmHoldForm key={`confirm-${view.therapist.id}-${view.date}`} />
+            ) : null}
             {view.slots.length > 0 ? (
               <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800" data-testid="slot-list">
                 {view.slots.map((slot) => (
@@ -141,6 +146,17 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                         className="min-h-11 rounded bg-foreground px-3 py-1 text-sm font-medium text-background"
                       >
                         Hold {slot.time}
+                      </button>
+                    ) : null}
+                    {slot.holdId ? (
+                      <button
+                        type="submit"
+                        form={CONFIRM_FORM_ID}
+                        name="hold_id"
+                        value={slot.holdId}
+                        className="min-h-11 rounded border border-foreground px-3 py-1 text-sm font-medium"
+                      >
+                        Confirm {slot.time}
                       </button>
                     ) : null}
                   </li>

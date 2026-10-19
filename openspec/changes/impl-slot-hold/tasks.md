@@ -27,7 +27,7 @@
 
 ## 4. Підтвердження утримання
 
-- [ ] 4.1 Міграція: функція `confirm_hold`; `confirmHoldAction` і кнопка Confirm на `/slots`; тести.
+- [x] 4.1 Міграція: функція `confirm_hold`; `confirmHoldAction` і кнопка Confirm на `/slots`; тести.
   Done when: AC-HOLD-12, AC-HOLD-13, AC-HOLD-14, AC-HOLD-19.
 
 ## 5. Розклад терапевта
