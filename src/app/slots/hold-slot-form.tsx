@@ -34,7 +34,9 @@ export function HoldSlotForm(props: { therapistId: string; clients: ClientOption
           ))}
         </select>
       </label>
-      {pending ? <p className="text-sm text-zinc-500">Holding…</p> : <ActionMessage state={state} />}
+      {/* ActionMessage не демонтуємо під час pending: інакше результат дії не оголошується. */}
+      {pending ? <p className="text-sm text-zinc-500">Holding…</p> : null}
+      <ActionMessage state={state} />
     </form>
   );
 }
