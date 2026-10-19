@@ -5,6 +5,7 @@ import {
   isoWeekday,
   practiceDate,
   practiceTimeToUtc,
+  toHoldRecord,
   type DaySlot,
 } from "@/lib/slots";
 
@@ -30,7 +31,8 @@ export async function loadMySchedule(
     supabase
       .from("therapist_availability")
       .select("weekday, start_hour, end_hour")
-      .eq("therapist_email", user.email),
+      // Без урахування регістру, як у RLS і hold_slot; % і _ екрануємо, щоб ilike був точним збігом.
+      .ilike("therapist_email", user.email.replace(/[\\%_]/g, (ch) => `\\${ch}`)),
     supabase
       .from("holds")
       .select("id, slot_start, created_at, confirmed_at, clients(full_name)")
@@ -43,13 +45,7 @@ export async function loadMySchedule(
     return { days: [], error: true };
   }
 
-  const records = holds.data.map((h) => ({
-    id: h.id,
-    slotStart: new Date(h.slot_start),
-    createdAt: new Date(h.created_at),
-    confirmedAt: h.confirmed_at ? new Date(h.confirmed_at) : null,
-    clientName: h.clients?.full_name ?? "—",
-  }));
+  const records = holds.data.map(toHoldRecord);
 
   const days = Array.from({ length: SCHEDULE_DAYS }, (_, i) => {
     const date = addDays(today, i);
@@ -61,6 +57,7 @@ export async function loadMySchedule(
         availability: availability.data.filter((a) => a.weekday === weekday),
         holds: records,
         now,
+        includeHoldHours: true,
       }),
     };
   });

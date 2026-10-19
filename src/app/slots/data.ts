@@ -10,6 +10,7 @@ import {
   type DaySlot,
   type ExpiredHold,
   type HoldRecord,
+  toHoldRecord,
 } from "@/lib/slots";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -20,24 +21,6 @@ export type ClientOption = { id: string; name: string };
 // Клієнти для вибору під час утримання (AC-HOLD-10); порядок задає запит (.order("full_name")).
 export function toClientOptions(rows: { id: string; full_name: string }[]): ClientOption[] {
   return rows.map((row) => ({ id: row.id, name: row.full_name }));
-}
-
-type HoldRow = {
-  id: string;
-  slot_start: string;
-  created_at: string;
-  confirmed_at: string | null;
-  clients: { full_name: string } | null;
-};
-
-function toHoldRecord(h: HoldRow): HoldRecord {
-  return {
-    id: h.id,
-    slotStart: new Date(h.slot_start),
-    createdAt: new Date(h.created_at),
-    confirmedAt: h.confirmed_at ? new Date(h.confirmed_at) : null,
-    clientName: h.clients?.full_name ?? "—",
-  };
 }
 
 export type DayView = {

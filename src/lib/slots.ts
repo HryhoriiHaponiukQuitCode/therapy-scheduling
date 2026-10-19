@@ -87,6 +87,25 @@ export type HoldRecord = {
   clientName: string;
 };
 
+// Рядок holds із вкладеним clients(full_name) → HoldRecord (спільне для /slots і /my-schedule).
+export type HoldRow = {
+  id: string;
+  slot_start: string;
+  created_at: string;
+  confirmed_at: string | null;
+  clients: { full_name: string } | null;
+};
+
+export function toHoldRecord(h: HoldRow): HoldRecord {
+  return {
+    id: h.id,
+    slotStart: new Date(h.slot_start),
+    createdAt: new Date(h.created_at),
+    confirmedAt: h.confirmed_at ? new Date(h.confirmed_at) : null,
+    clientName: h.clients?.full_name ?? "—",
+  };
+}
+
 export function heldUntil(hold: Pick<HoldRecord, "createdAt">): Date {
   return new Date(hold.createdAt.getTime() + HOLD_MINUTES * 60_000);
 }
@@ -119,10 +138,20 @@ export function buildDaySlots(input: {
   availability: AvailabilityWindow[];
   holds: HoldRecord[];
   now: Date;
+  // Розклад терапевта: показати й години активних утримань чи сеансів поза поточною доступністю.
+  includeHoldHours?: boolean;
 }): DaySlot[] {
   const hours = new Set<number>();
   for (const window of input.availability) {
     for (let hour = window.start_hour; hour < window.end_hour; hour++) hours.add(hour);
+  }
+  if (input.includeHoldHours) {
+    const active = new Set(
+      input.holds.filter((hold) => holdStatus(hold, input.now) !== "Expired").map((h) => h.slotStart.getTime()),
+    );
+    for (let hour = 0; hour < 24; hour++) {
+      if (active.has(practiceTimeToUtc(input.date, hour).getTime())) hours.add(hour);
+    }
   }
 
   return [...hours]

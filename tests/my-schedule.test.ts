@@ -8,8 +8,9 @@ function at(date: string, hour: number, minute = 0): Date {
 
 type Row = Record<string, unknown>;
 
-// Підмінений клієнт Supabase: фіксує фільтри запитів і повертає лише рядки, що їм відповідають
-// (у базі те саме забезпечує RLS holds_select_own_therapist).
+// Підмінений клієнт Supabase: фіксує фільтри запитів і повертає лише рядки, що їм відповідають.
+// Обмеження: ізоляцію між терапевтами в базі забезпечує RLS holds_select_own_therapist; тут перевіряємо лише,
+// що завантажувач сам фільтрує за власним id та email. RLS перевіряє db-check (міграції на одноразовій базі).
 function fakeSupabase(tables: { therapist_availability: Row[]; holds: Row[] }) {
   const filters: Record<string, Record<string, unknown>> = {};
   const query = (table: keyof typeof tables) => {
@@ -18,11 +19,14 @@ function fakeSupabase(tables: { therapist_availability: Row[]; holds: Row[] }) {
     const chain = {
       select: () => chain,
       eq: (col: string, val: unknown) => ((f[col] = val), chain),
+      ilike: (col: string, val: string) => ((f[col] = val.toLowerCase()), chain),
       gte: () => chain,
       lt: () => chain,
       then: (resolve: (v: unknown) => void) =>
         resolve({
-          data: tables[table].filter((row) => Object.entries(f).every(([k, v]) => row[k] === v)),
+          data: tables[table].filter((row) =>
+            Object.entries(f).every(([k, v]) => (typeof row[k] === "string" ? String(row[k]).toLowerCase() : row[k]) === v),
+          ),
           error: null,
         }),
     };
