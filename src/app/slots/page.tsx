@@ -14,7 +14,7 @@ const STATUS_STYLE: Record<SlotStatus, string> = {
   Confirmed: "border-zinc-500 text-zinc-600 dark:text-zinc-300",
 };
 
-// Слоти терапевта на вибраний день зі статусами (AC-HOLD-01, AC-HOLD-05, AC-HOLD-06, AC-HOLD-18).
+// Слоти терапевта на вибраний день зі статусами (AC-HOLD-01, 05, 06, 18, 24) і прострочені утримання (AC-HOLD-20).
 export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
   const supabase = await createClient();
   const user = await getCurrentUser(supabase);
@@ -150,7 +150,7 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                         Hold {slot.time}
                       </button>
                     ) : null}
-                    {slot.holdId ? (
+                    {slot.canConfirm && slot.holdId ? (
                       <button
                         type="submit"
                         form={CONFIRM_FORM_ID}
@@ -168,6 +168,28 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
           </>
         )}
       </section>
+
+      {view.expired.length > 0 ? (
+        <section aria-labelledby="expired-holds" className="flex flex-col gap-2">
+          <h2 id="expired-holds" className="text-lg font-medium">
+            Expired holds
+          </h2>
+          <p className="text-xs text-zinc-500">Not confirmed within 24 hours — these slots are free again.</p>
+          <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800" data-testid="expired-holds">
+            {view.expired.map((hold) => (
+              <li key={hold.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                <span className="font-mono">{formatPracticeTime(hold.slotStart)}</span>
+                <span className="flex items-center gap-3">
+                  <span>{hold.clientName}</span>
+                  <span className="rounded border border-red-600 px-2 py-0.5 text-xs text-red-700 dark:text-red-400">
+                    Expired
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </main>
   );
 }

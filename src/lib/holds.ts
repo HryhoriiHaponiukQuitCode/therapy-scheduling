@@ -49,6 +49,7 @@ export function holdErrorMessage(message: string | undefined): string {
 
 export const CONFIRM_MESSAGES = {
   HOLD_EXPIRED: "This hold has expired. Hold the slot again.", // AC-HOLD-13
+  SLOT_STARTED_CONFIRM: "This slot has already started and cannot be confirmed.", // AC-HOLD-22
   NOT_STAFF_CONFIRM: "Only schedulers and admins can confirm holds.", // AC-HOLD-14
   HOLD_CONFIRMED: "This hold is already confirmed.",
   HOLD_UNKNOWN: "This hold no longer exists.",

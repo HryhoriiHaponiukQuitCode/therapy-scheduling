@@ -2,11 +2,14 @@ import type { createClient } from "@/lib/supabase/server";
 import {
   addDays,
   buildDaySlots,
+  expiredHolds,
   isoWeekday,
   isPracticeDate,
   practiceDate,
   practiceTimeToUtc,
   type DaySlot,
+  type ExpiredHold,
+  type HoldRecord,
 } from "@/lib/slots";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -24,13 +27,14 @@ export type DayView = {
   therapist: Therapist | null;
   date: string;
   slots: DaySlot[];
+  expired: ExpiredHold[];
   clients: ClientOption[];
   clientsError: boolean;
   error: boolean;
 };
 
 // Дані сторінки /slots: терапевти, доступність вибраного дня, утримання цього дня й клієнти для утримання
-// (AC-HOLD-01, 05, 06, 18; AC-HOLD-10 — вибір клієнта).
+// (AC-HOLD-01, 05, 06, 18, 24; AC-HOLD-10 — вибір клієнта; AC-HOLD-20 — прострочені утримання).
 // RLS: admin і scheduler бачать профілі терапевтів і всі утримання.
 export async function loadDayView(
   supabase: ServerClient,
@@ -53,7 +57,7 @@ export async function loadDayView(
   const therapist = therapists.find((t) => t.id === params.therapist) ?? therapists[0] ?? null;
 
   if (profilesError || !therapist) {
-    return { therapists, therapist, date, slots: [], clients: [], clientsError: false, error: Boolean(profilesError) };
+    return { therapists, therapist, date, slots: [], expired: [], clients: [], clientsError: false, error: Boolean(profilesError) };
   }
 
   const dayStart = practiceTimeToUtc(date, 0).toISOString();
@@ -76,27 +80,24 @@ export async function loadDayView(
 
   // Без клієнтів не працює лише вибір для утримання — статуси слотів однаково показуємо.
   if (availability.error || holds.error) {
-    return { therapists, therapist, date, slots: [], clients: [], clientsError: false, error: true };
+    return { therapists, therapist, date, slots: [], expired: [], clients: [], clientsError: false, error: true };
   }
 
-  const slots = buildDaySlots({
-    date,
-    availability: availability.data,
-    holds: holds.data.map((h) => ({
-      id: h.id,
-      slotStart: new Date(h.slot_start),
-      createdAt: new Date(h.created_at),
-      confirmedAt: h.confirmed_at ? new Date(h.confirmed_at) : null,
-      clientName: h.clients?.full_name ?? "—",
-    })),
-    now,
-  });
+  const records: HoldRecord[] = holds.data.map((h) => ({
+    id: h.id,
+    slotStart: new Date(h.slot_start),
+    createdAt: new Date(h.created_at),
+    confirmedAt: h.confirmed_at ? new Date(h.confirmed_at) : null,
+    clientName: h.clients?.full_name ?? "—",
+  }));
+  const slots = buildDaySlots({ date, availability: availability.data, holds: records, now });
 
   return {
     therapists,
     therapist,
     date,
     slots,
+    expired: expiredHolds(records, now),
     clients: clients.error ? [] : toClientOptions(clients.data),
     clientsError: Boolean(clients.error),
     error: false,
