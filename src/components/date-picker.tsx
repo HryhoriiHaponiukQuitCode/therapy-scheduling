@@ -61,9 +61,13 @@ export function DatePicker({
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  // Фокус у сітку переносимо лише при відкритті й навігації клавіатурою в сітці,
+  // а не після кнопок попереднього / наступного місяця.
+  const moveFocusToGrid = useRef(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !moveFocusToGrid.current) return;
+    moveFocusToGrid.current = false;
     gridRef.current?.querySelector<HTMLButtonElement>(`[data-date="${focus}"]`)?.focus();
   }, [open, focus]);
 
@@ -97,6 +101,7 @@ export function DatePicker({
     };
     if (moves[event.key]) {
       event.preventDefault();
+      moveFocusToGrid.current = true;
       setFocus(moves[event.key]());
     } else if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
@@ -110,7 +115,14 @@ export function DatePicker({
   const weeks = Array.from({ length: 6 }, (_, w) => days.slice(w * 7, w * 7 + 7));
 
   return (
-    <div ref={rootRef} className="relative w-full">
+    <div
+      ref={rootRef}
+      className="relative w-full"
+      onBlur={(event) => {
+        // Фокус пішов за межі DatePicker (Tab) — закриваємо діалог.
+        if (open && !rootRef.current?.contains(event.relatedTarget as Node | null)) setOpen(false);
+      }}
+    >
       <input type="hidden" name={name} value={value} />
       <button
         ref={triggerRef}
@@ -120,6 +132,7 @@ export function DatePicker({
         aria-expanded={open}
         onClick={() => {
           setFocus(value);
+          moveFocusToGrid.current = !open;
           setOpen((o) => !o);
         }}
         className={`${controlClass} cursor-pointer`}

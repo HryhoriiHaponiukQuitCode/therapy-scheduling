@@ -3,13 +3,13 @@ import type { ButtonHTMLAttributes } from "react";
 export type ButtonVariant = "primary" | "secondary" | "ghost";
 
 const VARIANT: Record<ButtonVariant, string> = {
-  primary: "bg-btn text-on-btn hover:bg-btn-hover",
-  secondary: "border-border-strong bg-surface text-ink hover:bg-subtle",
+  primary: "bg-btn px-[18px] text-on-btn hover:bg-btn-hover",
+  secondary: "border-border-strong bg-surface px-[18px] text-ink hover:bg-subtle",
   ghost: "bg-transparent px-2 text-ink underline underline-offset-[3px] hover:bg-subtle",
 };
 
 export const buttonClass = (variant: ButtonVariant = "primary", extra = "") =>
-  `inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent px-[18px] text-sm leading-none font-medium disabled:cursor-not-allowed aria-busy:cursor-progress aria-busy:opacity-70 ${VARIANT[variant]} ${extra}`;
+  `inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent text-sm leading-none font-medium disabled:cursor-not-allowed aria-busy:cursor-progress aria-busy:opacity-70 ${VARIANT[variant]} ${extra}`;
 
 // Дві кнопки на все (розділ 1): primary — чорна, secondary — біла з межею; ghost — для дрібних дій (DatePicker).
 // pending: спінер, aria-busy і disabled; решта пропсів <button> (form, name, value) — як є.

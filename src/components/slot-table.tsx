@@ -19,12 +19,14 @@ export function SlotTable({
   rows,
   withAction = false,
   withHeader = true,
+  withHeldUntil = true,
   label,
   "data-testid": testId,
 }: {
   rows: SlotTableRow[];
   withAction?: boolean;
   withHeader?: boolean;
+  withHeldUntil?: boolean; // false — для списку без колонки «Held until» (Expired holds)
   label?: string;
   "data-testid"?: string;
 }) {
@@ -33,7 +35,7 @@ export function SlotTable({
       {withHeader ? (
         <thead className="max-[720px]:hidden">
           <tr>
-            {["Time", "Status", "Client", "Held until"].map((h) => (
+            {["Time", "Status", "Client", ...(withHeldUntil ? ["Held until"] : [])].map((h) => (
               <th
                 key={h}
                 scope="col"
@@ -54,16 +56,16 @@ export function SlotTable({
         {rows.map((row) => (
           <tr
             key={row.key}
-            className="max-[720px]:grid max-[720px]:grid-cols-[64px_1fr] max-[720px]:gap-x-3 max-[720px]:gap-y-1 max-[720px]:border-b max-[720px]:border-border max-[720px]:py-3.5 max-[720px]:last:border-b-0"
+            className="max-[720px]:grid max-[720px]:grid-cols-[minmax(64px,max-content)_1fr] max-[720px]:gap-x-3 max-[720px]:gap-y-1 max-[720px]:border-b max-[720px]:border-border max-[720px]:py-3.5 max-[720px]:last:border-b-0"
           >
-            <td className={`${td} w-20 font-mono text-[15px] leading-5 font-medium max-[720px]:row-span-4 max-[720px]:w-auto max-[720px]:pt-0.5`}>
+            <td className={`${td} w-20 font-mono whitespace-nowrap text-[15px] leading-5 font-medium max-[720px]:row-span-4 max-[720px]:w-auto max-[720px]:pt-0.5`}>
               {row.time}
             </td>
             <td className={td}>
               <StatusBadge status={row.status} />
             </td>
             <td className={td}>{row.client ?? empty}</td>
-            <td className={`${td} whitespace-nowrap text-muted`}>{row.heldUntil ?? empty}</td>
+            {withHeldUntil ? <td className={`${td} whitespace-nowrap text-muted`}>{row.heldUntil ?? empty}</td> : null}
             {withAction ? (
               <td className={`${td} w-[1%] text-right whitespace-nowrap max-[720px]:mt-1.5 max-[720px]:w-auto max-[720px]:text-left`}>
                 {row.action}

@@ -89,9 +89,13 @@ export function Select({
         event.preventDefault();
         setOpen(false);
         return;
-      case "Tab":
+      case "Tab": {
+        // Як у нативного select: Tab фіксує підсвічений варіант і пускає фокус далі.
+        const option = options[active];
+        if (option) setValue(option.value);
         setOpen(false);
         return;
+      }
     }
     // Набір літер переходить до варіанта.
     if (event.key.length === 1 && /\S/.test(event.key)) {

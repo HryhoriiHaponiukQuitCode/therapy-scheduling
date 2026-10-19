@@ -144,6 +144,7 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
           </p>
           <SlotTable
             withHeader={false}
+            withHeldUntil={false}
             data-testid="expired-holds"
             label="Expired holds"
             rows={view.expired.map((hold) => ({
