@@ -5,11 +5,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, isStaff } from "@/lib/roles";
 import { checkHoldRequest, HOLD_MESSAGES, holdErrorMessage } from "@/lib/holds";
+import type { ActionResult } from "@/components/action-message";
 
-export type HoldSlotState =
-  | { status: "idle" }
-  | { status: "error"; message: string }
-  | { status: "success"; message: string };
+export type HoldSlotState = ActionResult;
 
 // Утримання вільного слоту за клієнтом на 24 години (AC-HOLD-02 … AC-HOLD-17, AC-HOLD-10 — вибір клієнта).
 // Порядок: сесія → роль і дані (до бази) → private.hold_slot (роль, блокування слоту, перевірки, запис).
@@ -25,7 +23,13 @@ export async function holdSlot(_prevState: HoldSlotState, formData: FormData): P
   const clientId = String(formData.get("client_id") ?? "");
   const slotStart = slotStartRaw ? new Date(slotStartRaw) : null;
 
-  const code = checkHoldRequest({ isStaff: isStaff(user.role), slotStart, clientId, now: new Date() });
+  const code = checkHoldRequest({
+    isStaff: isStaff(user.role),
+    therapistId,
+    slotStart,
+    clientId,
+    now: new Date(),
+  });
   if (code) {
     return { status: "error", message: HOLD_MESSAGES[code] };
   }

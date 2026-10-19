@@ -11,19 +11,31 @@ export const HOLD_MESSAGES = {
 
 export type HoldErrorCode = keyof typeof HOLD_MESSAGES;
 
-const FALLBACK_MESSAGE = "Could not hold the slot. Try again.";
+// id форми утримання на /slots: кнопки Hold у рядках слотів надсилають її через атрибут form.
+export const HOLD_FORM_ID = "hold-slot-form";
 
-// Перевірка запиту до виклику бази: роль (AC-HOLD-08), вибраний клієнт, слот ще не почався (AC-HOLD-07).
+const FALLBACK_MESSAGE = "Could not hold the slot. Try again.";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Перевірка запиту до виклику бази: роль (AC-HOLD-08), слот, початок слоту (AC-HOLD-07), вибраний клієнт.
+// Слот, що вже почався, перевіряємо раніше за клієнта: вибір клієнта його вже не врятує.
 export function checkHoldRequest(input: {
   isStaff: boolean;
+  therapistId: string;
   slotStart: Date | null;
   clientId: string;
   now: Date;
 }): HoldErrorCode | null {
   if (!input.isStaff) return "NOT_STAFF";
-  if (!input.slotStart || Number.isNaN(input.slotStart.getTime())) return "SLOT_UNKNOWN";
-  if (!input.clientId) return "CLIENT_UNKNOWN";
+  if (
+    !UUID_PATTERN.test(input.therapistId) ||
+    !input.slotStart ||
+    Number.isNaN(input.slotStart.getTime())
+  ) {
+    return "SLOT_UNKNOWN";
+  }
   if (input.slotStart.getTime() <= input.now.getTime()) return "SLOT_STARTED";
+  if (!UUID_PATTERN.test(input.clientId)) return "CLIENT_UNKNOWN";
   return null;
 }
 

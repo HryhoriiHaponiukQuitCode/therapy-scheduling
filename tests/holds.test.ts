@@ -32,7 +32,7 @@ function at(date: string, hour: number, minute = 0): Date {
   return new Date(practiceTimeToUtc(date, hour).getTime() + minute * 60_000);
 }
 
-const THERAPIST1 = "therapist-1";
+const THERAPIST1 = "11111111-1111-4111-8111-111111111111";
 const SLOT_10 = at("2026-11-03", 10); // слот therapist1 2026-11-03 10:00–11:00
 
 function form(clientId: string, slotStart = SLOT_10) {
@@ -63,12 +63,12 @@ describe("slot-holds: утримання слоту", () => {
   it("AC-HOLD-02: утримання вільного слоту 2026-11-03 10:00 за client1 о 2026-11-02 14:30 — «Held until 2026-11-03 14:30»", async () => {
     supabaseMock.rpc.mockResolvedValue({ data: { id: "h1" }, error: null });
 
-    const state = await holdSlot({ status: "idle" }, form("client-1"));
+    const state = await holdSlot({ status: "idle" }, form("c1111111-1111-4111-8111-111111111111"));
 
     expect(supabaseMock.rpc).toHaveBeenCalledWith("hold_slot", {
       p_therapist_id: THERAPIST1,
       p_slot_start: SLOT_10.toISOString(),
-      p_client_id: "client-1",
+      p_client_id: "c1111111-1111-4111-8111-111111111111",
     });
     expect(state).toEqual({ status: "success", message: "Slot held for 24 hours." });
 
@@ -95,20 +95,22 @@ describe("slot-holds: утримання слоту", () => {
   it("AC-HOLD-03: слот уже утримано за client1 — утримання за client2 не створюється, повідомлення PM", async () => {
     supabaseMock.rpc.mockResolvedValue({ data: null, error: { message: "SLOT_UNAVAILABLE" } });
 
-    const state = await holdSlot({ status: "idle" }, form("client-2"));
+    const state = await holdSlot({ status: "idle" }, form("c2222222-2222-4222-8222-222222222222"));
 
     expect(state).toEqual({ status: "error", message: "This slot is no longer available." });
   });
 
   it("AC-HOLD-04: двоє планувальників одночасно — рівно одне утримання, інший бачить повідомлення PM", async () => {
     // private.hold_slot тримає pg_advisory_xact_lock на (терапевт, слот): другий виклик бачить перше утримання.
+    // Обмеження: тут rpc підмінено, тож тест перевіряє реакцію дії на відповідь бази, а не саме блокування.
+    // Одночасність гарантує SQL (міграція 20261019111956_hold_slot.sql); автотестів бази в CI немає (design.md, Risks).
     supabaseMock.rpc
       .mockResolvedValueOnce({ data: { id: "h1" }, error: null })
       .mockResolvedValueOnce({ data: null, error: { message: "SLOT_UNAVAILABLE" } });
 
     const results = await Promise.all([
-      holdSlot({ status: "idle" }, form("client-1")),
-      holdSlot({ status: "idle" }, form("client-2")),
+      holdSlot({ status: "idle" }, form("c1111111-1111-4111-8111-111111111111")),
+      holdSlot({ status: "idle" }, form("c2222222-2222-4222-8222-222222222222")),
     ]);
 
     expect(results.filter((r) => r.status === "success")).toHaveLength(1);
@@ -120,7 +122,7 @@ describe("slot-holds: утримання слоту", () => {
   it("AC-HOLD-07: слот 2026-11-03 10:00 о 10:05 — утримання не створюється, повідомлення PM", async () => {
     vi.setSystemTime(at("2026-11-03", 10, 5));
 
-    const state = await holdSlot({ status: "idle" }, form("client-1"));
+    const state = await holdSlot({ status: "idle" }, form("c1111111-1111-4111-8111-111111111111"));
 
     expect(supabaseMock.rpc).not.toHaveBeenCalled();
     expect(state).toEqual({ status: "error", message: "This slot has already started and cannot be held." });
@@ -129,7 +131,7 @@ describe("slot-holds: утримання слоту", () => {
   it("AC-HOLD-08: користувач з роллю therapist — утримання не створюється, повідомлення PM", async () => {
     signedInAs("therapist");
 
-    const state = await holdSlot({ status: "idle" }, form("client-1"));
+    const state = await holdSlot({ status: "idle" }, form("c1111111-1111-4111-8111-111111111111"));
 
     expect(supabaseMock.rpc).not.toHaveBeenCalled();
     expect(state).toEqual({ status: "error", message: "Only schedulers and admins can hold slots." });
@@ -139,7 +141,7 @@ describe("slot-holds: утримання слоту", () => {
     vi.setSystemTime(at("2026-11-02", 18));
     supabaseMock.rpc.mockResolvedValue({ data: null, error: { message: "SLOT_UNAVAILABLE" } });
 
-    const state = await holdSlot({ status: "idle" }, form("client-1"));
+    const state = await holdSlot({ status: "idle" }, form("c1111111-1111-4111-8111-111111111111"));
 
     expect(state).toEqual({ status: "error", message: HOLD_MESSAGES.SLOT_UNAVAILABLE });
     const [slot] = buildDaySlots({
@@ -155,15 +157,15 @@ describe("slot-holds: утримання слоту", () => {
 
   it("AC-HOLD-10: створеного клієнта «Client Three» можна вибрати під час утримання слоту", async () => {
     const options = toClientOptions([
-      { id: "client-1", full_name: "client1" },
-      { id: "client-3", full_name: "Client Three" },
+      { id: "c1111111-1111-4111-8111-111111111111", full_name: "client1" },
+      { id: "c3333333-3333-4333-8333-333333333333", full_name: "Client Three" },
     ]);
-    expect(options).toContainEqual({ id: "client-3", name: "Client Three" });
+    expect(options).toContainEqual({ id: "c3333333-3333-4333-8333-333333333333", name: "Client Three" });
 
     supabaseMock.rpc.mockResolvedValue({ data: { id: "h3" }, error: null });
-    const state = await holdSlot({ status: "idle" }, form("client-3"));
+    const state = await holdSlot({ status: "idle" }, form("c3333333-3333-4333-8333-333333333333"));
 
-    expect(supabaseMock.rpc).toHaveBeenCalledWith("hold_slot", expect.objectContaining({ p_client_id: "client-3" }));
+    expect(supabaseMock.rpc).toHaveBeenCalledWith("hold_slot", expect.objectContaining({ p_client_id: "c3333333-3333-4333-8333-333333333333" }));
     expect(state.status).toBe("success");
   });
 });
