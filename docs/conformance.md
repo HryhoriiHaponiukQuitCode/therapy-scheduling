@@ -51,9 +51,9 @@
 | AC-HOLD-08 | терапевт не може утримати слот | `src/app/slots/actions.ts` (holdSlot), `supabase/migrations/20261019111956_hold_slot.sql` | `tests/holds.test.ts` | реалізовано |
 | AC-HOLD-14 | терапевт не може підтвердити утримання | `src/app/slots/actions.ts` (confirmHold), `supabase/migrations/20261019125609_confirm_hold.sql` | `tests/confirm.test.ts` | реалізовано |
 | AC-HOLD-19 | адміністратор утримує й підтверджує, як планувальник | `src/app/slots/actions.ts` (confirmHold), `supabase/migrations/20261019125609_confirm_hold.sql` | `tests/confirm.test.ts` | реалізовано |
-| AC-HOLD-09 | терапевт бачить лише власний розклад | — | — | відкладено (чекає реалізації) |
+| AC-HOLD-09 | терапевт бачить лише власний розклад | `src/app/my-schedule/data.ts` (loadMySchedule), `supabase/migrations/20261019204522_therapist_clients.sql` | `tests/my-schedule.test.ts` | реалізовано |
 | AC-HOLD-24 | день без жодного слоту — лише повідомлення | `src/lib/slots.ts` (buildDaySlots), `src/app/slots/page.tsx` | `tests/clarify.test.ts` | реалізовано |
 | AC-HOLD-22 | підтвердження після початку слоту — відмова, «Held» | `src/app/slots/actions.ts` (confirmHold), `supabase/migrations/20261019195754_confirm_before_start.sql` | `tests/clarify.test.ts` | реалізовано |
 | AC-HOLD-23 | підтвердження за хвилину до початку — «Confirmed» | `src/app/slots/actions.ts` (confirmHold), `supabase/migrations/20261019195754_confirm_before_start.sql` | `tests/clarify.test.ts` | реалізовано |
 | AC-HOLD-20 | планувальник бачить прострочене утримання «Expired» | `src/lib/slots.ts` (expiredHolds), `src/app/slots/page.tsx` | `tests/clarify.test.ts` | реалізовано |
-| AC-HOLD-21 | прострочене утримання не в розкладі терапевта | — | — | відкладено (чекає реалізації) |
+| AC-HOLD-21 | прострочене утримання не в розкладі терапевта | `src/app/my-schedule/data.ts` (loadMySchedule), `src/lib/slots.ts` (buildDaySlots) | `tests/my-schedule.test.ts` | реалізовано |

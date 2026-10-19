@@ -34,6 +34,13 @@ export default async function Home() {
           </Link>
         </nav>
       ) : null}
+      {user.role === "therapist" ? (
+        <nav aria-label="Main" className="flex gap-4 text-sm">
+          <Link href="/my-schedule" className="underline">
+            My schedule
+          </Link>
+        </nav>
+      ) : null}
       <form action={signOut}>
         <button
           type="submit"
