@@ -46,9 +46,9 @@
 | AC-HOLD-07 | слот, що вже почався, утримати не можна | `src/app/slots/actions.ts` (holdSlot), `supabase/migrations/20261019111956_hold_slot.sql` | `tests/holds.test.ts` | реалізовано |
 | AC-HOLD-05 | за хвилину до спливу 24 годин — досі «Held» | `src/lib/slots.ts` (holdStatus) | `tests/slots.test.ts` | реалізовано |
 | AC-HOLD-06 | після 24 годин — «Expired», слот вільний | `src/lib/slots.ts` (holdStatus, buildDaySlots) | `tests/slots.test.ts` | реалізовано |
-| AC-HOLD-12 | підтвердження непростроченого утримання — «Confirmed» | — | — | відкладено (чекаю відповідь PM на Q1, Sofiia-pm/therapy-scheduling-spec#3) |
-| AC-HOLD-13 | прострочене утримання не підтверджується | — | — | відкладено (чекаю відповідь PM на Q1, Sofiia-pm/therapy-scheduling-spec#3) |
+| AC-HOLD-12 | підтвердження непростроченого утримання — «Confirmed» | `src/app/slots/actions.ts` (confirmHold), `supabase/migrations/20261019125609_confirm_hold.sql` | `tests/confirm.test.ts` | реалізовано |
+| AC-HOLD-13 | прострочене утримання не підтверджується | `src/app/slots/actions.ts` (confirmHold), `supabase/migrations/20261019125609_confirm_hold.sql` | `tests/confirm.test.ts` | реалізовано |
 | AC-HOLD-08 | терапевт не може утримати слот | `src/app/slots/actions.ts` (holdSlot), `supabase/migrations/20261019111956_hold_slot.sql` | `tests/holds.test.ts` | реалізовано |
-| AC-HOLD-14 | терапевт не може підтвердити утримання | — | — | відкладено (чекає реалізації) |
-| AC-HOLD-19 | адміністратор утримує й підтверджує, як планувальник | — | — | відкладено (чекає реалізації) |
+| AC-HOLD-14 | терапевт не може підтвердити утримання | `src/app/slots/actions.ts` (confirmHold), `supabase/migrations/20261019125609_confirm_hold.sql` | `tests/confirm.test.ts` | реалізовано |
+| AC-HOLD-19 | адміністратор утримує й підтверджує, як планувальник | `src/app/slots/actions.ts` (confirmHold), `supabase/migrations/20261019125609_confirm_hold.sql` | `tests/confirm.test.ts` | реалізовано |
 | AC-HOLD-09 | терапевт бачить лише власний розклад | — | — | відкладено (чекає реалізації) |

@@ -106,6 +106,7 @@ export type DaySlot = {
   clientName: string | null;
   heldUntil: Date | null;
   canHold: boolean;
+  holdId: string | null; // утримання «Held», яке можна підтвердити (AC-HOLD-12)
 };
 
 export type AvailabilityWindow = { start_hour: number; end_hour: number };
@@ -140,6 +141,7 @@ export function buildDaySlots(input: {
         clientName: active ? active.hold.clientName : null,
         heldUntil: active && active.status === "Held" ? heldUntil(active.hold) : null,
         canHold: status === "Free" && start.getTime() > input.now.getTime(),
+        holdId: active && active.status === "Held" ? active.hold.id : null,
       };
     });
 }

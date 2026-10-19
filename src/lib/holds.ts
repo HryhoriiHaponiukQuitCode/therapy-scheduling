@@ -44,3 +44,32 @@ export function holdErrorMessage(message: string | undefined): string {
   const code = Object.keys(HOLD_MESSAGES).find((key) => message?.includes(key));
   return code ? HOLD_MESSAGES[code as HoldErrorCode] : FALLBACK_MESSAGE;
 }
+
+// ── Підтвердження утримання (private.confirm_hold, міграція 20261019125609_confirm_hold.sql) ──
+
+export const CONFIRM_MESSAGES = {
+  HOLD_EXPIRED: "This hold has expired. Hold the slot again.", // AC-HOLD-13
+  NOT_STAFF_CONFIRM: "Only schedulers and admins can confirm holds.", // AC-HOLD-14
+  HOLD_CONFIRMED: "This hold is already confirmed.",
+  HOLD_UNKNOWN: "This hold no longer exists.",
+} as const;
+
+export type ConfirmErrorCode = keyof typeof CONFIRM_MESSAGES;
+
+// id форми підтвердження на /slots: кнопки Confirm у рядках утриманих слотів надсилають її через атрибут form.
+export const CONFIRM_FORM_ID = "confirm-hold-form";
+
+// Перевірка до виклику бази: роль (AC-HOLD-14) і id утримання. Прострочення (AC-HOLD-13) остаточно перевіряє база.
+export function checkConfirmRequest(input: { isStaff: boolean; holdId: string }): ConfirmErrorCode | null {
+  if (!input.isStaff) return "NOT_STAFF_CONFIRM";
+  if (!UUID_PATTERN.test(input.holdId)) return "HOLD_UNKNOWN";
+  return null;
+}
+
+export function confirmErrorMessage(message: string | undefined): string {
+  // NOT_STAFF_CONFIRM перевіряємо раніше за коротші коди, що можуть бути його частиною.
+  const code = (Object.keys(CONFIRM_MESSAGES) as ConfirmErrorCode[])
+    .sort((a, b) => b.length - a.length)
+    .find((key) => message?.includes(key));
+  return code ? CONFIRM_MESSAGES[code] : "Could not confirm the hold. Try again.";
+}
