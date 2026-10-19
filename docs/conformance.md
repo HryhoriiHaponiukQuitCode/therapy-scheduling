@@ -33,7 +33,7 @@
 
 | AC | Що перевіряє | Код | Тест | Статус |
 |---|---|---|---|---|
-| AC-HOLD-10 | планувальник створює клієнта з іменем і новим email | `src/app/clients/actions.ts` (addClient), `supabase/migrations/20261019102511_roles_and_clients.sql` | `tests/clients.test.ts` | реалізовано |
+| AC-HOLD-10 | планувальник створює клієнта з іменем і новим email | `src/app/clients/actions.ts` (addClient), `supabase/migrations/20261019102511_roles_and_clients.sql` | `tests/clients.test.ts` | відкладено (вибір клієнта під час утримання — задача 3.1) |
 | AC-HOLD-11 | порожнє ім'я — клієнта не створено, повідомлення | `src/lib/clients.ts` (validateClient) | `tests/clients.test.ts` | реалізовано |
 | AC-HOLD-15 | email без @ — клієнта не створено, повідомлення | `src/lib/clients.ts` (validateClient) | `tests/clients.test.ts` | реалізовано |
 | AC-HOLD-16 | дублікат email — клієнта не створено, повідомлення | `src/lib/clients.ts` (clientInsertErrorMessage), `supabase/migrations/20261019102511_roles_and_clients.sql` | `tests/clients.test.ts` | реалізовано |

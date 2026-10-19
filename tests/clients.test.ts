@@ -10,6 +10,7 @@ import {
 const supabaseMock = vi.hoisted(() => ({
   insert: vi.fn(),
   getClaims: vi.fn(),
+  profile: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -17,6 +18,8 @@ vi.mock("@/lib/supabase/server", () => ({
     auth: { getClaims: supabaseMock.getClaims },
     from: (table: string) => ({
       insert: (row: unknown) => supabaseMock.insert(table, row),
+      // getCurrentUser: profiles.select(…).eq("id", …).maybeSingle()
+      select: () => ({ eq: () => ({ maybeSingle: supabaseMock.profile }) }),
     }),
   }),
 }));
@@ -40,6 +43,9 @@ beforeEach(() => {
   supabaseMock.insert.mockReset();
   supabaseMock.getClaims.mockReset();
   supabaseMock.getClaims.mockResolvedValue({ data: { claims: { sub: "scheduler-1" } } });
+  supabaseMock.profile.mockResolvedValue({
+    data: { email: "scheduler1@example.test", full_name: "Scheduler One", role: "scheduler" },
+  });
 });
 
 describe("clients", () => {
@@ -63,7 +69,11 @@ describe("clients", () => {
     const state = await addClient({ status: "idle" }, form("", "client3@example.test"));
 
     expect(supabaseMock.insert).not.toHaveBeenCalled();
-    expect(state).toEqual({ status: "error", message: "Enter the client's name and a valid email." });
+    expect(state).toEqual({
+      status: "error",
+      message: "Enter the client's name and a valid email.",
+      values: { fullName: "", email: "client3@example.test" },
+    });
     expect(validateClient("   ", "client3@example.test")).toEqual({
       ok: false,
       message: CLIENT_INVALID_MESSAGE,
@@ -74,7 +84,11 @@ describe("clients", () => {
     const state = await addClient({ status: "idle" }, form("Client Three", "client3example.test"));
 
     expect(supabaseMock.insert).not.toHaveBeenCalled();
-    expect(state).toEqual({ status: "error", message: CLIENT_INVALID_MESSAGE });
+    expect(state).toEqual({
+      status: "error",
+      message: CLIENT_INVALID_MESSAGE,
+      values: { fullName: "Client Three", email: "client3example.test" },
+    });
   });
 
   it("AC-HOLD-16: email client1@example.test уже існує — клієнта не створено, повідомлення PM", async () => {
@@ -84,7 +98,11 @@ describe("clients", () => {
     const state = await addClient({ status: "idle" }, form("Client One Again", "client1@example.test"));
 
     expect(supabaseMock.insert).toHaveBeenCalledTimes(1);
-    expect(state).toEqual({ status: "error", message: "A client with this email already exists." });
+    expect(state).toEqual({
+      status: "error",
+      message: "A client with this email already exists.",
+      values: { fullName: "Client One Again", email: "client1@example.test" },
+    });
     expect(CLIENT_DUPLICATE_MESSAGE).toBe("A client with this email already exists.");
   });
 });

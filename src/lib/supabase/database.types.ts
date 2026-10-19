@@ -42,21 +42,21 @@ export type Database = {
           id: string;
           full_name: string;
           email: string;
-          created_by: string;
+          created_by: string | null;
           created_at: string;
         };
         Insert: {
           id?: string;
           full_name: string;
           email: string;
-          created_by?: string;
+          created_by?: string | null;
           created_at?: string;
         };
         Update: {
           id?: string;
           full_name?: string;
           email?: string;
-          created_by?: string;
+          created_by?: string | null;
           created_at?: string;
         };
         Relationships: [

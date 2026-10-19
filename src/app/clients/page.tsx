@@ -25,7 +25,7 @@ export default async function ClientsPage() {
   }
 
   // RLS (clients_select_staff): admin і scheduler бачать усіх клієнтів.
-  const { data: clients } = await supabase
+  const { data: clients, error } = await supabase
     .from("clients")
     .select("id, full_name, email")
     .order("full_name");
@@ -50,7 +50,11 @@ export default async function ClientsPage() {
         <h2 id="all-clients" className="text-lg font-medium">
           All clients
         </h2>
-        {clients && clients.length > 0 ? (
+        {error ? (
+          <p role="alert" className="text-sm text-red-600">
+            Could not load clients. Try again later.
+          </p>
+        ) : clients && clients.length > 0 ? (
           <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800" data-testid="client-list">
             {clients.map((client) => (
               <li key={client.id} className="flex justify-between gap-4 py-2">

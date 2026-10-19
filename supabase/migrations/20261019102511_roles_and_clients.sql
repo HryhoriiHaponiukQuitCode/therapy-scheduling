@@ -32,10 +32,13 @@ grant execute on function private.is_staff() to authenticated;
 create table public.clients (
   id         uuid primary key default gen_random_uuid(),
   full_name  text not null
-             constraint clients_full_name_not_blank check (length(btrim(full_name)) > 0),          -- AC-HOLD-11
+             constraint clients_full_name_not_blank check (length(btrim(full_name)) > 0)           -- AC-HOLD-11
+             constraint clients_full_name_length check (length(full_name) <= 200),
   email      text not null
-             constraint clients_email_format check (email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$'),  -- AC-HOLD-15
-  created_by uuid not null default auth.uid() references public.profiles (id),
+             constraint clients_email_format check (email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$')  -- AC-HOLD-15
+             constraint clients_email_length check (length(email) <= 254),
+  -- Хто створив картку; set null — щоб видалення користувача в Auth (каскад на profiles) не впиралося в клієнтів.
+  created_by uuid default auth.uid() references public.profiles (id) on delete set null,
   created_at timestamptz not null default now()
 );
 
