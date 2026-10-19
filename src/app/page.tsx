@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isStaff } from "@/lib/roles";
 import { signOut } from "./login/actions";
 
 // Головна сторінка шаблону: хто увійшов і з якою роллю (з таблиці profiles).
@@ -30,6 +32,13 @@ export default async function Home() {
         <dt className="text-zinc-500">Роль</dt>
         <dd data-testid="user-role">{profile?.role ?? "профіль не знайдено"}</dd>
       </dl>
+      {isStaff(profile?.role) ? (
+        <nav aria-label="Main" className="flex gap-4 text-sm">
+          <Link href="/clients" className="underline">
+            Clients
+          </Link>
+        </nav>
+      ) : null}
       <form action={signOut}>
         <button
           type="submit"

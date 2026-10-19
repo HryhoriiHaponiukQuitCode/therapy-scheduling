@@ -5,7 +5,7 @@
 
 ## 1. Ролі й картка клієнта
 
-- [ ] 1.1 Міграція: ролі `admin`/`scheduler`/`therapist` (дані → default → constraint), хелпер `private.is_staff`,
+- [x] 1.1 Міграція: ролі `admin`/`scheduler`/`therapist` (дані → default → constraint), хелпер `private.is_staff`,
   таблиця `clients` з унікальним `lower(email)`, RLS і GRANT; `supabase/demo-users.json` (admin, scheduler1, scheduler2,
   therapist1, therapist2); `validateClient`; сторінка `/clients` і `createClientAction`; тести.
   Done when: AC-HOLD-10, AC-HOLD-11, AC-HOLD-15, AC-HOLD-16 — тести зелені, після merge `db-deploy` і `users:demo`
