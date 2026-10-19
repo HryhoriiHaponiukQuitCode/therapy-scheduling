@@ -150,12 +150,12 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                         Hold {slot.time}
                       </button>
                     ) : null}
-                    {slot.canConfirm && slot.holdId ? (
+                    {slot.canConfirm ? (
                       <button
                         type="submit"
                         form={CONFIRM_FORM_ID}
                         name="hold_id"
-                        value={slot.holdId}
+                        value={`${slot.holdId!}|${slot.start.toISOString()}`}
                         className="min-h-11 rounded border border-foreground px-3 py-1 text-sm font-medium"
                       >
                         Confirm {slot.time}
@@ -174,7 +174,9 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
           <h2 id="expired-holds" className="text-lg font-medium">
             Expired holds
           </h2>
-          <p className="text-xs text-zinc-500">Not confirmed within 24 hours — these slots are free again.</p>
+          <p className="text-xs text-zinc-500">
+            Upcoming slots of this therapist not confirmed within 24 hours — they are free again.
+          </p>
           <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800" data-testid="expired-holds">
             {view.expired.map((hold) => (
               <li key={hold.id} className="flex flex-wrap items-center justify-between gap-2 py-2">

@@ -22,6 +22,24 @@ export function toClientOptions(rows: { id: string; full_name: string }[]): Clie
   return rows.map((row) => ({ id: row.id, name: row.full_name }));
 }
 
+type HoldRow = {
+  id: string;
+  slot_start: string;
+  created_at: string;
+  confirmed_at: string | null;
+  clients: { full_name: string } | null;
+};
+
+function toHoldRecord(h: HoldRow): HoldRecord {
+  return {
+    id: h.id,
+    slotStart: new Date(h.slot_start),
+    createdAt: new Date(h.created_at),
+    confirmedAt: h.confirmed_at ? new Date(h.confirmed_at) : null,
+    clientName: h.clients?.full_name ?? "—",
+  };
+}
+
 export type DayView = {
   therapists: Therapist[];
   therapist: Therapist | null;
@@ -63,7 +81,7 @@ export async function loadDayView(
   const dayStart = practiceTimeToUtc(date, 0).toISOString();
   const dayEnd = practiceTimeToUtc(addDays(date, 1), 0).toISOString();
 
-  const [availability, holds, clients] = await Promise.all([
+  const [availability, holds, clients, upcoming] = await Promise.all([
     supabase
       .from("therapist_availability")
       .select("start_hour, end_hour")
@@ -76,6 +94,14 @@ export async function loadDayView(
       .gte("slot_start", dayStart)
       .lt("slot_start", dayEnd),
     supabase.from("clients").select("id, full_name").order("full_name"),
+    // AC-HOLD-20: огляд прострочених утримань терапевта на майбутні слоти, незалежно від вибраного дня.
+    supabase
+      .from("holds")
+      .select("id, slot_start, created_at, confirmed_at, clients(full_name)")
+      .eq("therapist_id", therapist.id)
+      .gt("slot_start", now.toISOString())
+      .order("slot_start")
+      .limit(200),
   ]);
 
   // Без клієнтів не працює лише вибір для утримання — статуси слотів однаково показуємо.
@@ -83,13 +109,7 @@ export async function loadDayView(
     return { therapists, therapist, date, slots: [], expired: [], clients: [], clientsError: false, error: true };
   }
 
-  const records: HoldRecord[] = holds.data.map((h) => ({
-    id: h.id,
-    slotStart: new Date(h.slot_start),
-    createdAt: new Date(h.created_at),
-    confirmedAt: h.confirmed_at ? new Date(h.confirmed_at) : null,
-    clientName: h.clients?.full_name ?? "—",
-  }));
+  const records: HoldRecord[] = holds.data.map(toHoldRecord);
   const slots = buildDaySlots({ date, availability: availability.data, holds: records, now });
 
   return {
@@ -97,7 +117,7 @@ export async function loadDayView(
     therapist,
     date,
     slots,
-    expired: expiredHolds(records, now),
+    expired: upcoming.error ? [] : expiredHolds(upcoming.data.map(toHoldRecord), now),
     clients: clients.error ? [] : toClientOptions(clients.data),
     clientsError: Boolean(clients.error),
     error: false,

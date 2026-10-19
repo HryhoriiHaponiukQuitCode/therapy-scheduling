@@ -50,7 +50,7 @@ const holdAt10: HoldRecord = {
 
 function confirmForm() {
   const data = new FormData();
-  data.set("hold_id", HOLD_ID);
+  data.set("hold_id", `${HOLD_ID}|${holdAt10.slotStart.toISOString()}`);
   return data;
 }
 
@@ -94,10 +94,12 @@ describe("slot-holds: уточнення PM", () => {
   it("AC-HOLD-22: о 10:00 або пізніше утримання не підтверджується, лишається «Held», повідомлення PM", async () => {
     for (const now of [at("2026-11-03", 10), at("2026-11-03", 10, 30)]) {
       vi.setSystemTime(now);
-      supabaseMock.rpc.mockResolvedValueOnce({ data: null, error: { message: "SLOT_STARTED_CONFIRM" } });
+      supabaseMock.rpc.mockReset();
 
       const state = await confirmHold({ status: "idle" }, confirmForm());
 
+      // Дія відмовляє сама, до бази (той самий рядок перевіряє private.confirm_hold).
+      expect(supabaseMock.rpc).not.toHaveBeenCalled();
       expect(state).toEqual({
         status: "error",
         message: "This slot has already started and cannot be confirmed.",

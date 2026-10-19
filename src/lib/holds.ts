@@ -60,10 +60,17 @@ export type ConfirmErrorCode = keyof typeof CONFIRM_MESSAGES;
 // id форми підтвердження на /slots: кнопки Confirm у рядках утриманих слотів надсилають її через атрибут form.
 export const CONFIRM_FORM_ID = "confirm-hold-form";
 
-// Перевірка до виклику бази: роль (AC-HOLD-14) і id утримання. Прострочення (AC-HOLD-13) остаточно перевіряє база.
-export function checkConfirmRequest(input: { isStaff: boolean; holdId: string }): ConfirmErrorCode | null {
+// Перевірка до виклику бази: роль (AC-HOLD-14), id утримання й початок слоту (AC-HOLD-22, з моменту початку включно).
+// Прострочення (AC-HOLD-13) і остаточну перевірку початку слоту робить private.confirm_hold.
+export function checkConfirmRequest(input: {
+  isStaff: boolean;
+  holdId: string;
+  slotStart: Date | null;
+  now: Date;
+}): ConfirmErrorCode | null {
   if (!input.isStaff) return "NOT_STAFF_CONFIRM";
   if (!UUID_PATTERN.test(input.holdId)) return "HOLD_UNKNOWN";
+  if (input.slotStart && input.slotStart.getTime() <= input.now.getTime()) return "SLOT_STARTED_CONFIRM";
   return null;
 }
 

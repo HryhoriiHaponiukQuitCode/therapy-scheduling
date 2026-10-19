@@ -151,9 +151,18 @@ export function buildDaySlots(input: {
 export type ExpiredHold = { id: string; clientName: string; slotStart: Date };
 
 // AC-HOLD-20: прострочені утримання (статус «Expired») для планувальника й адміністратора; їхні слоти вільні.
+// Лише слоти, що ще не почалися й не зайняті іншим активним утриманням чи сеансом: їх можна утримати знову.
 export function expiredHolds(holds: HoldRecord[], now: Date): ExpiredHold[] {
+  const occupied = new Set(
+    holds.filter((hold) => holdStatus(hold, now) !== "Expired").map((hold) => hold.slotStart.getTime()),
+  );
   return holds
-    .filter((hold) => holdStatus(hold, now) === "Expired")
+    .filter(
+      (hold) =>
+        holdStatus(hold, now) === "Expired" &&
+        hold.slotStart.getTime() > now.getTime() &&
+        !occupied.has(hold.slotStart.getTime()),
+    )
     .sort((a, b) => a.slotStart.getTime() - b.slotStart.getTime())
     .map((hold) => ({ id: hold.id, clientName: hold.clientName, slotStart: hold.slotStart }));
 }
