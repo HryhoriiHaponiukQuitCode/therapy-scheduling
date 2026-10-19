@@ -69,6 +69,78 @@ export type Database = {
           },
         ];
       };
+      therapist_availability: {
+        Row: {
+          id: number;
+          therapist_email: string;
+          weekday: number;
+          start_hour: number;
+          end_hour: number;
+        };
+        Insert: {
+          id?: never;
+          therapist_email: string;
+          weekday: number;
+          start_hour: number;
+          end_hour: number;
+        };
+        Update: {
+          id?: never;
+          therapist_email?: string;
+          weekday?: number;
+          start_hour?: number;
+          end_hour?: number;
+        };
+        Relationships: [];
+      };
+      holds: {
+        Row: {
+          id: string;
+          therapist_id: string;
+          slot_start: string;
+          client_id: string;
+          created_at: string;
+          created_by: string | null;
+          confirmed_at: string | null;
+          confirmed_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          therapist_id: string;
+          slot_start: string;
+          client_id: string;
+          created_at?: string;
+          created_by?: string | null;
+          confirmed_at?: string | null;
+          confirmed_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          therapist_id?: string;
+          slot_start?: string;
+          client_id?: string;
+          created_at?: string;
+          created_by?: string | null;
+          confirmed_at?: string | null;
+          confirmed_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "holds_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "clients";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "holds_therapist_id_fkey";
+            columns: ["therapist_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

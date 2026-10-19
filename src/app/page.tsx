@@ -29,6 +29,9 @@ export default async function Home() {
           <Link href="/clients" className="underline">
             Clients
           </Link>
+          <Link href="/slots" className="underline">
+            Slots
+          </Link>
         </nav>
       ) : null}
       <form action={signOut}>

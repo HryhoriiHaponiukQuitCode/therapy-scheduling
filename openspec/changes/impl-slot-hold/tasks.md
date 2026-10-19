@@ -13,7 +13,7 @@
 
 ## 2. Слоти дня й прострочення
 
-- [ ] 2.1 Міграція: `therapist_availability` (сид для therapist1/therapist2), `holds` з RLS (select за роллю);
+- [x] 2.1 Міграція: `therapist_availability` (сид для therapist1/therapist2), `holds` з RLS (select за роллю);
   `holdStatus`, `buildDaySlots`, `formatLA`; сторінка `/slots` (терапевт, день, статуси, «Held until», «No free slots on
   this day.»); тести.
   Done when: AC-HOLD-01, AC-HOLD-05, AC-HOLD-06, AC-HOLD-18.
