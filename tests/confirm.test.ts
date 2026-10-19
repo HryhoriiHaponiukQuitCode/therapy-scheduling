@@ -72,7 +72,8 @@ describe("slot-holds: підтвердження утримання", () => {
       confirmedAt: at("2026-11-02", 16),
       clientName: "client1",
     };
-    for (const now of [at("2026-11-02", 16, 1), at("2026-11-03", 9, 0)]) {
+    // Одразу після підтвердження і після межі 24 годин від створення (2026-11-03 14:30).
+    for (const now of [at("2026-11-02", 16, 1), at("2026-11-03", 15, 0)]) {
       const [slot] = buildDaySlots({
         date: "2026-11-03",
         availability: [{ start_hour: 10, end_hour: 11 }],

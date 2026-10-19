@@ -98,7 +98,9 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                 {NO_FREE_SLOTS_MESSAGE}
               </p>
             ) : null}
-            {view.therapist && view.slots.some((slot) => slot.canHold) ? (
+            {/* Форми монтуємо для вибраного терапевта й дня зі слотами завжди, а не лише коли є що утримати чи
+                підтвердити: після останньої дії revalidatePath прибрав би форму разом із повідомленням про результат. */}
+            {view.therapist && view.slots.length > 0 ? (
               view.clientsError ? (
                 <p role="alert" className="text-sm text-red-600">
                   Could not load clients, so slots cannot be held right now.
@@ -116,7 +118,7 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                 </Link>
               )
             ) : null}
-            {view.therapist && view.slots.some((slot) => slot.holdId) ? (
+            {view.therapist && view.slots.length > 0 ? (
               // key: новий терапевт чи день — новий стан форми (без чужого повідомлення).
               <ConfirmHoldForm key={`confirm-${view.therapist.id}-${view.date}`} />
             ) : null}

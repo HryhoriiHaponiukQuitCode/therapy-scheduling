@@ -11,6 +11,7 @@ set search_path = ''
 as $$
 declare
   v_hold public.holds;
+  v_now timestamptz;
 begin
   -- AC-HOLD-14: підтверджують лише admin і scheduler (AC-HOLD-19 — admin так само, як scheduler).
   if not private.is_staff() then
@@ -28,6 +29,8 @@ begin
   );
 
   select * into v_hold from public.holds as h where h.id = p_hold_id for update;
+  -- Час після блокування: now() — початок транзакції, а очікування блокування може перетнути межу 24 годин.
+  v_now := clock_timestamp();
 
   if v_hold.confirmed_at is not null then
     raise exception 'HOLD_CONFIRMED' using errcode = 'P0001';
@@ -35,21 +38,21 @@ begin
 
   -- AC-HOLD-13: прострочене утримання (1440 хв від створення) не підтверджується;
   -- так само, якщо слот уже утримали знову після прострочення.
-  if now() >= v_hold.created_at + interval '1440 minutes'
+  if v_now >= v_hold.created_at + interval '1440 minutes'
      or exists (
        select 1
        from public.holds as h
        where h.therapist_id = v_hold.therapist_id
          and h.slot_start = v_hold.slot_start
          and h.id <> v_hold.id
-         and (h.confirmed_at is not null or now() < h.created_at + interval '1440 minutes')
+         and (h.confirmed_at is not null or v_now < h.created_at + interval '1440 minutes')
      ) then
     raise exception 'HOLD_EXPIRED' using errcode = 'P0001';
   end if;
 
   -- AC-HOLD-12: утримання стає сеансом — «Confirmed», без «Held until», слот лишається зайнятим.
   update public.holds as h
-  set confirmed_at = now(),
+  set confirmed_at = v_now,
       confirmed_by = (select auth.uid())
   where h.id = p_hold_id
   returning * into v_hold;
