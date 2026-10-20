@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getRequestUser } from "@/lib/roles";
+import { getRequestUser } from "@/lib/request-user";
 import { formatPracticeTime } from "@/lib/slots";
 import { ActionMessage } from "@/components/action-message";
 import { Card } from "@/components/card";

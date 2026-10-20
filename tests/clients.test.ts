@@ -31,7 +31,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-const { addClient } = await import("@/app/clients/actions");
+const { addClient } = await import("@/app/(app)/clients/actions");
 
 function form(fullName: string, email: string) {
   const data = new FormData();

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getRequestUser, isStaff } from "@/lib/roles";
+import { getRequestUser } from "@/lib/request-user";
+import { isStaff } from "@/lib/roles";
 import { ActionMessage } from "@/components/action-message";
 import { Card } from "@/components/card";
 import { EmptyState } from "@/components/empty-state";

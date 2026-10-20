@@ -1,7 +1,8 @@
 import { Card } from "@/components/card";
 import { FilterIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
-import { LoadingStatus, Skeleton, SkeletonField, SkeletonRows } from "@/components/skeleton";
+import { LoadingStatus } from "@/components/route-status";
+import { Skeleton, SkeletonField, SkeletonRows } from "@/components/skeleton";
 
 // Миттєвий стан переходу на /slots: фільтр і таблиця слотів зі скелетонами.
 export default function SlotsLoading() {

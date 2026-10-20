@@ -1,7 +1,6 @@
 // Ролі продукту (requirements/product.md): admin, scheduler, therapist.
 // Роль читаємо з public.profiles (RLS: власний профіль), ніколи з user_metadata.
-import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import type { createClient } from "@/lib/supabase/server";
 
 const APP_ROLES = ["admin", "scheduler", "therapist"] as const;
 export type AppRole = (typeof APP_ROLES)[number];
@@ -35,7 +34,3 @@ export async function getCurrentUser(supabase: ServerClient) {
     role: isAppRole(profile?.role) ? profile.role : null,
   };
 }
-
-// Користувач поточного рендера: layout розділу і сторінка викликають це разом, а getClaims і запит профілю
-// виконуються один раз на запит (React cache). Server actions і далі викликають getCurrentUser напряму.
-export const getRequestUser = cache(async () => getCurrentUser(await createClient()));

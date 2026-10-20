@@ -1,6 +1,7 @@
 import { Card } from "@/components/card";
 import { PageHeader } from "@/components/page-header";
-import { LoadingStatus, Skeleton, SkeletonRows } from "@/components/skeleton";
+import { LoadingStatus } from "@/components/route-status";
+import { Skeleton, SkeletonRows } from "@/components/skeleton";
 
 // Миттєвий стан переходу на /my-schedule: картки днів зі скелетонами слотів.
 export default function MyScheduleLoading() {

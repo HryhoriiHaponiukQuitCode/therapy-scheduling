@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getRequestUser, isStaff } from "@/lib/roles";
+import { getRequestUser } from "@/lib/request-user";
+import { isStaff } from "@/lib/roles";
 import { formatPracticeTime, hasFreeSlots, NO_FREE_SLOTS_MESSAGE } from "@/lib/slots";
 import { CONFIRM_FORM_ID, HOLD_FORM_ID } from "@/lib/holds";
 import { ActionMessage } from "@/components/action-message";

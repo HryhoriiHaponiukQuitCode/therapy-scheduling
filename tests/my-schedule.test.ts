@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadMySchedule } from "@/app/my-schedule/data";
+import { loadMySchedule } from "@/app/(app)/my-schedule/data";
 import { practiceTimeToUtc } from "@/lib/slots";
 
 function at(date: string, hour: number, minute = 0): Date {

@@ -1,7 +1,8 @@
 import { Card } from "@/components/card";
 import { UserIcon, UsersIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
-import { LoadingStatus, Skeleton, SkeletonField, SkeletonRows } from "@/components/skeleton";
+import { LoadingStatus } from "@/components/route-status";
+import { Skeleton, SkeletonField, SkeletonRows } from "@/components/skeleton";
 
 // Миттєвий стан переходу на /clients: ті самі картки, що й на сторінці, з скелетонами замість даних.
 export default function ClientsLoading() {

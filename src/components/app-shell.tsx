@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
 import { signOut } from "@/app/login/actions";
-import { getRequestUser, isStaff, type AppRole } from "@/lib/roles";
+import { isStaff, type AppRole } from "@/lib/roles";
 import { Button } from "./button";
 import { BrandMark, HomeIcon, ScheduleIcon, SlotsIcon, UsersIcon } from "./icons";
 import { NavLink } from "./nav-link";
+import { ROUTE_STATUS_ID } from "./route-status";
 
 type ShellUser = { email: string | null; role: AppRole | null };
 
@@ -75,6 +75,8 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
   return (
     <div className="grid min-h-dvh w-full flex-1 grid-cols-[248px_minmax(0,1fr)] bg-page max-[860px]:grid-cols-1">
       <Sidebar user={user} />
+      {/* Постійна live-область: loading.tsx пише в неї «Loading…» (LoadingStatus), тож скрінрідер оголошує перехід. */}
+      <p id={ROUTE_STATUS_ID} role="status" className="sr-only" />
       <main className="flex w-full max-w-[960px] min-w-0 flex-col gap-6 px-10 pt-10 pb-12 max-[720px]:px-4 max-[720px]:pt-6 max-[720px]:pb-8">
         {children}
       </main>
@@ -82,12 +84,3 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
   );
 }
 
-// AppShell для layout розділу (/clients, /slots, /my-schedule): меню лишається на місці, поки loading.tsx
-// розділу показує скелетон контенту. Користувач — той самий, що й у сторінки (getRequestUser, React cache).
-export async function SignedInShell({ children }: { children: ReactNode }) {
-  const user = await getRequestUser();
-  if (!user) {
-    redirect("/login");
-  }
-  return <AppShell user={user}>{children}</AppShell>;
-}

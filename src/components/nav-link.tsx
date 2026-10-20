@@ -22,7 +22,8 @@ export function NavLink({ href, icon, children }: { href: string; icon: ReactNod
   );
 }
 
-// Поки перехід на цей пункт триває (useLinkStatus) — спінер замість іконки, того ж розміру 18px: без зсуву макета.
+// Поки перехід на цей пункт чекає сервера (useLinkStatus) — спінер замість іконки, того ж розміру 18px: без зсуву
+// макета. Якщо loading.tsx розділу вже завантажено наперед, Next пропускає pending і одразу показує скелетон.
 function NavIcon({ icon }: { icon: ReactNode }) {
   const { pending } = useLinkStatus();
   if (!pending) return icon;

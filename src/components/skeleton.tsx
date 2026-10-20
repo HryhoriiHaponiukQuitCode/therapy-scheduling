@@ -1,15 +1,7 @@
 // Скелетон (розділ 4): блок кольору border, що пульсує, поки розділ вантажиться (loading.tsx).
-// Пульс вимикається при prefers-reduced-motion (розділ 7). Для скрінрідера — лише LoadingStatus.
+// Пульс вимикається при prefers-reduced-motion (розділ 7). Скрінрідеру перехід оголошує LoadingStatus (route-status.tsx).
 export function Skeleton({ className = "" }: { className?: string }) {
   return <span aria-hidden className={`block animate-pulse rounded-md bg-border motion-reduce:animate-none ${className}`} />;
-}
-
-export function LoadingStatus() {
-  return (
-    <p role="status" className="sr-only">
-      Loading…
-    </p>
-  );
 }
 
 // Поле форми: підпис і контрол 44px, як у Field.
