@@ -1,29 +1,37 @@
-import { Card } from "@/components/card";
-import { FilterIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
+import { Panel } from "@/components/panel";
 import { LoadingStatus } from "@/components/route-status";
-import { Skeleton, SkeletonField, SkeletonRows } from "@/components/skeleton";
+import { Skeleton, SkeletonRows } from "@/components/skeleton";
 
-// Миттєвий стан переходу на /slots: фільтр і таблиця слотів зі скелетонами.
+// Миттєвий стан переходу на /slots: ті самі панелі «Therapist», «Day» і сітка дня зі скелетонами.
 export default function SlotsLoading() {
   return (
     <>
       <LoadingStatus />
       <PageHeader title="Slots" description="Times in America/Los_Angeles." />
-      <Card title="Therapist and day" icon={<FilterIcon />}>
-        <div className="flex flex-wrap items-end gap-4">
-          <SkeletonField className="min-w-0 flex-[1_1_280px]" />
-          <SkeletonField className="min-w-0 flex-[1_1_220px]" />
-          <Skeleton className="h-11 w-20 max-[720px]:w-full" />
+      <div className="grid grid-cols-[360px_minmax(0,1fr)] items-start gap-6 max-[1000px]:grid-cols-1">
+        <div className="flex min-w-0 flex-col gap-6">
+          <Panel title="Therapist">
+            <div className="flex flex-col gap-2">
+              {Array.from({ length: 3 }, (_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          </Panel>
+          <Panel title="Day">
+            <Skeleton className="h-[280px] w-full rounded-lg" />
+          </Panel>
         </div>
-      </Card>
-      <Card>
-        <div className="flex flex-col gap-4">
-          <Skeleton className="mb-1 h-[22px] w-56" />
-          <Skeleton className="h-[68px] w-full rounded-lg" />
-          <SkeletonRows rows={6} columns={["w-12", "w-20", "w-28", "ml-auto w-24"]} />
-        </div>
-      </Card>
+        <Panel>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <Skeleton className="h-7 w-56" />
+              <Skeleton className="h-12 w-full max-w-[320px]" />
+            </div>
+            <SkeletonRows rows={6} rowClassName="min-h-[104px]" columns={["w-12", "h-[72px] flex-1 rounded-lg"]} />
+          </div>
+        </Panel>
+      </div>
     </>
   );
 }

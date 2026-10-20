@@ -1,18 +1,18 @@
 import type { ButtonHTMLAttributes } from "react";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "glass";
 
 const VARIANT: Record<ButtonVariant, string> = {
-  primary: "bg-btn px-[18px] text-on-btn hover:bg-btn-hover",
-  secondary: "border-border-strong bg-surface px-[18px] text-ink hover:bg-subtle",
-  ghost: "bg-transparent px-2 text-ink underline underline-offset-[3px] hover:bg-subtle",
+  primary: "bg-navy text-on-navy shadow-navy hover:brightness-110",
+  secondary: "border-navy bg-glass-hi text-navy hover:bg-glass",
+  glass: "border-glass-edge bg-glass-hi text-ink shadow-glass hover:bg-glass",
 };
 
 export const buttonClass = (variant: ButtonVariant = "primary", extra = "") =>
-  `inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md border border-transparent text-sm leading-none font-medium disabled:cursor-not-allowed aria-busy:cursor-progress aria-busy:opacity-70 ${VARIANT[variant]} ${extra}`;
+  `inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-transparent px-5 text-sm leading-none font-semibold transition-[filter,background-color] duration-150 focus-visible:outline-offset-3 disabled:cursor-not-allowed aria-busy:cursor-progress aria-busy:opacity-70 ${VARIANT[variant]} ${extra}`;
 
-// Дві кнопки на все (розділ 1): primary — чорна, secondary — біла з межею; ghost — для дрібних дій (DatePicker).
-// pending: спінер, aria-busy і disabled; решта пропсів <button> (form, name, value) — як є.
+// Усі кнопки — пігулки (розділ 1): primary — темно-синя основна дія, secondary — біла з синьою межею,
+// glass — нейтральна скляна. pending: спінер, aria-busy і disabled; решта пропсів <button> (form, name, value) — як є.
 export function Button({
   variant = "primary",
   pending = false,

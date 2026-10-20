@@ -3,10 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getRequestUser } from "@/lib/request-user";
 import { isStaff } from "@/lib/roles";
 import { ActionMessage } from "@/components/action-message";
-import { Card } from "@/components/card";
+import { Avatar } from "@/components/avatar";
 import { EmptyState } from "@/components/empty-state";
-import { UserIcon, UsersIcon } from "@/components/icons";
+import { UsersIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
+import { Panel } from "@/components/panel";
 import { AddClientForm } from "./add-client-form";
 
 // Клієнти практики: список і створення картки (admin, scheduler). AC-HOLD-10 … AC-HOLD-16.
@@ -32,47 +33,36 @@ export default async function ClientsPage() {
     .select("id, full_name, email")
     .order("full_name");
 
-  const th = "border-b border-border px-3 py-2.5 text-left text-xs leading-4 font-semibold text-muted";
-  const td = "border-b border-border px-3 py-3 align-middle";
-
   return (
     <>
       <PageHeader title="Clients" />
 
-      <Card id="new-client" title="New client" icon={<UserIcon />}>
-        <AddClientForm />
-      </Card>
+      {/* Розділ 5: панель «New client» і панель «All clients» поруч (одна колонка до 1000px). */}
+      <div className="grid grid-cols-[360px_minmax(0,1fr)] items-start gap-6 max-[1000px]:grid-cols-1">
+        <Panel id="new-client" title="New client">
+          <AddClientForm />
+        </Panel>
 
-      <Card id="all-clients" title="All clients" icon={<UsersIcon />}>
-        {error ? (
-          <ActionMessage state={{ status: "error", message: "Could not load clients. Try again later." }} />
-        ) : clients && clients.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse" data-testid="client-list">
-              <thead>
-                <tr>
-                  <th scope="col" className={th}>
-                    Name
-                  </th>
-                  <th scope="col" className={th}>
-                    Email
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="[&>tr:last-child>td]:border-b-0">
-                {clients.map((client) => (
-                  <tr key={client.id}>
-                    <td className={td}>{client.full_name}</td>
-                    <td className={`${td} break-all text-muted`}>{client.email}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <EmptyState icon={<UsersIcon />}>No clients yet.</EmptyState>
-        )}
-      </Card>
+        <Panel id="all-clients" title="All clients">
+          {error ? (
+            <ActionMessage state={{ status: "error", message: "Could not load clients. Try again later." }} />
+          ) : clients && clients.length > 0 ? (
+            <ul role="list" className="m-0 flex list-none flex-col p-0" data-testid="client-list">
+              {clients.map((client) => (
+                <li key={client.id} className="flex min-h-14 items-center gap-3 border-t border-line py-2 first:border-t-0">
+                  <Avatar name={client.full_name} />
+                  <span className="min-w-0">
+                    <span className="block font-semibold">{client.full_name}</span>
+                    <span className="block text-[13px] break-all text-muted">{client.email}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState icon={<UsersIcon />}>No clients yet.</EmptyState>
+          )}
+        </Panel>
+      </div>
     </>
   );
 }

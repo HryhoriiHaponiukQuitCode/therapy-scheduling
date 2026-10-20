@@ -27,7 +27,7 @@ export type DayView = {
   therapists: Therapist[];
   therapist: Therapist | null;
   date: string;
-  today: string; // «сьогодні» в America/Los_Angeles — для DatePicker
+  today: string; // «сьогодні» в America/Los_Angeles — для Calendar
   slots: DaySlot[];
   expired: ExpiredHold[];
   clients: ClientOption[];

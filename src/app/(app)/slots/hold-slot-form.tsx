@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, type ReactNode } from "react";
 import { ActionMessage } from "@/components/action-message";
 import { Field } from "@/components/field";
 import { Select } from "@/components/select";
@@ -13,15 +13,17 @@ const initialState: HoldSlotState = { status: "idle" };
 // Одна форма утримання на сторінку: клієнт вибирається один раз, а кнопки Hold у рядках вільних слотів
 // надсилають цю форму з атрибутом form і передають slot_start як значення кнопки (AC-HOLD-02, AC-HOLD-10).
 // Форма лишається змонтованою після утримання, тож повідомлення про успіх видно.
-// Вигляд — смуга subtle з власним Select (design-system.md, розділ 5); client_id — прихованим полем Select.
-export function HoldSlotForm(props: { therapistId: string; clients: ClientOption[] }) {
+// Вигляд (design-system.md, розділ 5): заголовок панелі зліва, Select «Client to hold a slot for» справа, під ними
+// ActionMessage; client_id — прихованим полем Select.
+export function HoldSlotForm(props: { heading: ReactNode; therapistId: string; clients: ClientOption[] }) {
   const [state, formAction, pending] = useActionState(holdSlot, initialState);
 
   return (
     <form id={HOLD_FORM_ID} action={formAction} className="flex flex-col gap-3" aria-busy={pending}>
       <input type="hidden" name="therapist_id" value={props.therapistId} />
-      <div className="flex flex-wrap items-end gap-4 rounded-md bg-subtle p-4">
-        <Field label="Client to hold a slot for" htmlFor="hold-client" className="min-w-0 flex-1 basis-60">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        {props.heading}
+        <Field label="Client to hold a slot for" htmlFor="hold-client" className="min-w-0 flex-[0_1_320px] max-[760px]:flex-auto">
           <Select
             id="hold-client"
             name="client_id"

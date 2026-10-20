@@ -7,20 +7,21 @@ import { formatPracticeTime, hasFreeSlots, NO_FREE_SLOTS_MESSAGE } from "@/lib/s
 import { CONFIRM_FORM_ID, HOLD_FORM_ID } from "@/lib/holds";
 import { ActionMessage } from "@/components/action-message";
 import { Button } from "@/components/button";
-import { Card } from "@/components/card";
-import { DatePicker } from "@/components/date-picker";
+import { Calendar } from "@/components/calendar";
+import { ChoiceList } from "@/components/choice-list";
+import { DayGrid } from "@/components/day-grid";
 import { EmptyState } from "@/components/empty-state";
-import { Field } from "@/components/field";
-import { CalendarIcon, FilterIcon, HistoryIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
-import { Select } from "@/components/select";
-import { SlotTable } from "@/components/slot-table";
+import { Panel } from "@/components/panel";
+import { SlotsNavigation } from "@/components/slots-navigation";
+import { StatusBadge } from "@/components/status-badge";
 import { loadDayView } from "./data";
 import { ConfirmHoldForm } from "./confirm-hold-form";
 import { HoldSlotForm } from "./hold-slot-form";
 
 // Слоти терапевта на вибраний день зі статусами (AC-HOLD-01, 05, 06, 18, 24) і прострочені утримання (AC-HOLD-20).
-// Вигляд — design-system.md, розділ 5: картки «Therapist and day», «<Терапевт> — <дата>», «Expired holds».
+// Вигляд — design-system.md, розділи 4.2 і 5: ліворуч GET-форми «Therapist» і «Day», праворуч погодинна сітка дня
+// і «Expired holds».
 export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
   const supabase = await createClient();
   const user = await getRequestUser();
@@ -67,96 +68,115 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
       ) : null,
   }));
 
+  // Лінія «зараз» — лише коли вибрано сьогоднішній день (час практики).
+  const nowTime = view.date === view.today ? formatPracticeTime(new Date()).slice(11) : null;
+  const now = nowTime ? { time: nowTime, hour: nowTime.slice(0, 2), minute: Number(nowTime.slice(3)) } : null;
+
+  const heading = (
+    <h2 id="day-slots" className="m-0 text-[22px] leading-7 font-medium tracking-[-0.01em]">
+      {view.therapist ? `${view.therapist.name} — ${view.date}` : "No therapists yet"}
+    </h2>
+  );
+  const withSlots = Boolean(view.therapist) && view.slots.length > 0;
+
   return (
     <>
       <PageHeader title="Slots" description="Times in America/Los_Angeles." />
 
-      <form method="get">
-        <Card id="slots-filter" title="Therapist and day" icon={<FilterIcon />}>
-          <div className="flex flex-wrap items-end gap-4">
-            <Field label="Therapist" htmlFor="slots-therapist" className="min-w-0 flex-[1_1_280px]">
-              <Select
-                key={view.therapist?.id ?? "none"}
-                id="slots-therapist"
-                name="therapist"
-                defaultValue={view.therapist?.id}
-                options={view.therapists.map((t) => ({ value: t.id, label: t.name }))}
-              />
-            </Field>
-            <Field label="Day" htmlFor="slots-date" className="min-w-0 flex-[1_1_220px]">
-              <DatePicker key={view.date} id="slots-date" name="date" defaultValue={view.date} today={view.today} />
-            </Field>
-            <Button type="submit" variant="primary" className="max-[720px]:w-full">
-              Show
-            </Button>
-          </div>
-        </Card>
-      </form>
-
-      <Card
-        id="day-slots"
-        title={view.therapist ? `${view.therapist.name} — ${view.date}` : "No therapists yet"}
-        icon={<CalendarIcon />}
-      >
-        {view.error ? (
-          <ActionMessage state={{ status: "error", message: "Could not load slots. Try again later." }} />
-        ) : (
-          <div className="flex flex-col gap-4">
-            {view.therapist && !hasFreeSlots(view.slots) ? (
-              <EmptyState role="status" data-testid="no-free-slots">
-                {NO_FREE_SLOTS_MESSAGE}
-              </EmptyState>
-            ) : null}
-            {/* Форми монтуємо для вибраного терапевта й дня зі слотами завжди, а не лише коли є що утримати чи
-                підтвердити: після останньої дії revalidatePath прибрав би форму разом із повідомленням про результат. */}
-            {view.therapist && view.slots.length > 0 ? (
-              view.clientsError ? (
-                <ActionMessage
-                  state={{ status: "error", message: "Could not load clients, so slots cannot be held right now." }}
-                />
-              ) : view.clients.length > 0 ? (
-                // key: новий терапевт чи день — новий стан форми (без чужого повідомлення).
-                <HoldSlotForm
-                  key={`${view.therapist.id}-${view.date}`}
-                  therapistId={view.therapist.id}
-                  clients={view.clients}
+      <SlotsNavigation action="/slots" className="grid grid-cols-[360px_minmax(0,1fr)] items-start gap-6 max-[1000px]:grid-cols-1">
+        <div className="flex min-w-0 flex-col gap-6">
+          <Panel id="slots-therapist" title="Therapist">
+            {/* Вибір терапевта одразу відправляє форму; поточний день — прихованим полем. */}
+            <form method="get" action="/slots" data-navigate="">
+              <input type="hidden" name="date" value={view.date} />
+              {view.therapists.length > 0 ? (
+                <ChoiceList
+                  name="therapist"
+                  value={view.therapist?.id ?? null}
+                  choices={view.therapists.map((t) => ({ value: t.id, label: t.name }))}
                 />
               ) : (
-                <Link href="/clients" className="text-sm underline underline-offset-[3px]">
-                  Create a client to hold a slot
-                </Link>
-              )
-            ) : null}
-            {view.therapist && view.slots.length > 0 ? (
-              // key: новий терапевт чи день — новий стан форми (без чужого повідомлення).
-              <ConfirmHoldForm key={`confirm-${view.therapist.id}-${view.date}`} />
-            ) : null}
-            {view.slots.length > 0 ? <SlotTable rows={rows} withAction data-testid="slot-list" /> : null}
-          </div>
-        )}
-      </Card>
+                <p className="m-0 text-muted">No therapists yet.</p>
+              )}
+            </form>
+          </Panel>
+          <Panel id="slots-day" title="Day">
+            {/* Вибір дня одразу відправляє форму; поточний терапевт — прихованим полем. */}
+            <form method="get" action="/slots" data-navigate="">
+              {view.therapist ? <input type="hidden" name="therapist" value={view.therapist.id} /> : null}
+              <Calendar name="date" value={view.date} today={view.today} />
+            </form>
+          </Panel>
+        </div>
 
-      {/* AC-HOLD-24: у дні без жодного слоту — лише повідомлення, без інших розділів. */}
-      {view.slots.length > 0 && view.expired.length > 0 ? (
-        <Card id="expired-holds-title" title="Expired holds" icon={<HistoryIcon />}>
-          <p className="-mt-4 mb-2 text-xs leading-4 text-muted">
-            Upcoming slots of this therapist not confirmed within 24 hours — they are free again.
-          </p>
-          <SlotTable
-            withHeader={false}
-            withHeldUntil={false}
-            data-testid="expired-holds"
-            label="Expired holds"
-            rows={view.expired.map((hold) => ({
-              key: hold.id,
-              time: formatPracticeTime(hold.slotStart),
-              status: "Expired",
-              client: hold.clientName,
-              heldUntil: null,
-            }))}
-          />
-        </Card>
-      ) : null}
+        <div className="flex min-w-0 flex-col gap-6 transition-opacity duration-200 group-data-[pending]/nav:opacity-60">
+          <Panel labelledBy="day-slots">
+            {view.error ? (
+              <div className="flex flex-col gap-4">
+                {heading}
+                <ActionMessage state={{ status: "error", message: "Could not load slots. Try again later." }} />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {/* Форми монтуємо для вибраного терапевта й дня зі слотами завжди, а не лише коли є що утримати чи
+                    підтвердити: після останньої дії revalidatePath прибрав би форму разом із повідомленням про результат. */}
+                {withSlots && !view.clientsError && view.clients.length > 0 ? (
+                  // key: новий терапевт чи день — новий стан форми (без чужого повідомлення).
+                  <HoldSlotForm
+                    key={`${view.therapist!.id}-${view.date}`}
+                    heading={heading}
+                    therapistId={view.therapist!.id}
+                    clients={view.clients}
+                  />
+                ) : (
+                  <div className="flex flex-wrap items-end justify-between gap-4">
+                    {heading}
+                    {withSlots && !view.clientsError ? (
+                      <Link href="/clients" className="text-sm font-semibold text-navy underline underline-offset-[3px]">
+                        Create a client to hold a slot
+                      </Link>
+                    ) : null}
+                  </div>
+                )}
+                {withSlots && view.clientsError ? (
+                  <ActionMessage
+                    state={{ status: "error", message: "Could not load clients, so slots cannot be held right now." }}
+                  />
+                ) : null}
+                {withSlots ? (
+                  // key: новий терапевт чи день — новий стан форми (без чужого повідомлення).
+                  <ConfirmHoldForm key={`confirm-${view.therapist!.id}-${view.date}`} />
+                ) : null}
+                {view.therapist && !hasFreeSlots(view.slots) ? (
+                  <EmptyState role="status" data-testid="no-free-slots">
+                    {NO_FREE_SLOTS_MESSAGE}
+                  </EmptyState>
+                ) : null}
+                {view.slots.length > 0 ? <DayGrid rows={rows} now={now} data-testid="slot-list" /> : null}
+              </div>
+            )}
+          </Panel>
+
+          {/* AC-HOLD-24: у дні без жодного слоту — лише повідомлення, без інших розділів. */}
+          {view.slots.length > 0 && view.expired.length > 0 ? (
+            <Panel
+              id="expired-holds-title"
+              title="Expired holds"
+              description="Upcoming slots of this therapist not confirmed within 24 hours — they are free again."
+            >
+              <ul role="list" className="m-0 flex list-none flex-col gap-2 p-0" data-testid="expired-holds" aria-label="Expired holds">
+                {view.expired.map((hold) => (
+                  <li key={hold.id} className="slot-expired flex flex-wrap items-center gap-x-3.5 gap-y-1.5 rounded-lg px-3.5 py-3">
+                    <b className="font-semibold">{formatPracticeTime(hold.slotStart)}</b>
+                    <span>{hold.clientName}</span>
+                    <StatusBadge status="Expired" />
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          ) : null}
+        </div>
+      </SlotsNavigation>
     </>
   );
 }

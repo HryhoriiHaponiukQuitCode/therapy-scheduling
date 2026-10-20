@@ -80,7 +80,7 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
 - **AppShell** для всіх сторінок, крім `/login`: сітка `96px | 1fr` на тлі градієнта з плямами.
 - **Бічна смуга** (`aside`) без фону: знак угорі (два перекриті кола блакитного й лавандового градієнтів, 48px —
   свій, не серце MindBridge), нижче `nav aria-label="Main"` з круглими скляними кнопками 56px, активна — 64px,
-  фон `navy`, іконка `on-navy`, `aria-current="page"`. Унизу — кнопка «Вийти» (наявна форма `signOut`).
+  фон `navy`, іконка `on-navy`, `aria-current="page"`. Унизу — кнопка «Sign out» (наявна форма `signOut`).
 - **Назва пункту обовʼязкова:** `aria-label` на кожній кнопці + видима підказка (пігулка `navy`) праворуч на hover і focus.
 - **Пункти за роллю:** staff — Home, Clients, Slots; `therapist` — Home, My schedule. Іконки: будинок, люди, календар, годинник.
 - **Шапка контенту:** зліва заголовок сторінки й опис `muted`; справа скляна пігулка акаунта (email 600, роль `muted`,
@@ -109,7 +109,7 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
 | `SlotCard` | server | картка слота з фактурою за статусом (2.3) |
 | `DayGrid` | server | погодинна сітка дня (розділ 5) |
 | `ActionMessage` | наявний | API не змінювати; вигляд — пігулка `success-bg` / `error-bg` з круглою іконкою; `role="alert"` / `"status"` без `aria-live`; елемент лишається змонтованим |
-| `SubmitButton` | client | `Button` для форм із server action без `useActionState` (вхід, «Вийти»): `pending` з `useFormStatus` |
+| `SubmitButton` | client | `Button` для форм із server action без `useActionState` («Sign in», «Sign out»): `pending` з `useFormStatus` |
 | `Skeleton`, `SkeletonField`, `SkeletonRows`, `LoadingStatus` | server / server / server / client | стан завантаження розділу в `loading.tsx`: ті самі панелі й заголовки, що на сторінці, з пульсуючими блоками `glass-hi`; `LoadingStatus` (`route-status.tsx`) пише «Loading…» у постійну `role="status"`-область AppShell (так само робить `RailLink`, поки перехід чекає сервера) |
 | `EmptyState` | server | пунктирна рамка `r-lg`, іконка календаря в скляному колі 56px (`navy`), текст 600; `role="status"` і `data-testid` як зараз |
 
@@ -135,6 +135,11 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
   крапка `blue` під числом; дні інших місяців — `muted` 50%. Поточний терапевт — прихований `<input name="therapist">`.
   Клавіатура: Tab до сітки, стрілки по днях (roving tabindex), PageUp / PageDown — місяць.
 - Кнопка «Show» більше не потрібна: вибір одразу відправляє форму. Без JavaScript усе працює, бо це звичайні submit-кнопки.
+- З JavaScript обидві форми (позначені `data-navigate`) перехоплює клієнтський `SlotsNavigation`: збирає URL з
+  `new FormData(form, submitter)` і робить `router.push` у `startTransition`, тож перехід клієнтський, а поки він
+  чекає сервера, права колонка тьмяніє (`data-pending`, `aria-busy`) і live-область AppShell оголошує «Loading…».
+  `next/form` не підходить: він не передає `name`/`value` натиснутої кнопки.
+- `Calendar` не перемонтовуємо (`key`) на зміну дня: кнопка дня, яку натиснули, зберігає фокус після переходу.
 
 ## 5. Сторінки
 
@@ -152,15 +157,19 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
   - **Лінія «зараз»** (опційно, лише коли вибрано сьогоднішній день): 2px `blue` з точкою 10px і пігулкою «Now HH:MM»
     біля колонки годин; проходить під картками (`z-index`), `aria-hidden`.
   - Панель «Expired holds»: опис `muted`, список карток Expired (час 600, імʼя, бейдж), `data-testid="expired-holds"`.
-- **`/my-schedule`**: панель на кожен із 7 днів (заголовок — дата), всередині `DayGrid` без дій.
+- **`/my-schedule`**: панель на кожен із 7 днів (заголовок — дата, для сьогодні «, today»), всередині `DayGrid` без дій;
+  лінія «зараз» — лише в панелі сьогоднішнього дня.
 - **`/clients`**: панель «New client» (Field + Input для Name і Email, кнопка Create client — primary, `ActionMessage`);
   панель «All clients» — список рядків 56px: коло з ініціалами, імʼя 600, email `muted`, `data-testid="client-list"`.
-- **`/`**: панель з парами «підпис / значення» (Email, Роль) у 2 колонки; `data-testid` як зараз.
-- **`/login`**: без смуги; на тлі градієнта по центру одна скляна панель 400px, ті самі Field / Input / Button.
+- **`/`**: заголовок «Home», панель «Account» з парами «підпис / значення» (Email, Role) у 2 колонки; `data-testid` як зараз.
+- **`/login`**: без смуги; на тлі градієнта по центру одна скляна панель 400px (знак, «Practice scheduling», `h1`
+  «Sign in»), ті самі Field / Input / SubmitButton.
 
 ## 6. Що не можна змінювати
 
 - Тексти PM (статуси, повідомлення, «No free slots on this day.» тощо) і наявні тексти UI.
+- **Інтерфейс лише англійською:** заголовки, підписи, кнопки, помилки, `aria-label`, `<title>` і `lang="en"`.
+  Українською лишаються коментарі в коді, документація й назви тестів; дані (імена людей) показуємо як є.
 - Імена полів: `full_name`, `email`, `client_id`, `therapist_id`, `slot_start`, `hold_id`; GET-параметри `therapist`, `date`.
 - `data-testid`: `user-email`, `user-role`, `client-list`, `slot-list`, `no-free-slots`, `expired-holds`.
 - `useActionState`, server actions у `actions.ts`, `requirements/`, `openspec/specs/`, міграції.
