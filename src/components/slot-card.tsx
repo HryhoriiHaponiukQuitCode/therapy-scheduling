@@ -8,33 +8,32 @@ const TEXTURE: Record<BadgeStatus, string> = {
   Expired: "slot-expired",
 };
 
-// Картка слота (розділ 2.3): фактура за статусом (пунктир / штриховка / суцільне / приглушене скло) + бейдж.
-// Free — бейдж і дія; Held — імʼя, «Held until …», бейдж, дія; Confirmed — імʼя й бейдж. На телефоні дія під текстом.
+// Картка слота (розділ 2.3): фактура за статусом (пунктир / штриховка / суцільне / приглушене скло), імʼя клієнта
+// 600, «Held until …» muted, бейдж статусу; унизу проміжок часу «09:00 – 10:00»; дія — під ним на всю ширину картки.
 export function SlotCard({
   status,
   name,
   detail,
+  range,
   action,
-  compact = false,
 }: {
   status: BadgeStatus;
   name?: ReactNode;
   detail?: ReactNode;
+  range: string;
   action?: ReactNode;
-  compact?: boolean;
 }) {
   return (
     <div
-      className={`relative flex h-full flex-wrap items-start justify-between gap-x-4 gap-y-2.5 overflow-hidden rounded-lg ${
-        compact ? "px-3.5 py-3" : "min-h-[86px] px-4 py-3.5"
-      } ${TEXTURE[status]}`}
+      className={`relative flex h-full min-h-[108px] flex-col justify-between gap-2.5 overflow-hidden rounded-lg px-3.5 py-3 ${TEXTURE[status]}`}
     >
-      <div className="relative z-[1] flex min-w-0 flex-col gap-1">
-        {name ? <span className="text-[15px] leading-5 font-semibold">{name}</span> : null}
-        {detail ? <span className="text-[13px] text-muted">{detail}</span> : null}
+      <div className="relative z-[1] flex min-w-0 flex-col items-start gap-1">
+        {name ? <span className="max-w-full truncate text-sm leading-5 font-semibold">{name}</span> : null}
+        {detail ? <span className="text-xs leading-4 text-muted">{detail}</span> : null}
         <StatusBadge status={status} />
       </div>
-      {action ? <div className="relative z-[1] self-center max-[760px]:basis-full [&>button]:max-[760px]:w-full">{action}</div> : null}
+      <span className="relative z-[1] text-xs leading-4 font-medium text-muted">{range}</span>
+      {action ? <div className="relative z-[1] [&>button]:w-full">{action}</div> : null}
     </div>
   );
 }

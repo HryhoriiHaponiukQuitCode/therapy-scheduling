@@ -19,7 +19,9 @@
 
 Усі значення — CSS-змінні в `src/app/globals.css`, Tailwind бачить їх через `@theme inline`. Сирі класи палітри
 Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у `src/` після впровадження не лишаються.
-Темна тема — `@media (prefers-color-scheme: dark)`.
+За замовчуванням — світла тема, незалежно від налаштування ОС. Темну вмикає перемикач у смузі: `<html data-theme="dark">`,
+токени — у `:root[data-theme="dark"]`. Вибір зберігається в cookie `theme` на рік (`src/lib/theme.ts`); кореневий layout
+читає його й одразу віддає сторінку в потрібній темі, без спалаху.
 
 ### 2.1 Фон і скло
 
@@ -80,7 +82,8 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
 - **AppShell** для всіх сторінок, крім `/login`: сітка `96px | 1fr` на тлі градієнта з плямами.
 - **Бічна смуга** (`aside`) без фону: знак угорі (два перекриті кола блакитного й лавандового градієнтів, 48px —
   свій, не серце MindBridge), нижче `nav aria-label="Main"` з круглими скляними кнопками 56px, активна — 64px,
-  фон `navy`, іконка `on-navy`, `aria-current="page"`. Унизу — кнопка «Sign out» (наявна форма `signOut`).
+  фон `navy`, іконка `on-navy`, `aria-current="page"`. Унизу — перемикач теми (`role="switch"`, `aria-checked`, `aria-label="Dark theme"`; іконка місяць / сонце,
+  підказка «Dark theme»; стан — `aria-checked`) і під ним кнопка «Sign out» (наявна форма `signOut`).
 - **Назва пункту обовʼязкова:** `aria-label` на кожній кнопці + видима підказка (пігулка `navy`) праворуч на hover і focus.
 - **Пункти за роллю:** staff — Home, Clients, Slots; `therapist` — Home, My schedule. Іконки: будинок, люди, календар, годинник.
 - **Шапка контенту:** зліва заголовок сторінки й опис `muted`; справа скляна пігулка акаунта (email 600, роль `muted`,
@@ -103,11 +106,11 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
 | `Button` | server | `variant: "primary" \| "secondary" \| "glass"`, `pending?` (спінер + `aria-busy`, `disabled`); пропси `<button>` (`form`, `name`, `value`) |
 | `Field`, `Input` | server | підпис 13/600 над полем; поле — пігулка 48px, `glass-hi`, межа `border-strong`; `aria-invalid` → межа `error` |
 | `Select` | client | власний, без нативного `<select>` (4.1) |
-| `ChoiceList` | server | список-вибір терапевта (4.2) |
+| `ChoiceList` | client | чекбокси кількох терапевтів (4.2) |
 | `Calendar` | client | вбудований календар дня (4.2) |
 | `StatusBadge` | server | `status: "Free" \| "Held" \| "Confirmed" \| "Expired"`; пігулка: іконка + текст |
-| `SlotCard` | server | картка слота з фактурою за статусом (2.3) |
-| `DayGrid` | server | погодинна сітка дня (розділ 5) |
+| `SlotCard` | server | картка слота: фактура за статусом (2.3) і проміжок часу |
+| `DayGrid` | server | погодинна сітка дня з колонкою на терапевта (розділ 5) |
 | `ActionMessage` | наявний | API не змінювати; вигляд — пігулка `success-bg` / `error-bg` з круглою іконкою; `role="alert"` / `"status"` без `aria-live`; елемент лишається змонтованим |
 | `SubmitButton` | client | `Button` для форм із server action без `useActionState` («Sign in», «Sign out»): `pending` з `useFormStatus` |
 | `Skeleton`, `SkeletonField`, `SkeletonRows`, `LoadingStatus` | server / server / server / client | стан завантаження розділу в `loading.tsx`: ті самі панелі й заголовки, що на сторінці, з пульсуючими блоками `glass-hi`; `LoadingStatus` (`route-status.tsx`) пише «Loading…» у постійну `role="status"`-область AppShell (так само робить `RailLink`, поки перехід чекає сервера) |
@@ -126,15 +129,19 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
 
 Нативні `<select>` і `<input type="date">` зникають. Ліва колонка — та сама **GET-форма**:
 
-- **ChoiceList «Therapist»**: кожен терапевт — кнопка `type="submit" name="therapist" value=<id>` з `aria-pressed`
-  (вибраний — `true`). Рядок 60px: коло з ініціалами, імʼя 600, праворуч кільце-радіо; вибраний — фон `glass-hi`,
-  межа `glass-edge`, тінь, заповнене коло `navy` з галочкою. Поточна дата йде прихованим `<input name="date">`.
+- **ChoiceList «Therapists»**: кілька терапевтів — `<input type="checkbox" name="therapist" value=<id>>` (повторюваний
+  GET-параметр `?therapist=a&therapist=b`). Рядок 60px: чекбокс (`accent-color: navy`), коло з ініціалами, імʼя 600;
+  вибраний — фон `glass-hi`, межа `glass-edge`, тінь. Зміна одразу відправляє форму (`requestSubmit`); без JavaScript —
+  кнопка «Show» у `<noscript>`. Останнього вибраного зняти не можна; без параметра `therapist` вибрані перші 4.
+  Поточна дата йде прихованим `<input name="date">`.
 - **Calendar «Day»**: місяць із кнопками попереднього / наступного (44×44, перемикають лише вигляд, без відправки),
   тиждень з понеділка (Mo … Su). Сітка `repeat(7, minmax(0, 1fr))` без проміжків між колонками; день — коло `width: 100%; max-width: 44px; aspect-ratio: 1`, тож календар ніколи не виходить за межі панелі. Кожен день — `type="submit" name="date" value="YYYY-MM-DD"`, `aria-pressed` для
   вибраного, `aria-label="YYYY-MM-DD"` (для сьогодні — «, today»). Вибраний — коло `navy`; сьогодні (America/Los_Angeles) —
-  крапка `blue` під числом; дні інших місяців — `muted` 50%. Поточний терапевт — прихований `<input name="therapist">`.
+  крапка `blue` під числом; дні інших місяців — `muted` 50%. Вибрані терапевти — приховані `<input name="therapist">`.
   Клавіатура: Tab до сітки, стрілки по днях (roving tabindex), PageUp / PageDown — місяць.
-- Кнопка «Show» більше не потрібна: вибір одразу відправляє форму. Без JavaScript усе працює, бо це звичайні submit-кнопки.
+  Під сіткою — скляна кнопка «Today» (`type="submit" name="date" value=<сьогодні>`): повертає до сьогодні після
+  гортання місяців. Фокус на дні іншого місяця вигляд не перемикає — клік по ньому одразу відправляє форму.
+- Вибір дня одразу відправляє форму: дні — звичайні submit-кнопки, тож без JavaScript це теж працює.
 - З JavaScript обидві форми (позначені `data-navigate`) перехоплює клієнтський `SlotsNavigation`: збирає URL з
   `new FormData(form, submitter)` і робить `router.push` у `startTransition`, тож перехід клієнтський, а поки він
   чекає сервера, права колонка тьмяніє (`data-pending`, `aria-busy`) і live-область AppShell оголошує «Loading…».
@@ -143,21 +150,33 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
 
 ## 5. Сторінки
 
-- **`/slots`**: дві колонки `360px | 1fr` (одна колонка до 1000px).
-  - Ліва: панелі «Therapist» і «Day» (4.2).
-  - Права, панель «<Терапевт> — <дата>»: заголовок зліва; справа поле «Client to hold a slot for» (Select);
-    під ними `ActionMessage`.
-  - **DayGrid** — рядок на кожну годину, зліва година `muted` 500 (колонка 64px), роздільник `line`; у рядку `SlotCard`:
-    - **Free:** бейдж Free + кнопка «Hold HH:MM» (primary) праворуч;
-    - **Held:** імʼя 600, «Held until …» `muted`, бейдж Held, кнопка «Confirm HH:MM» (secondary);
-    - **Confirmed:** імʼя, бейдж Confirmed, без дії.
+- **`/slots`**: дві колонки `360px | 1fr` (одна колонка до 1100px).
+  - Ліва: панелі «Therapists» і «Day» (4.2).
+  - Права панель: заголовок — дата і `muted` «<день тижня> · N therapists»; справа поле «Client to hold a slot for»
+    (Select, один клієнт для всіх колонок); під ними `ActionMessage`.
+  - **DayGrid** — спільна шкала годин зліва (64px, година `muted` 500) і колонка на кожного вибраного терапевта
+    (`minmax(160px, 1fr)`; якщо колонки ширші за панель — сітка прокручується всередині панелі, сторінка — ні).
+    Шапка колонки: коло з ініціалами, імʼя 600, `muted` «N free of M». Години — від найранішого до найпізнішого
+    слота всіх колонок; роздільники `line` між годинами й колонками. Семантика — таблиця (`role="table"`, шапки
+    колонок і рядків), тож скрінрідер називає терапевта й годину клітинки.
+  - Рядок повідомлень під шапкою: у колонці без вільних слотів — «No free slots on this day.» (`data-testid="no-free-slots"`,
+    AC-HOLD-18); у колонці без слотів — лише воно (AC-HOLD-24).
+  - **SlotCard** у клітинці: імʼя клієнта 600 (для Held / Confirmed), «Held until …» `muted`, бейдж статусу; унизу
+    проміжок «09:00 – 10:00» `muted`; дія — під ним на всю ширину картки:
+    - **Free:** кнопка «Hold» (primary), `aria-label="Hold HH:MM, <терапевт>"`;
+    - **Held:** кнопка «Confirm» (secondary), `aria-label="Confirm HH:MM, <терапевт>"`;
+    - **Confirmed:** без дії.
 
-    Кнопки й далі надсилають форми через атрибут `form` з `name="slot_start"` / `name="hold_id"`. `data-testid="slot-list"` —
-    на контейнері сітки. На телефоні кнопка переходить під текст на всю ширину картки.
-  - **Лінія «зараз»** (опційно, лише коли вибрано сьогоднішній день): 2px `blue` з точкою 10px і пігулкою «Now HH:MM»
-    біля колонки годин; проходить під картками (`z-index`), `aria-hidden`.
-  - Панель «Expired holds»: опис `muted`, список карток Expired (час 600, імʼя, бейдж), `data-testid="expired-holds"`.
-- **`/my-schedule`**: панель на кожен із 7 днів (заголовок — дата, для сьогодні «, today»), всередині `DayGrid` без дій;
+    Кнопки й далі надсилають форми через атрибут `form` з `name="slot_start"` / `name="hold_id"`. Форма утримання —
+    на кожного терапевта (`holdFormId(id)`) з прихованими `therapist_id` і `client_id`; клієнт вибирається один раз у
+    спільному Select, результат показує лише остання відправлена форма. Поля server action ті самі.
+    Рядки таблиці — бокси з `grid-template-columns: subgrid` (не `display: contents`). `data-testid="slot-list"` — на таблиці.
+  - **Лінія «зараз»** (лише коли вибрано сьогоднішній день): 2px `blue` з точкою 10px через усі колонки, під картками
+    (`z-index`), `aria-hidden`; час «HH:MM» — пігулка `blue` / `on-navy` у колонці годин на рівні лінії, поверх підписів. До першої години — по верхньому краю сітки, після
+    останньої — по нижньому.
+  - Панель «Expired holds»: опис `muted`, список карток Expired усіх вибраних терапевтів (час 600, імʼя клієнта,
+    терапевт `muted`, бейдж), `data-testid="expired-holds"`; терапевтів без жодного слоту цього дня тут немає (AC-HOLD-24).
+- **`/my-schedule`**: панель на кожен із 7 днів (заголовок — дата, для сьогодні «, today»), всередині `DayGrid` з однією колонкою без шапки, без дій;
   лінія «зараз» — лише в панелі сьогоднішнього дня.
 - **`/clients`**: панель «New client» (Field + Input для Name і Email, кнопка Create client — primary, `ActionMessage`);
   панель «All clients» — список рядків 56px: коло з ініціалами, імʼя 600, email `muted`, `data-testid="client-list"`.

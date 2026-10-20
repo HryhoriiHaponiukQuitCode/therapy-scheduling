@@ -29,6 +29,12 @@ function practiceParts(date: Date) {
   };
 }
 
+// Годинник практики для лінії «зараз» (DayGrid): «14:30», година й хвилина числами.
+export function practiceClock(date: Date): { time: string; hour: number; minute: number } {
+  const p = practiceParts(date);
+  return { time: `${p.hour}:${p.minute}`, hour: Number(p.hour), minute: Number(p.minute) };
+}
+
 // «2026-11-03 14:30» — формат Assumptions специфікації.
 export function formatPracticeTime(date: Date): string {
   const p = practiceParts(date);
@@ -75,6 +81,13 @@ export function isoWeekday(date: string): number {
   const [y, m, d] = date.split("-").map(Number);
   const day = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
   return day === 0 ? 7 : day;
+}
+
+// Назва дня тижня для календарної дати «2026-11-03» → «Tuesday» (дата без часу, тож рахуємо в UTC).
+const weekdayFormat = new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: "UTC" });
+export function weekdayName(date: string): string {
+  const [y, m, d] = date.split("-").map(Number);
+  return weekdayFormat.format(new Date(Date.UTC(y, m - 1, d)));
 }
 
 export type HoldStatus = "Held" | "Expired" | "Confirmed";

@@ -12,7 +12,7 @@ export default function MyScheduleLoading() {
       {Array.from({ length: 3 }, (_, day) => (
         <Panel key={day}>
           <Skeleton className="mb-5 h-7 w-36" />
-          <SkeletonRows rows={3} rowClassName="min-h-[104px]" columns={["w-12", "h-[72px] flex-1 rounded-lg"]} />
+          <SkeletonRows rows={3} rowClassName="min-h-[104px]" columns={["h-4 w-12", "h-[72px] flex-1 rounded-lg"]} />
         </Panel>
       ))}
     </>

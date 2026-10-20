@@ -1,10 +1,12 @@
 // Скелетон (розділ 4): блок glass-hi з межею line, що пульсує, поки розділ вантажиться (loading.tsx).
 // Пульс вимикається при prefers-reduced-motion (розділ 7). Скрінрідеру перехід оголошує LoadingStatus (route-status.tsx).
+// Заокруглення за замовчуванням — пігулка; власне rounded-* у className його замінює (без конфлікту класів).
 export function Skeleton({ className = "" }: { className?: string }) {
+  const radius = /(^|\s)rounded-/.test(className) ? "" : "rounded-full";
   return (
     <span
       aria-hidden
-      className={`block animate-pulse rounded-full border border-line bg-glass-hi motion-reduce:animate-none ${className}`}
+      className={`block animate-pulse border border-line bg-glass-hi motion-reduce:animate-none ${radius} ${className}`}
     />
   );
 }
@@ -19,7 +21,8 @@ export function SkeletonField({ className = "" }: { className?: string }) {
   );
 }
 
-// Рядки списку з роздільником line: години сітки дня (DayGrid) і список клієнтів.
+// Рядки списку з роздільником line: години сітки дня (DayGrid) і список клієнтів. columns — повні класи блоків
+// (висота й ширина), без доданих тут розмірів, щоб не конфліктувати з класами виклику.
 export function SkeletonRows({
   rows,
   columns,
@@ -34,7 +37,7 @@ export function SkeletonRows({
       {Array.from({ length: rows }, (_, row) => (
         <div key={row} className={`flex items-center gap-4 border-t border-line py-2 first:border-t-0 ${rowClassName}`}>
           {columns.map((width, col) => (
-            <Skeleton key={col} className={`h-4 ${width}`} />
+            <Skeleton key={col} className={width} />
           ))}
         </div>
       ))}

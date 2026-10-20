@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
+import { getRequestTheme } from "@/lib/request-theme";
 import "./globals.css";
 
 // Розділ 2.4: один шрифт Manrope (next/font, не npm-залежність). Інтерфейс англійською (розділ 6), кирилиця —
@@ -15,10 +16,13 @@ export const metadata: Metadata = {
   description: "Next.js + Supabase + OpenSpec",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+// Тема — з cookie (світла за замовчуванням), тож сторінка одразу приходить у вибраній темі, без спалаху.
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const theme = await getRequestTheme();
   return (
     <html
       lang="en"
+      data-theme={theme}
       className={`${manrope.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

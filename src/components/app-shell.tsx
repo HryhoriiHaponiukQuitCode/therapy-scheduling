@@ -1,15 +1,19 @@
 import type { ReactNode } from "react";
 import { signOut } from "@/app/login/actions";
+import { getRequestTheme } from "@/lib/request-theme";
 import { isStaff, type AppRole } from "@/lib/roles";
+import type { Theme } from "@/lib/theme";
+import { Avatar } from "./avatar";
 import { BrandMark, HomeIcon, ScheduleIcon, SignOutIcon, SlotsIcon, UsersIcon } from "./icons";
-import { RailLink, RailSignOut } from "./rail-link";
+import { RailLink, RailSignOut, RailThemeToggle } from "./rail-link";
 import { ROUTE_STATUS_ID } from "./route-status-id";
 
 type ShellUser = { email: string | null; role: AppRole | null };
 
-// Бічна смуга (розділ 3): знак, круглі скляні кнопки пунктів за роллю, унизу «Sign out» (наявна форма signOut).
+// Бічна смуга (розділ 3): знак, круглі скляні кнопки пунктів за роллю, унизу перемикач теми і «Sign out»
+// (наявна форма signOut).
 // До 760px — плаваюча скляна панель-пігулка внизу екрана, знак ховається.
-export function Rail({ user }: { user: ShellUser }) {
+export function Rail({ user, theme }: { user: ShellUser; theme: Theme }) {
   return (
     <aside
       aria-label="Sidebar"
@@ -26,36 +30,37 @@ export function Rail({ user }: { user: ShellUser }) {
         ) : null}
         {user.role === "therapist" ? <RailLink href="/my-schedule" label="My schedule" icon={<ScheduleIcon />} /> : null}
       </nav>
-      <form action={signOut} className="mt-auto max-[760px]:mt-0">
-        <RailSignOut label="Sign out" icon={<SignOutIcon />} />
-      </form>
+      <div className="mt-auto flex flex-col items-center gap-3.5 max-[760px]:mt-0 max-[760px]:flex-row max-[760px]:gap-1">
+        <RailThemeToggle initial={theme} />
+        <form action={signOut}>
+          <RailSignOut label="Sign out" icon={<SignOutIcon />} />
+        </form>
+      </div>
     </aside>
   );
 }
 
 // Пігулка акаунта праворуч у шапці контенту (розділ 3): email 600, роль muted, коло з першою літерою.
-// До 760px email і роль ховаються.
+// До 760px email і роль лишаються лише для скрінрідера (sr-only).
 function AccountPill({ user }: { user: ShellUser }) {
-  const initial = (user.email ?? "?").charAt(0).toUpperCase();
   return (
     <div className="glass col-start-2 row-start-1 col-span-1! flex items-center gap-3 self-start rounded-full py-2 pr-2 pl-[18px] max-[760px]:p-1">
-      <span className="min-w-0 max-[760px]:hidden">
+      <span className="min-w-0 max-[760px]:sr-only">
         <span className="block truncate text-[13px] leading-4 font-semibold">{user.email ?? "—"}</span>
         <span className="text-xs text-muted">{user.role ?? "—"}</span>
       </span>
-      <span aria-hidden className="avatar size-11 text-sm">
-        {initial}
-      </span>
+      <Avatar name={user.email ?? ""} className="size-11 text-sm" />
     </div>
   );
 }
 
 // Каркас усіх сторінок, крім /login (розділ 3): сітка 96px | 1fr на тлі градієнта з плямами.
 // Перший ряд контенту — PageHeader сторінки зліва і пігулка акаунта справа; решта дітей — на всю ширину.
-export function AppShell({ user, children }: { user: ShellUser; children: ReactNode }) {
+export async function AppShell({ user, children }: { user: ShellUser; children: ReactNode }) {
+  const theme = await getRequestTheme();
   return (
     <div className="grid min-h-dvh w-full flex-1 grid-cols-[96px_minmax(0,1fr)] max-[760px]:grid-cols-1">
-      <Rail user={user} />
+      <Rail user={user} theme={theme} />
       {/* Постійна live-область: loading.tsx пише в неї «Loading…» (LoadingStatus), тож скрінрідер оголошує перехід. */}
       <p id={ROUTE_STATUS_ID} role="status" className="sr-only" />
       <main className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] content-start gap-6 pt-7 pr-8 pb-10 pl-2 max-[760px]:px-4 max-[760px]:pt-5 max-[760px]:pb-28 [&>*]:col-span-2">

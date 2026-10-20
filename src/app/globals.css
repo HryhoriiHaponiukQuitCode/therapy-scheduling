@@ -40,44 +40,43 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-1: #0b1024;
-    --bg-2: #120f2a;
-    --blob-a: #1b2a63;
-    --blob-b: #2a1f5c;
-    --blob-c: #123056;
-    --glass: rgba(255, 255, 255, 0.06);
-    --glass-hi: rgba(255, 255, 255, 0.1);
-    --glass-edge: rgba(255, 255, 255, 0.12);
-    --line: rgba(238, 241, 255, 0.1);
-    --ink: #eef1ff;
-    --muted: #a5acc8;
-    --border-strong: #7a84a8;
-    --navy: #c9d6ff;
-    --on-navy: #0d1330;
-    --blue: #8fb0ff;
-    --success: #a3e3bd;
-    --success-bg: #14301f;
-    --error: #ffadb9;
-    --error-bg: #3a1820;
-    --free-fg: #a3e3bd;
-    --free-bg: #14301f;
-    --held-fg: #f0d488;
-    --held-bg: #2e260d;
-    --hatch: rgba(240, 212, 136, 0.1);
-    --confirmed-fg: #bcc8ff;
-    --confirmed-bg: #1e2650;
-    --expired-fg: #c3c7d4;
-    --expired-bg: #262b3d;
-    --free-card: rgba(255, 255, 255, 0.03);
-    --avatar-from: #2a3364;
-    --avatar-to: #1b2147;
-    --shadow-value: 0 18px 48px rgba(0, 0, 0, 0.35);
-    --shadow-pop-value: 0 24px 56px rgba(0, 0, 0, 0.55);
-    --shadow-navy-value: 0 8px 20px rgba(0, 0, 0, 0.4);
-    color-scheme: dark;
-  }
+/* Темна тема — лише за вибором у перемикачі смуги (cookie theme → <html data-theme="dark">); за замовчуванням світла. */
+:root[data-theme="dark"] {
+  --bg-1: #0b1024;
+  --bg-2: #120f2a;
+  --blob-a: #1b2a63;
+  --blob-b: #2a1f5c;
+  --blob-c: #123056;
+  --glass: rgba(255, 255, 255, 0.06);
+  --glass-hi: rgba(255, 255, 255, 0.1);
+  --glass-edge: rgba(255, 255, 255, 0.12);
+  --line: rgba(238, 241, 255, 0.1);
+  --ink: #eef1ff;
+  --muted: #a5acc8;
+  --border-strong: #7a84a8;
+  --navy: #c9d6ff;
+  --on-navy: #0d1330;
+  --blue: #8fb0ff;
+  --success: #a3e3bd;
+  --success-bg: #14301f;
+  --error: #ffadb9;
+  --error-bg: #3a1820;
+  --free-fg: #a3e3bd;
+  --free-bg: #14301f;
+  --held-fg: #f0d488;
+  --held-bg: #2e260d;
+  --hatch: rgba(240, 212, 136, 0.1);
+  --confirmed-fg: #bcc8ff;
+  --confirmed-bg: #1e2650;
+  --expired-fg: #c3c7d4;
+  --expired-bg: #262b3d;
+  --free-card: rgba(255, 255, 255, 0.03);
+  --avatar-from: #2a3364;
+  --avatar-to: #1b2147;
+  --shadow-value: 0 18px 48px rgba(0, 0, 0, 0.35);
+  --shadow-pop-value: 0 24px 56px rgba(0, 0, 0, 0.55);
+  --shadow-navy-value: 0 8px 20px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
 }
 
 @theme inline {

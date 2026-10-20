@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getRequestUser } from "@/lib/request-user";
-import { formatPracticeTime, practiceDate } from "@/lib/slots";
+import { formatPracticeTime, practiceClock, practiceDate } from "@/lib/slots";
 import { ActionMessage } from "@/components/action-message";
 import { DayGrid } from "@/components/day-grid";
 import { EmptyState } from "@/components/empty-state";
@@ -11,7 +11,7 @@ import { Panel } from "@/components/panel";
 import { loadMySchedule } from "./data";
 
 // Розклад терапевта: власні слоти, утримання й сеанси на 7 днів (AC-HOLD-09, AC-HOLD-21).
-// Вигляд — панель на кожен день із погодинною сіткою DayGrid без дій (design-system.md, розділ 5).
+// Вигляд — панель на кожен день із погодинною сіткою DayGrid (одна колонка без шапки) без дій (design-system.md, розділ 5).
 export default async function MySchedulePage() {
   const supabase = await createClient();
   const user = await getRequestUser();
@@ -31,8 +31,7 @@ export default async function MySchedulePage() {
   const now = new Date();
   const { days, error } = await loadMySchedule(supabase, { id: user.id, email: user.email }, now);
   // Лінія «зараз» — лише в панелі сьогоднішнього дня (час практики).
-  const nowTime = formatPracticeTime(now).slice(11);
-  const nowLine = { time: nowTime, hour: nowTime.slice(0, 2), minute: Number(nowTime.slice(3)) };
+  const nowLine = practiceClock(now);
   const today = practiceDate(now);
 
   return (
@@ -47,14 +46,20 @@ export default async function MySchedulePage() {
               <EmptyState icon={<CalendarIcon />}>No slots on this day.</EmptyState>
             ) : (
               <DayGrid
+                label={`My slots on ${day.date}`}
                 now={day.date === today ? nowLine : null}
-                rows={day.slots.map((slot) => ({
-                  key: slot.start.toISOString(),
-                  time: slot.time,
-                  status: slot.status,
-                  client: slot.clientName,
-                  heldUntil: slot.heldUntil ? `Held until ${formatPracticeTime(slot.heldUntil)}` : null,
-                }))}
+                columns={[
+                  {
+                    key: day.date,
+                    slots: day.slots.map((slot) => ({
+                      key: slot.start.toISOString(),
+                      time: slot.time,
+                      status: slot.status,
+                      client: slot.clientName,
+                      heldUntil: slot.heldUntil ? `Held until ${formatPracticeTime(slot.heldUntil)}` : null,
+                    })),
+                  },
+                ]}
               />
             )}
           </Panel>

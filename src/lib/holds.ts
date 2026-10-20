@@ -11,8 +11,10 @@ export const HOLD_MESSAGES = {
 
 export type HoldErrorCode = keyof typeof HOLD_MESSAGES;
 
-// id форми утримання на /slots: кнопки Hold у рядках слотів надсилають її через атрибут form.
-export const HOLD_FORM_ID = "hold-slot-form";
+// id форми утримання терапевта на /slots: кнопки Hold у його колонці надсилають її через атрибут form.
+export function holdFormId(therapistId: string): string {
+  return `hold-slot-form-${therapistId}`;
+}
 
 const FALLBACK_MESSAGE = "Could not hold the slot. Try again.";
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

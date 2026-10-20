@@ -2,8 +2,10 @@
 
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
+import { THEME_COOKIE, THEME_MAX_AGE, type Theme } from "@/lib/theme";
+import { MoonIcon, SunIcon } from "./icons";
 import { useLoadingAnnouncement } from "./route-status";
 
 // Кругла скляна кнопка смуги (розділ 3): 56px, активна — 64px, фон navy. Назва — aria-label і видима
@@ -59,7 +61,28 @@ function Spinner() {
   );
 }
 
-// «Вийти» у смузі — кругла кнопка наявної форми signOut; на час дії — спінер, aria-busy і disabled.
+// Перемикач темної теми над «Sign out»: role="switch" з aria-checked, назва «Dark theme» — однакова в aria-label
+// і видимій підказці (WCAG 2.5.3), стан — лише в aria-checked і іконці.
+// Тема міняється одразу (data-theme на <html>) і запамʼятовується в cookie на рік: наступні сторінки сервер
+// віддає вже в ній. initial — тема цього запиту з cookie (за замовчуванням світла).
+export function RailThemeToggle({ initial }: { initial: Theme }) {
+  const [theme, setTheme] = useState(initial);
+  const dark = theme === "dark";
+  const toggle = () => {
+    const next: Theme = dark ? "light" : "dark";
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    document.cookie = `${THEME_COOKIE}=${next}; path=/; max-age=${THEME_MAX_AGE}; samesite=lax`;
+  };
+  return (
+    <button type="button" role="switch" aria-checked={dark} aria-label="Dark theme" onClick={toggle} className={railButton}>
+      {dark ? <SunIcon /> : <MoonIcon />}
+      <Tip>Dark theme</Tip>
+    </button>
+  );
+}
+
+// «Sign out» у смузі — кругла кнопка наявної форми signOut; на час дії — спінер, aria-busy і disabled.
 export function RailSignOut({ label, icon }: { label: string; icon: ReactNode }) {
   const { pending } = useFormStatus();
   return (

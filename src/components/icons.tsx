@@ -60,32 +60,6 @@ export function CalendarIcon(props: IconProps) {
   );
 }
 
-export function FilterIcon(props: IconProps) {
-  return (
-    <svg {...base("0 0 18 18", props)} strokeWidth={1.4} strokeLinecap="round">
-      <path d="M3 4.5h12M5.5 9h7M8 13.5h2" />
-    </svg>
-  );
-}
-
-export function HistoryIcon(props: IconProps) {
-  return (
-    <svg {...base("0 0 18 18", props)} strokeWidth={1.4}>
-      <path d="M3.2 9a5.8 5.8 0 1 0 1.7-4.1M3 3v3h3" />
-      <path d="M9 6v3l2 1.3" />
-    </svg>
-  );
-}
-
-export function UserIcon(props: IconProps) {
-  return (
-    <svg {...base("0 0 18 18", props)} strokeWidth={1.4}>
-      <circle cx="9" cy="6.5" r="3" />
-      <path d="M3.5 15c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6" />
-    </svg>
-  );
-}
-
 export function ChevronDownIcon(props: IconProps) {
   return (
     <svg {...base("0 0 16 16", props)} strokeWidth={1.5}>
@@ -188,6 +162,24 @@ export function SignOutIcon(props: IconProps) {
   return (
     <svg {...base("0 0 24 24", props)} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" />
+    </svg>
+  );
+}
+
+// Перемикач теми в смузі: місяць — увімкнути темну, сонце — повернути світлу.
+export function MoonIcon(props: IconProps) {
+  return (
+    <svg {...base("0 0 24 24", props)} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+    </svg>
+  );
+}
+
+export function SunIcon(props: IconProps) {
+  return (
+    <svg {...base("0 0 24 24", props)} strokeWidth={1.6} strokeLinecap="round">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
     </svg>
   );
 }

@@ -18,7 +18,7 @@ export default function ClientsLoading() {
           </div>
         </Panel>
         <Panel title="All clients">
-          <SkeletonRows rows={4} columns={["size-10 flex-none", "w-32", "w-48"]} />
+          <SkeletonRows rows={4} columns={["size-10 flex-none", "h-4 w-32", "h-4 w-48"]} />
         </Panel>
       </div>
     </>

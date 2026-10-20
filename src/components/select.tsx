@@ -17,12 +17,14 @@ export function Select({
   options,
   defaultValue = "",
   placeholder,
+  onChange,
 }: {
   id: string;
-  name: string;
+  name?: string; // без name — значення лише через onChange (одне поле для кількох форм)
   options: SelectOption[];
   defaultValue?: string;
   placeholder?: string;
+  onChange?: (value: string) => void;
 }) {
   const listId = useId();
   const [value, setValue] = useState(defaultValue);
@@ -57,7 +59,10 @@ export function Select({
 
   const choose = (index: number) => {
     const option = options[index];
-    if (option) setValue(option.value);
+    if (option) {
+      setValue(option.value);
+      onChange?.(option.value);
+    }
     setOpen(false);
     triggerRef.current?.focus();
   };
@@ -118,7 +123,7 @@ export function Select({
 
   return (
     <div ref={rootRef} className="relative w-full">
-      <input type="hidden" name={name} value={value} />
+      {name ? <input type="hidden" name={name} value={value} /> : null}
       <button
         ref={triggerRef}
         id={id}
@@ -158,8 +163,9 @@ export function Select({
                 onPointerDown={(event) => event.preventDefault()}
                 onClick={() => choose(index)}
                 onPointerEnter={() => setActive(index)}
+                // Активний (клавіатура, наведення) — фон і рамка; вибраний — жирний текст і галочка, без фону.
                 className={`flex min-h-12 cursor-pointer items-center gap-2.5 rounded-md px-2.5 font-medium ${
-                  index === active || isSelected ? "bg-glass" : ""
+                  index === active ? "bg-glass ring-1 ring-border-strong ring-inset" : ""
                 } ${isSelected ? "font-bold" : ""}`}
               >
                 <Avatar name={option.label} className="size-8 text-[11px]" />

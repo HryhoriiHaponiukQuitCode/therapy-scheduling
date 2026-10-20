@@ -44,7 +44,7 @@ function monthGrid(focus: string) {
 // Вбудований календар дня (розділ 4.2): кожен день — submit-кнопка GET-форми name={name}, тож вибір одразу
 // відправляє форму й без JavaScript. Кнопки місяця лише перемикають вигляд. Вибраний день — коло navy,
 // «сьогодні» (America/Los_Angeles, передає сервер) — крапка blue. Клавіатура: roving tabindex, стрілки по днях,
-// PageUp / PageDown — місяць.
+// PageUp / PageDown — місяць; кнопка «Today» вибирає сьогоднішній день.
 export function Calendar({ name, value, today }: { name: string; value: string; today: string }) {
   const [focus, setFocus] = useState(value);
   // Новий вибраний день із сервера — показуємо його місяць. Без перемонтування (key), щоб кнопка дня, яку
@@ -55,6 +55,15 @@ export function Calendar({ name, value, today }: { name: string; value: string; 
     setFocus(value);
   }
   const gridRef = useRef<HTMLDivElement>(null);
+
+  // День вибрали в сітці (клік чи Enter) — після переходу фокусуємо вибраний день: якщо це день іншого місяця,
+  // сітка перебудувалась і натиснута кнопка зникла, тож без цього фокус упав би на body.
+  const pickedInGrid = useRef(false);
+  useEffect(() => {
+    if (!pickedInGrid.current) return;
+    pickedInGrid.current = false;
+    gridRef.current?.querySelector<HTMLButtonElement>(`[data-date="${value}"]`)?.focus();
+  }, [value]);
   const days = monthGrid(focus);
   const month = parse(focus).getUTCMonth();
   const title = `${MONTHS[month]} ${parse(focus).getUTCFullYear()}`;
@@ -124,7 +133,12 @@ export function Calendar({ name, value, today }: { name: string; value: string; 
                     tabIndex={day === focus ? 0 : -1}
                     aria-pressed={selected}
                     aria-label={isToday ? `${day}, today` : day}
-                    onFocus={() => setFocus(day)}
+                    // День іншого місяця не перемикає вигляд на фокусі: інакше mousedown перебудує сітку
+                    // до кліку і під курсором опиниться інша кнопка.
+                    onFocus={outside ? undefined : () => setFocus(day)}
+                    onClick={() => {
+                      pickedInGrid.current = day !== value;
+                    }}
                     className={`relative aspect-square w-full max-w-11 cursor-pointer rounded-full border-0 text-[13px] leading-none ${
                       selected ? "bg-navy font-bold text-on-navy" : "bg-transparent font-medium text-ink hover:bg-glass-hi"
                     } ${outside && !selected ? "text-muted opacity-50" : ""}`}
@@ -142,6 +156,17 @@ export function Calendar({ name, value, today }: { name: string; value: string; 
             })}
           </div>
         ))}
+      </div>
+      {/* «Today» — та сама submit-кнопка форми, що й дні: повертає до сьогодні після гортання місяців. */}
+      <div className="mt-2 flex justify-center">
+        <button
+          type="submit"
+          name={name}
+          value={today}
+          className="min-h-11 cursor-pointer rounded-full border border-glass-edge bg-glass px-5 text-sm font-semibold text-ink hover:bg-glass-hi"
+        >
+          Today
+        </button>
       </div>
     </div>
   );
