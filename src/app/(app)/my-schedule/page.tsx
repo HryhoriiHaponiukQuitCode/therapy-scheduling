@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser } from "@/lib/roles";
+import { getRequestUser } from "@/lib/request-user";
 import { formatPracticeTime } from "@/lib/slots";
 import { ActionMessage } from "@/components/action-message";
-import { AppShell } from "@/components/app-shell";
 import { Card } from "@/components/card";
 import { EmptyState } from "@/components/empty-state";
 import { CalendarIcon } from "@/components/icons";
@@ -15,24 +14,24 @@ import { loadMySchedule } from "./data";
 // Вигляд — картка на кожен день із SlotTable без колонки дії (design-system.md, розділ 5).
 export default async function MySchedulePage() {
   const supabase = await createClient();
-  const user = await getCurrentUser(supabase);
+  const user = await getRequestUser();
   if (!user) {
     redirect("/login");
   }
 
   if (user.role !== "therapist" || !user.email) {
     return (
-      <AppShell user={user}>
+      <>
         <PageHeader title="My schedule" />
         <p className="m-0">Only therapists have a personal schedule.</p>
-      </AppShell>
+      </>
     );
   }
 
   const { days, error } = await loadMySchedule(supabase, { id: user.id, email: user.email }, new Date());
 
   return (
-    <AppShell user={user}>
+    <>
       <PageHeader title="My schedule" description="Next 7 days, times in America/Los_Angeles." />
       {error ? (
         <ActionMessage state={{ status: "error", message: "Could not load your schedule. Try again later." }} />
@@ -55,6 +54,6 @@ export default async function MySchedulePage() {
           </Card>
         ))
       )}
-    </AppShell>
+    </>
   );
 }

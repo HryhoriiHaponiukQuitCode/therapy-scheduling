@@ -23,7 +23,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-const { confirmHold, holdSlot } = await import("@/app/slots/actions");
+const { confirmHold, holdSlot } = await import("@/app/(app)/slots/actions");
 
 function at(date: string, hour: number, minute = 0): Date {
   return new Date(practiceTimeToUtc(date, hour).getTime() + minute * 60_000);

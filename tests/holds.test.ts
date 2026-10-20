@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HOLD_MESSAGES } from "@/lib/holds";
 import { buildDaySlots, formatPracticeTime, practiceTimeToUtc, type HoldRecord } from "@/lib/slots";
-import { toClientOptions } from "@/app/slots/data";
+import { toClientOptions } from "@/app/(app)/slots/data";
 
 // Підмінений клієнт Supabase: тест перевіряє, що дія викликає hold_slot з потрібними даними й показує тексти PM.
 // Блокування й перевірки в самій функції private.hold_slot перевіряє db-check (міграція на одноразовій базі).
@@ -25,7 +25,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-const { holdSlot } = await import("@/app/slots/actions");
+const { holdSlot } = await import("@/app/(app)/slots/actions");
 
 // Момент за годинником практики (America/Los_Angeles).
 function at(date: string, hour: number, minute = 0): Date {

@@ -68,8 +68,11 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
 - **Пункти меню за роллю** (як зараз на головній): staff (`admin`, `scheduler`) — Home, Clients, Slots;
   `therapist` — Home, My schedule. Пункт: висота 44px, радіус 8px, колір `muted`; hover — фон `subtle`;
   активний — фон `subtle`, `ink`, 600 і `aria-current="page"` (визначати через `usePathname` в окремому клієнтському
-  компоненті `NavLink`).
+  компоненті `NavLink`). Якщо перехід на пункт чекає сервера, бо скелетон розділу ще не завантажено наперед (`useLinkStatus`), іконка пункту
+  стає спінером того ж розміру 18px; для вже завантаженого розділу одразу видно скелетон, і спінера немає.
 - Посилання «Home» / «Back» у шапках сторінок прибрати: їх замінює меню.
+- AppShell — у спільному `src/app/(app)/layout.tsx` для `/`, `/clients`, `/slots`, `/my-schedule`, а не на сторінках:
+  між розділами меню не перемальовується, а `loading.tsx` розділу замінює лише контент.
 - **Контент**: `max-width: 960px`, padding 40px; заголовок сторінки (`PageHeader`) і під ним опис `muted`.
 - **До 860px**: панель стає верхнім рядком — знак і назва зліва, «Вийти» справа, пункти меню рядком нижче
   (горизонтальна прокрутка, якщо не влазять); email і роль ховаються. Горизонтальної прокрутки сторінки бути не повинно.
@@ -90,6 +93,7 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
 | `ActionMessage` | наявний | API не змінювати; вигляд — плашка з іконкою: `success` на `success-bg`, `error` на `error-bg`; `role="alert"` / `role="status"` без `aria-live`; елемент лишається змонтованим |
 | `EmptyState` | server | пунктирна рамка `border-strong`, іконка, текст (напр. «No free slots on this day.»), зберегти `role="status"` і `data-testid` |
 | `SlotTable` | server | таблиця слотів (розділ 5) |
+| `Skeleton`, `SkeletonField`, `SkeletonRows`, `LoadingStatus` | server / server / server / client | стан завантаження розділу в `loading.tsx`: блоки кольору `border` з `animate-pulse`, ті самі картки й заголовки, що на сторінці; `LoadingStatus` (`route-status.tsx`) пише «Loading…» у постійну `role="status"`-область AppShell, щоб скрінрідер оголосив перехід; так само робить `NavLink`, поки перехід чекає сервера |
 
 Іконки статусів (12px, stroke): Free — коло; Held — годинник; Confirmed — галочка; Expired — перекреслене коло.
 
@@ -145,7 +149,7 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
 - Контраст тексту ≥ 4.5:1, меж контролів і focus ≥ 3:1 — значення в таблиці 2.1, в обох темах.
 - Focus ring: `outline: 2px solid var(--focus); outline-offset: 2px` на всіх інтерактивних елементах; `outline-none` без заміни заборонено.
 - Цілі натискання ≥ 44×44 px.
-- Анімація спінера вимикається при `prefers-reduced-motion: reduce`.
+- Анімація спінера й пульс скелетона вимикаються при `prefers-reduced-motion: reduce`.
 
 ## 8. Перевірка після впровадження
 

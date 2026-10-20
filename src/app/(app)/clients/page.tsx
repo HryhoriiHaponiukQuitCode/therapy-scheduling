@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser, isStaff } from "@/lib/roles";
+import { getRequestUser } from "@/lib/request-user";
+import { isStaff } from "@/lib/roles";
 import { ActionMessage } from "@/components/action-message";
-import { AppShell } from "@/components/app-shell";
 import { Card } from "@/components/card";
 import { EmptyState } from "@/components/empty-state";
 import { UserIcon, UsersIcon } from "@/components/icons";
@@ -12,17 +12,17 @@ import { AddClientForm } from "./add-client-form";
 // Клієнти практики: список і створення картки (admin, scheduler). AC-HOLD-10 … AC-HOLD-16.
 export default async function ClientsPage() {
   const supabase = await createClient();
-  const user = await getCurrentUser(supabase);
+  const user = await getRequestUser();
   if (!user) {
     redirect("/login");
   }
 
   if (!isStaff(user.role)) {
     return (
-      <AppShell user={user}>
+      <>
         <PageHeader title="Clients" />
         <p className="m-0">Only schedulers and admins can manage clients.</p>
-      </AppShell>
+      </>
     );
   }
 
@@ -36,7 +36,7 @@ export default async function ClientsPage() {
   const td = "border-b border-border px-3 py-3 align-middle";
 
   return (
-    <AppShell user={user}>
+    <>
       <PageHeader title="Clients" />
 
       <Card id="new-client" title="New client" icon={<UserIcon />}>
@@ -73,6 +73,6 @@ export default async function ClientsPage() {
           <EmptyState icon={<UsersIcon />}>No clients yet.</EmptyState>
         )}
       </Card>
-    </AppShell>
+    </>
   );
 }
