@@ -42,6 +42,12 @@ export function Select({
     return () => document.removeEventListener("pointerdown", onPointer);
   }, [open]);
 
+  // Фокус лишається на тригері (aria-activedescendant), тож активний варіант прокручуємо в зону видимості самі.
+  useEffect(() => {
+    if (!open) return;
+    document.getElementById(`${listId}-${active}`)?.scrollIntoView({ block: "nearest" });
+  }, [open, active, listId]);
+
   const openList = (index = selectedIndex >= 0 ? selectedIndex : 0) => {
     setActive(Math.max(0, index));
     setOpen(true);

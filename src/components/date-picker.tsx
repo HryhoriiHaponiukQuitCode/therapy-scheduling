@@ -119,8 +119,11 @@ export function DatePicker({
       ref={rootRef}
       className="relative w-full"
       onBlur={(event) => {
-        // Фокус пішов за межі DatePicker (Tab) — закриваємо діалог.
-        if (open && !rootRef.current?.contains(event.relatedTarget as Node | null)) setOpen(false);
+        // Фокус пішов на інший елемент за межами DatePicker (Tab) — закриваємо діалог.
+        // relatedTarget === null (зник сфокусований день після PageUp / PageDown) не закриває:
+        // клік назовні й так обробляє pointerdown.
+        const next = event.relatedTarget as Node | null;
+        if (open && next && !rootRef.current?.contains(next)) setOpen(false);
       }}
     >
       <input type="hidden" name={name} value={value} />
