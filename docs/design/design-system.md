@@ -93,7 +93,7 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
 | `ActionMessage` | наявний | API не змінювати; вигляд — плашка з іконкою: `success` на `success-bg`, `error` на `error-bg`; `role="alert"` / `role="status"` без `aria-live`; елемент лишається змонтованим |
 | `EmptyState` | server | пунктирна рамка `border-strong`, іконка, текст (напр. «No free slots on this day.»), зберегти `role="status"` і `data-testid` |
 | `SlotTable` | server | таблиця слотів (розділ 5) |
-| `Skeleton`, `SkeletonField`, `SkeletonRows`, `LoadingStatus` | server / server / server / client | стан завантаження розділу в `loading.tsx`: блоки кольору `border` з `animate-pulse`, ті самі картки й заголовки, що на сторінці; `LoadingStatus` (`route-status.tsx`) пише «Loading…» у постійну `role="status"`-область AppShell, щоб скрінрідер оголосив перехід |
+| `Skeleton`, `SkeletonField`, `SkeletonRows`, `LoadingStatus` | server / server / server / client | стан завантаження розділу в `loading.tsx`: блоки кольору `border` з `animate-pulse`, ті самі картки й заголовки, що на сторінці; `LoadingStatus` (`route-status.tsx`) пише «Loading…» у постійну `role="status"`-область AppShell, щоб скрінрідер оголосив перехід; так само робить `NavLink`, поки перехід чекає сервера |
 
 Іконки статусів (12px, stroke): Free — коло; Held — годинник; Confirmed — галочка; Expired — перекреслене коло.
 

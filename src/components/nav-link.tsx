@@ -3,6 +3,7 @@
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { useLoadingAnnouncement } from "./route-status";
 
 // Пункт меню бічної панелі: 44px, радіус 8px; активний — фон subtle, ink, 600 і aria-current="page" (розділ 3).
 export function NavLink({ href, icon, children }: { href: string; icon: ReactNode; children: ReactNode }) {
@@ -24,8 +25,10 @@ export function NavLink({ href, icon, children }: { href: string; icon: ReactNod
 
 // Поки перехід на цей пункт чекає сервера (useLinkStatus) — спінер замість іконки, того ж розміру 18px: без зсуву
 // макета. Якщо loading.tsx розділу вже завантажено наперед, Next пропускає pending і одразу показує скелетон.
+// Спінер лише візуальний (aria-hidden); скрінрідеру очікування оголошує live-область AppShell.
 function NavIcon({ icon }: { icon: ReactNode }) {
   const { pending } = useLinkStatus();
+  useLoadingAnnouncement(pending);
   if (!pending) return icon;
   return (
     <span

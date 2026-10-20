@@ -4,7 +4,7 @@ import { isStaff, type AppRole } from "@/lib/roles";
 import { Button } from "./button";
 import { BrandMark, HomeIcon, ScheduleIcon, SlotsIcon, UsersIcon } from "./icons";
 import { NavLink } from "./nav-link";
-import { ROUTE_STATUS_ID } from "./route-status";
+import { ROUTE_STATUS_ID } from "./route-status-id";
 
 type ShellUser = { email: string | null; role: AppRole | null };
 
