@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>therapy-scheduling — design v5 (mono + pastel, sidebar)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#f7f7f8; --surface:#ffffff; --subtle:#f4f4f5;
+  --ink:#111113; --muted:#5f6168; --border:#e6e6e9; --border-strong:#8b8d94;
+  --btn:#111113; --btn-hover:#2a2a2e; --on-btn:#ffffff;
+  --focus:#111113;
+  --success:#1e5b3f; --success-bg:#e5f3eb; --error:#9f2528; --error-bg:#fbeaea;
+  --free-fg:#1e5b3f; --free-bg:#e5f3eb; --held-fg:#6e4c0a; --held-bg:#faf0d7;
+  --confirmed-fg:#3b3878; --confirmed-bg:#ebeaf8; --expired-fg:#4f5157; --expired-bg:#efeff1;
+  --shadow:0 1px 2px rgba(17,17,19,.04);
+  --shadow-pop:0 1px 2px rgba(17,17,19,.06),0 12px 32px rgba(17,17,19,.10);
+  --r-sm:6px; --r-md:8px; --r-lg:12px;
+  --ui:Geist,system-ui,sans-serif; --mono:"Geist Mono",ui-monospace,monospace;
+}
+[data-theme="dark"]{
+  --page:#0e0e10; --surface:#17171a; --subtle:#1e1e22;
+  --ink:#f2f2f3; --muted:#a2a3aa; --border:#2a2a2f; --border-strong:#74757c;
+  --btn:#f2f2f3; --btn-hover:#ffffff; --on-btn:#111113;
+  --focus:#f2f2f3;
+  --success:#a9dfc3; --success-bg:#16271e; --error:#f4a9a9; --error-bg:#2c1617;
+  --free-fg:#a9dfc3; --free-bg:#16271e; --held-fg:#ecd08f; --held-bg:#2a2210;
+  --confirmed-fg:#c3c1f2; --confirmed-bg:#212036; --expired-fg:#c4c5ca; --expired-bg:#232327;
+  --shadow:none; --shadow-pop:0 12px 32px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#e4e4e7;font-family:var(--ui);font-size:14px;line-height:20px;color:var(--ink);padding:24px 16px;-webkit-font-smoothing:antialiased}
+.label-top{max-width:1180px;margin:0 auto 12px;font:600 12px/16px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:#52525b}
+.frame{max-width:1180px;margin:0 auto 32px;background:var(--page);color:var(--ink);border-radius:16px;overflow:hidden;border:1px solid #d4d4d8}
+
+/* top bar */
+.topbar{height:64px;display:flex;align-items:center;gap:32px;padding:0 32px;background:var(--surface);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:-.01em;white-space:nowrap}
+.nav{display:flex;gap:28px;height:100%;flex:1}
+.nav a{display:flex;align-items:center;height:100%;color:var(--muted);text-decoration:none;font-weight:500;border-bottom:2px solid transparent;padding-top:2px}
+.nav a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
+.who{display:flex;align-items:center;gap:14px;white-space:nowrap}
+.who .em{font-weight:500;font-size:13px}
+.who .rl{font-size:12px;color:var(--muted)}
+
+/* app shell with left sidebar */
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:820px}
+.side{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 12px 16px;gap:24px;align-self:stretch}
+.side .brand{padding:4px 10px}
+.side nav{display:flex;flex-direction:column;gap:2px}
+.side .navhead{font:600 11px/14px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px}
+.side nav a{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px;border-radius:var(--r-md);color:var(--muted);text-decoration:none;font-weight:500}
+.side nav a svg{width:18px;height:18px;flex:none}
+.side nav a:hover{background:var(--subtle);color:var(--ink)}
+.side nav a[aria-current="page"]{background:var(--subtle);color:var(--ink);font-weight:600}
+.side nav a:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.side .account{margin-top:auto;border-top:1px solid var(--border);padding:16px 10px 0;display:flex;flex-direction:column;gap:12px}
+.side .account .av{width:36px;height:36px;border-radius:50%;background:var(--subtle);border:1px solid var(--border);display:grid;place-items:center;font:600 12px/1 var(--ui);flex:none}
+.side .account .id{display:flex;align-items:center;gap:10px;min-width:0}
+.side .account .em{font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side .account .rl{font-size:12px;color:var(--muted)}
+.side .account .btn{width:100%}
+
+/* page */
+.wrap{max-width:960px;width:100%;padding:40px 40px 48px;display:flex;flex-direction:column;gap:24px}
+.phead h1{font:600 26px/32px var(--ui);letter-spacing:-.02em;margin:0}
+.phead p{margin:4px 0 0;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:28px}
+.chead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin-bottom:20px}
+.ctitle{display:flex;align-items:center;gap:10px;font:600 16px/22px var(--ui);letter-spacing:-.01em;margin:0}
+.ctitle svg{width:18px;height:18px;flex:none}
+.cap{font-size:12px;line-height:16px;color:var(--muted)}
+
+/* label/value grid (як у референсі) */
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px 48px;margin:0}
+.kv div{display:flex;flex-direction:column;gap:4px}
+.kv dt{font-weight:600}
+.kv dd{margin:0;color:var(--muted)}
+
+/* controls */
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:6px}
+.field>.lbl{font-weight:600;font-size:13px}
+.anchor{position:relative}
+.ctl{min-height:44px;min-width:240px;width:100%;display:flex;align-items:center;gap:10px;padding:0 12px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-md);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.ctl .v{flex:1}
+.ctl .ph{color:var(--muted)}
+.ctl svg{width:16px;height:16px;flex:none;color:var(--muted)}
+.ctl:focus-visible,.ctl.open{outline:2px solid var(--focus);outline-offset:2px}
+.ctl.invalid{border-color:var(--error)}
+input.ctl{cursor:text}
+.mono{font-family:var(--mono)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:var(--r-md);border:1px solid transparent;font:500 14px/1 var(--ui);cursor:pointer;white-space:nowrap}
+.btn svg{width:16px;height:16px}
+.btn-primary{background:var(--btn);color:var(--on-btn)}
+.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong)}
+.btn-ghost{background:transparent;color:var(--ink);border-color:transparent;text-decoration:underline;text-underline-offset:3px;padding:0 8px}
+.btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.btn[aria-busy="true"]{opacity:.7;cursor:progress}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:s .8s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:var(--r-sm);font:500 12px/1 var(--ui)}
+.badge svg{width:12px;height:12px}
+.free{color:var(--free-fg);background:var(--free-bg)}
+.held{color:var(--held-fg);background:var(--held-bg)}
+.confirmed{color:var(--confirmed-fg);background:var(--confirmed-bg)}
+.expired{color:var(--expired-fg);background:var(--expired-bg)}
+
+/* messages */
+.msg{display:flex;gap:10px;align-items:flex-start;margin:0;padding:12px 14px;border-radius:var(--r-md);font-weight:500}
+.msg svg{width:18px;height:18px;flex:none;margin-top:1px}
+.msg.ok{background:var(--success-bg);color:var(--success)}
+.msg.err{background:var(--error-bg);color:var(--error)}
+
+/* hold strip */
+.holdbar{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;padding:16px;border-radius:var(--r-md);background:var(--subtle);margin-bottom:16px}
+.holdbar .field{flex:1;min-width:240px}
+.holdbar .ctl{min-width:0}
+
+/* slot table */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font:600 12px/16px var(--ui);color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);height:60px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl .t{font:500 15px/20px var(--mono);width:80px}
+.tbl .until{color:var(--muted);white-space:nowrap}
+.tbl .act{text-align:right;width:1%;white-space:nowrap}
+.tbl .none{color:var(--muted)}
+@media (max-width:720px){
+  .tbl thead{display:none}
+  .tbl,.tbl tbody,.tbl tr,.tbl td{display:block;width:auto}
+  .tbl tr{display:grid;grid-template-columns:64px 1fr;gap:4px 12px;padding:14px 0;border-bottom:1px solid var(--border)}
+  .tbl tr:last-child{border-bottom:none}
+  .tbl td{border:none;padding:0;height:auto}
+  .tbl .t{grid-row:1/span 4;width:auto;padding-top:2px}
+  .tbl .act{text-align:left;width:auto;margin-top:6px}
+  .tbl .none{display:none}
+}
+
+/* popovers */
+.pop{position:absolute;top:calc(100% + 6px);left:0;z-index:3;min-width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-pop);padding:4px;margin:0;list-style:none}
+.opt{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px;border-radius:var(--r-sm);cursor:pointer}
+.opt .sub{margin-left:auto;color:var(--muted);font-size:12px}
+.opt.hover{background:var(--subtle)}
+.opt[aria-selected="true"]{font-weight:600}
+.opt[aria-selected="true"]::before{content:"";width:12px;height:7px;border-left:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(-45deg) translate(1px,-2px)}
+.opt:not([aria-selected="true"])::before{content:"";width:12px}
+.cal{width:300px;padding:12px}
+.calhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:600}
+.icb{width:44px;height:44px;border:none;border-radius:var(--r-md);background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.icb:hover{background:var(--subtle)}
+.icb svg{width:16px;height:16px}
+.dow,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.dow{font:600 11px/14px var(--ui);color:var(--muted);margin-bottom:4px}
+.day{height:38px;border:none;border-radius:var(--r-sm);background:transparent;color:var(--ink);font:500 13px/1 var(--mono);cursor:pointer}
+.day.out{color:var(--muted);opacity:.5}
+.day.today{box-shadow:inset 0 0 0 1px var(--border-strong)}
+.day[aria-selected="true"]{background:var(--btn);color:var(--on-btn)}
+.calfoot{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+
+/* empty */
+.empty{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:32px 16px;border:1px dashed var(--border-strong);border-radius:var(--r-lg)}
+.empty svg{width:28px;height:28px;color:var(--muted)}
+.empty p{margin:0;font-weight:600}
+
+/* sheet */
+.sheet{padding:32px;display:grid;gap:36px}
+.sheet h3{font:600 12px/16px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.rowx{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:10px}
+.sw{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:var(--surface);font-size:12px}
+.sw i{display:block;height:44px;border-bottom:1px solid var(--border)}
+.sw div{padding:8px 10px;line-height:16px}
+.sw code{font-family:var(--mono);color:var(--muted);font-size:11px}
+.twocol{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:36px}
+
+@media (max-width:860px){
+  .app{grid-template-columns:1fr;min-height:0}
+  .side{position:static;min-height:0;border-right:none;border-bottom:1px solid var(--border);flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px;gap:8px}
+  .side .navhead{display:none}
+  .side nav{flex-direction:row;order:3;flex-basis:100%;overflow-x:auto}
+  .side .account{margin:0 0 0 auto;border:none;padding:0;flex-direction:row;align-items:center}
+  .side .account .id{display:none}
+  .side .account .btn{width:auto}
+}
+@media (max-width:720px){
+  .wrap{padding:24px 16px 32px}
+  .card{padding:20px}
+  .ctl{min-width:0}
+  .row>.field{flex:1 1 100%}
+  .sheet{padding:24px 16px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-free" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-held" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6V6l1.6 1" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-confirmed" viewBox="0 0 12 12"><path d="M2.5 6.3l2.2 2.2 4.8-5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-expired" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3.2 8.8l5.6-5.6" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.8 9.2l2.2 2.2 4.2-4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-err" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 5.5v4.2M9 12.3v.2" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 18 18"><rect x="2.5" y="3.5" width="13" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 7.5h13M6 2v3M12 2v3" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-user" viewBox="0 0 18 18"><circle cx="9" cy="6.5" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3.5 15c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 18 18"><path d="M3 4.5h12M5.5 9h7M8 13.5h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-history" viewBox="0 0 18 18"><path d="M3.2 9a5.8 5.8 0 1 0 1.7-4.1M3 3v3h3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M9 6v3l2 1.3" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-home" viewBox="0 0 18 18"><path d="M3 8l6-4.5L15 8v6.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M7.5 15.5V11h3v4.5" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-users" viewBox="0 0 18 18"><circle cx="7" cy="6.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 14.5c.5-2.6 2.3-4 4.5-4s4 1.4 4.5 4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 4.2a2.6 2.6 0 0 1 0 5M13.5 10.8c1 .6 1.7 1.9 2 3.7" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-slots" viewBox="0 0 18 18"><rect x="2.5" y="3.5" width="13" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 7.5h13M6 2v3M12 2v3M6 10.5h2M10 10.5h2M6 13h2" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-sched" viewBox="0 0 18 18"><circle cx="9" cy="9" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M9 5.5V9l2.5 1.5" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="mark" viewBox="0 0 28 28"><rect width="28" height="28" rx="7" fill="#111113"/><rect x="7" y="8.5" width="14" height="12" rx="2.5" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M7 12.5h14M11 6.5v3M17 6.5v3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></symbol>
+</defs></svg>
+
+<!-- ============ SLOTS ============ -->
+<p class="label-top">Варіант 5 — екран /slots, бічна панель персоналу</p>
+<div class="frame" data-theme="light">
+  <div class="app">
+  <aside class="side" aria-label="Sidebar">
+    <div class="brand"><svg width="28" height="28" aria-hidden="true"><use href="#mark"/></svg>Practice scheduling</div>
+    <nav aria-label="Main">
+      <div class="navhead">Menu</div>
+      <a href="#"><svg aria-hidden="true"><use href="#i-home"/></svg>Home</a>
+      <a href="#"><svg aria-hidden="true"><use href="#i-users"/></svg>Clients</a>
+      <a href="#" aria-current="page"><svg aria-hidden="true"><use href="#i-slots"/></svg>Slots</a>
+    </nav>
+    <div class="account">
+      <div class="id"><span class="av" aria-hidden="true">S</span><span style="min-width:0"><span class="em" style="display:block">scheduler@example.test</span><span class="rl">scheduler</span></span></div>
+      <form><button class="btn btn-secondary" type="button">Вийти</button></form>
+    </div>
+  </aside>
+
+  <div class="wrap">
+    <div class="phead">
+      <h1>Slots</h1>
+      <p>Times in America/Los_Angeles.</p>
+    </div>
+
+    <form class="card" onsubmit="return false">
+      <div class="chead"><h2 class="ctitle"><svg aria-hidden="true"><use href="#i-filter"/></svg>Therapist and day</h2></div>
+      <div class="row">
+        <div class="field" style="flex:1 1 280px"><span class="lbl">Therapist</span>
+          <button type="button" class="ctl" aria-haspopup="listbox"><span class="v">Olena Koval</span><svg aria-hidden="true"><use href="#i-chev"/></svg></button>
+        </div>
+        <div class="field" style="flex:1 1 220px"><span class="lbl">Day</span>
+          <button type="button" class="ctl" aria-haspopup="dialog"><span class="v mono">2026-10-21</span><svg aria-hidden="true" viewBox="0 0 18 18"><use href="#i-cal"/></svg></button>
+        </div>
+        <button class="btn btn-primary" type="submit">Show</button>
+      </div>
+    </form>
+
+    <section class="card" aria-labelledby="day-slots">
+      <div class="chead">
+        <h2 class="ctitle" id="day-slots"><svg aria-hidden="true"><use href="#i-cal"/></svg>Olena Koval — 2026-10-21</h2>
+      </div>
+      <div class="holdbar">
+        <div class="field"><span class="lbl">Client to hold a slot for</span>
+          <button type="button" class="ctl" aria-haspopup="listbox"><span class="v">Ivan Petrenko</span><svg aria-hidden="true"><use href="#i-chev"/></svg></button>
+        </div>
+      </div>
+      <p class="msg ok" role="status" style="margin-bottom:12px"><svg aria-hidden="true"><use href="#i-ok"/></svg>Slot held for 24 hours.</p>
+      <table class="tbl" data-testid="slot-list">
+        <thead><tr><th scope="col">Time</th><th scope="col">Status</th><th scope="col">Client</th><th scope="col">Held until</th><th scope="col"><span style="position:absolute;left:-9999px">Action</span></th></tr></thead>
+        <tbody>
+          <tr><td class="t">09:00</td><td><span class="badge free"><svg aria-hidden="true"><use href="#i-free"/></svg>Free</span></td><td class="none">—</td><td class="none">—</td><td class="act"><button class="btn btn-primary">Hold 09:00</button></td></tr>
+          <tr><td class="t">10:00</td><td><span class="badge held"><svg aria-hidden="true"><use href="#i-held"/></svg>Held</span></td><td>Maria Sydorenko</td><td class="until">Held until 2026-10-21 09:40</td><td class="act"><button class="btn btn-secondary">Confirm 10:00</button></td></tr>
+          <tr><td class="t">11:00</td><td><span class="badge confirmed"><svg aria-hidden="true"><use href="#i-confirmed"/></svg>Confirmed</span></td><td>Andrii Boiko</td><td class="none">—</td><td class="act"></td></tr>
+          <tr><td class="t">12:00</td><td><span class="badge free"><svg aria-hidden="true"><use href="#i-free"/></svg>Free</span></td><td class="none">—</td><td class="none">—</td><td class="act"><button class="btn btn-primary" aria-busy="true"><span class="spin" aria-hidden="true"></span>Hold 12:00</button></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card" aria-labelledby="expired-holds">
+      <div class="chead" style="margin-bottom:4px"><h2 class="ctitle" id="expired-holds"><svg aria-hidden="true"><use href="#i-history"/></svg>Expired holds</h2></div>
+      <p class="cap" style="margin:0 0 8px">Upcoming slots of this therapist not confirmed within 24 hours — they are free again.</p>
+      <table class="tbl">
+        <tbody><tr><td class="t">13:00</td><td><span class="badge expired"><svg aria-hidden="true"><use href="#i-expired"/></svg>Expired</span></td><td>Sofiia Melnyk</td><td class="none" style="width:40%"></td><td class="act"></td></tr></tbody>
+      </table>
+    </section>
+  </div>
+  </div>
+</div>
+
+<!-- ============ HOME ============ -->
+<p class="label-top">Головна — бічна панель терапевта (пари «підпис / значення», як у референсі)</p>
+<div class="frame" data-theme="light">
+  <div class="app" style="min-height:420px">
+  <aside class="side" aria-label="Sidebar" style="min-height:420px">
+    <div class="brand"><svg width="28" height="28" aria-hidden="true"><use href="#mark"/></svg>Practice scheduling</div>
+    <nav aria-label="Main">
+      <div class="navhead">Menu</div>
+      <a href="#" aria-current="page"><svg aria-hidden="true"><use href="#i-home"/></svg>Home</a>
+      <a href="#"><svg aria-hidden="true"><use href="#i-sched"/></svg>My schedule</a>
+    </nav>
+    <div class="account">
+      <div class="id"><span class="av" aria-hidden="true">T</span><span style="min-width:0"><span class="em" style="display:block">therapist@example.test</span><span class="rl">therapist</span></span></div>
+      <form><button class="btn btn-secondary" type="button">Вийти</button></form>
+    </div>
+  </aside>
+  <div class="wrap">
+    <section class="card">
+      <div class="chead"><h2 class="ctitle"><svg aria-hidden="true"><use href="#i-user"/></svg>Проєкт команди</h2></div>
+      <dl class="kv">
+        <div><dt>Email</dt><dd>therapist@example.test</dd></div>
+        <div><dt>Роль</dt><dd>therapist</dd></div>
+      </dl>
+    </section>
+  </div>
+  </div>
+</div>
+
+<!-- ============ SHEET ============ -->
+<p class="label-top">Компоненти</p>
+<div class="frame" data-theme="light">
+  <div class="sheet">
+    <div>
+      <h3>Основа · чорне й біле</h3>
+      <div class="swatches">
+        <div class="sw"><i style="background:#111113"></i><div>ink / button<br><code>#111113 · 17.62:1</code></div></div>
+        <div class="sw"><i style="background:#5f6168"></i><div>muted<br><code>#5f6168 · 5.78:1</code></div></div>
+        <div class="sw"><i style="background:#8b8d94"></i><div>border-strong<br><code>#8b8d94 · 3.10:1</code></div></div>
+        <div class="sw"><i style="background:#e6e6e9"></i><div>border<br><code>#e6e6e9</code></div></div>
+        <div class="sw"><i style="background:#f7f7f8"></i><div>page<br><code>#f7f7f8</code></div></div>
+        <div class="sw"><i style="background:#ffffff"></i><div>surface<br><code>#ffffff</code></div></div>
+      </div>
+    </div>
+    <div>
+      <h3>Пастель · лише статуси й повідомлення</h3>
+      <div class="swatches">
+        <div class="sw"><i style="background:#e5f3eb"></i><div>mint · Free<br><code>#1e5b3f · 7.00:1</code></div></div>
+        <div class="sw"><i style="background:#faf0d7"></i><div>butter · Held<br><code>#6e4c0a · 6.85:1</code></div></div>
+        <div class="sw"><i style="background:#ebeaf8"></i><div>lavender · Confirmed<br><code>#3b3878 · 8.73:1</code></div></div>
+        <div class="sw"><i style="background:#efeff1"></i><div>stone · Expired<br><code>#4f5157 · 6.91:1</code></div></div>
+        <div class="sw"><i style="background:#fbeaea"></i><div>blush · error<br><code>#9f2528 · 6.52:1</code></div></div>
+      </div>
+    </div>
+
+    <div class="twocol">
+      <div>
+        <h3>Типографіка · Geist</h3>
+        <div style="font:600 26px/32px var(--ui);letter-spacing:-.02em">Slots</div>
+        <div style="font:600 16px/22px var(--ui);margin:8px 0">Expired holds</div>
+        <div><b style="font-weight:600">Held until</b> <span style="color:var(--muted)">2026-10-21 09:40</span></div>
+        <div style="font:500 15px/22px var(--mono);margin-top:6px">09:00 · 10:00 · 11:00</div>
+        <p class="cap" style="margin-top:8px">Три розміри, дві ваги (500/600). Підпис — ink 600, значення — muted 400.</p>
+      </div>
+      <div>
+        <h3>Статуси</h3>
+        <div class="rowx">
+          <span class="badge free"><svg aria-hidden="true"><use href="#i-free"/></svg>Free</span>
+          <span class="badge held"><svg aria-hidden="true"><use href="#i-held"/></svg>Held</span>
+          <span class="badge confirmed"><svg aria-hidden="true"><use href="#i-confirmed"/></svg>Confirmed</span>
+          <span class="badge expired"><svg aria-hidden="true"><use href="#i-expired"/></svg>Expired</span>
+        </div>
+        <p class="cap" style="margin-top:10px">Текст + іконка + пастельний фон. Без рамок і тіней.</p>
+      </div>
+    </div>
+
+    <div>
+      <h3>Кнопки</h3>
+      <div class="rowx">
+        <button class="btn btn-primary">Create client</button>
+        <button class="btn btn-secondary">Confirm 10:00</button>
+        <button class="btn btn-primary" aria-busy="true"><span class="spin" aria-hidden="true"></span>Creating…</button>
+        <button class="btn btn-primary" style="outline:2px solid var(--focus);outline-offset:2px">Focus</button>
+        <button class="btn btn-ghost">Back</button>
+      </div>
+      <p class="cap" style="margin-top:10px">Дві кнопки на все: чорна — основна дія, біла з межею — другорядна.</p>
+    </div>
+
+    <div class="twocol">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h3 style="margin:0">Поля</h3>
+        <label class="field"><span class="lbl">Name</span><input class="ctl" value="Ivan Petrenko"></label>
+        <label class="field"><span class="lbl">Email</span><input class="ctl invalid" value="ivan@" aria-invalid="true"></label>
+        <p class="msg err" role="alert"><svg aria-hidden="true"><use href="#i-err"/></svg>Enter the client's name and a valid email.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h3 style="margin:0">Повідомлення й порожній стан</h3>
+        <p class="msg ok" role="status"><svg aria-hidden="true"><use href="#i-ok"/></svg>Client "Ivan Petrenko" created.</p>
+        <p class="msg err" role="alert"><svg aria-hidden="true"><use href="#i-err"/></svg>Only schedulers and admins can hold slots.</p>
+        <div class="empty"><svg aria-hidden="true" viewBox="0 0 18 18"><use href="#i-cal"/></svg><p>No free slots on this day.</p></div>
+      </div>
+    </div>
+
+    <div class="twocol" style="align-items:start">
+      <div>
+        <h3>Select (власний)</h3>
+        <div class="field" style="min-height:240px"><span class="lbl">Client to hold a slot for</span>
+          <div class="anchor">
+            <button type="button" class="ctl open" aria-haspopup="listbox" aria-expanded="true"><span class="v ph">Choose a client</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10l4-4 4 4"/></svg></button>
+            <ul class="pop" role="listbox" aria-label="Client to hold a slot for">
+              <li class="opt" role="option" aria-selected="false">Andrii Boiko</li>
+              <li class="opt" role="option" aria-selected="true">Ivan Petrenko</li>
+              <li class="opt hover" role="option" aria-selected="false">Maria Sydorenko</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>DatePicker (власний)</h3>
+        <div class="field" style="min-height:480px"><span class="lbl">Day</span>
+          <div class="anchor" style="width:300px">
+            <button type="button" class="ctl open" aria-haspopup="dialog" aria-expanded="true" style="min-width:0"><span class="v mono">2026-10-21</span><svg aria-hidden="true" viewBox="0 0 18 18"><use href="#i-cal"/></svg></button>
+            <div class="pop cal" role="dialog" aria-label="Choose a day">
+              <div class="calhead">
+                <button class="icb" aria-label="Previous month"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 4l-4 4 4 4"/></svg></button>
+                <span>October 2026</span>
+                <button class="icb" aria-label="Next month"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4l4 4-4 4"/></svg></button>
+              </div>
+              <div class="dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+              <div class="days" role="grid">
+                <button class="day out">28</button><button class="day out">29</button><button class="day out">30</button><button class="day">1</button><button class="day">2</button><button class="day">3</button><button class="day">4</button>
+                <button class="day">5</button><button class="day">6</button><button class="day">7</button><button class="day">8</button><button class="day">9</button><button class="day">10</button><button class="day">11</button>
+                <button class="day">12</button><button class="day">13</button><button class="day">14</button><button class="day">15</button><button class="day">16</button><button class="day">17</button><button class="day">18</button>
+                <button class="day">19</button><button class="day today" aria-label="2026-10-20, today">20</button><button class="day" aria-selected="true">21</button><button class="day">22</button><button class="day">23</button><button class="day">24</button><button class="day">25</button>
+                <button class="day">26</button><button class="day">27</button><button class="day">28</button><button class="day">29</button><button class="day">30</button><button class="day">31</button><button class="day out">1</button>
+              </div>
+              <div class="calfoot"><button class="btn btn-ghost">Today</button><button class="btn btn-ghost">Close</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DARK ============ -->
+<p class="label-top">Темна тема</p>
+<div class="frame" data-theme="dark">
+  <div class="sheet">
+    <div class="rowx">
+      <button class="btn btn-primary">Show</button>
+      <button class="btn btn-secondary">Confirm 10:00</button>
+      <span class="badge free"><svg aria-hidden="true"><use href="#i-free"/></svg>Free</span>
+      <span class="badge held"><svg aria-hidden="true"><use href="#i-held"/></svg>Held</span>
+      <span class="badge confirmed"><svg aria-hidden="true"><use href="#i-confirmed"/></svg>Confirmed</span>
+      <span class="badge expired"><svg aria-hidden="true"><use href="#i-expired"/></svg>Expired</span>
+    </div>
+    <section class="card">
+      <table class="tbl"><tbody>
+        <tr><td class="t">10:00</td><td><span class="badge held"><svg aria-hidden="true"><use href="#i-held"/></svg>Held</span></td><td>Maria Sydorenko</td><td class="until">Held until 2026-10-21 09:40</td><td class="act"><button class="btn btn-secondary">Confirm 10:00</button></td></tr>
+        <tr><td class="t">11:00</td><td><span class="badge confirmed"><svg aria-hidden="true"><use href="#i-confirmed"/></svg>Confirmed</span></td><td>Andrii Boiko</td><td class="none">—</td><td class="act"></td></tr>
+      </tbody></table>
+    </section>
+    <p class="msg err" role="alert"><svg aria-hidden="true"><use href="#i-err"/></svg>This slot is no longer available.</p>
+  </div>
+</div>
+
+</body>
+</html>

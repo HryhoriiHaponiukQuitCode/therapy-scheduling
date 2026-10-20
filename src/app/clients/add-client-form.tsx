@@ -2,7 +2,15 @@
 
 import { useActionState } from "react";
 import { ActionMessage } from "@/components/action-message";
-import { CLIENT_EMAIL_MAX, CLIENT_NAME_MAX } from "@/lib/clients";
+import { Button } from "@/components/button";
+import { Field, Input } from "@/components/field";
+import {
+  CLIENT_DUPLICATE_MESSAGE,
+  CLIENT_EMAIL_MAX,
+  CLIENT_INVALID_MESSAGE,
+  CLIENT_NAME_MAX,
+  validateClient,
+} from "@/lib/clients";
 import { addClient, type AddClientState } from "./actions";
 
 const initialState: AddClientState = { status: "idle" };
@@ -11,39 +19,43 @@ export function AddClientForm() {
   const [state, formAction, pending] = useActionState(addClient, initialState);
   // React 19 скидає форму до defaultValue після дії: після помилки повертаємо введене.
   const values = state.status === "error" ? state.values : { fullName: "", email: "" };
+  // aria-invalid — лише на полі, якого стосується помилка; помилка прав чи збою не позначає жодного поля.
+  const message = state.status === "error" ? state.message : null;
+  const nameInvalid = message === CLIENT_INVALID_MESSAGE && !validateClient(values.fullName, "client@example.test").ok;
+  const emailInvalid =
+    message === CLIENT_DUPLICATE_MESSAGE ||
+    (message === CLIENT_INVALID_MESSAGE && !validateClient("Client", values.email).ok);
 
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
-      <label className="flex flex-col gap-1 text-sm">
-        Name
-        <input
+      <Field label="Name" htmlFor="client-name">
+        <Input
+          id="client-name"
           name="full_name"
           type="text"
           autoComplete="off"
           maxLength={CLIENT_NAME_MAX}
           defaultValue={values.fullName}
-          className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+          aria-invalid={nameInvalid || undefined}
         />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        Email
-        <input
+      </Field>
+      <Field label="Email" htmlFor="client-email">
+        <Input
+          id="client-email"
           name="email"
           type="email"
           autoComplete="off"
           maxLength={CLIENT_EMAIL_MAX}
           defaultValue={values.email}
-          className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+          aria-invalid={emailInvalid || undefined}
         />
-      </label>
+      </Field>
       <ActionMessage state={state} />
-      <button
-        type="submit"
-        disabled={pending}
-        className="min-h-11 rounded bg-foreground px-4 py-2 font-medium text-background disabled:opacity-60"
-      >
-        {pending ? "Creating…" : "Create client"}
-      </button>
+      <div>
+        <Button type="submit" variant="primary" pending={pending}>
+          {pending ? "Creating…" : "Create client"}
+        </Button>
+      </div>
     </form>
   );
 }

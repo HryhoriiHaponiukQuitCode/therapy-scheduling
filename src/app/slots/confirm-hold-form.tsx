@@ -14,7 +14,7 @@ export function ConfirmHoldForm() {
 
   return (
     <form id={CONFIRM_FORM_ID} action={formAction} className="flex flex-col gap-1" aria-busy={pending}>
-      {pending ? <p className="text-sm text-zinc-500">Confirming…</p> : null}
+      {pending ? <p className="m-0 text-sm text-muted">Confirming…</p> : null}
       <ActionMessage state={state} />
     </form>
   );

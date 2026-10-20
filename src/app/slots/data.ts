@@ -27,6 +27,7 @@ export type DayView = {
   therapists: Therapist[];
   therapist: Therapist | null;
   date: string;
+  today: string; // «сьогодні» в America/Los_Angeles — для DatePicker
   slots: DaySlot[];
   expired: ExpiredHold[];
   clients: ClientOption[];
@@ -58,7 +59,7 @@ export async function loadDayView(
   const therapist = therapists.find((t) => t.id === params.therapist) ?? therapists[0] ?? null;
 
   if (profilesError || !therapist) {
-    return { therapists, therapist, date, slots: [], expired: [], clients: [], clientsError: false, error: Boolean(profilesError) };
+    return { therapists, therapist, date, today: practiceDate(now), slots: [], expired: [], clients: [], clientsError: false, error: Boolean(profilesError) };
   }
 
   const dayStart = practiceTimeToUtc(date, 0).toISOString();
@@ -89,7 +90,7 @@ export async function loadDayView(
 
   // Без клієнтів не працює лише вибір для утримання — статуси слотів однаково показуємо.
   if (availability.error || holds.error) {
-    return { therapists, therapist, date, slots: [], expired: [], clients: [], clientsError: false, error: true };
+    return { therapists, therapist, date, today: practiceDate(now), slots: [], expired: [], clients: [], clientsError: false, error: true };
   }
 
   const records: HoldRecord[] = holds.data.map(toHoldRecord);
@@ -99,6 +100,7 @@ export async function loadDayView(
     therapists,
     therapist,
     date,
+    today: practiceDate(now),
     slots,
     expired: upcoming.error ? [] : expiredHolds(upcoming.data.map(toHoldRecord), now),
     clients: clients.error ? [] : toClientOptions(clients.data),

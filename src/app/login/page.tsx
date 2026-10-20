@@ -1,3 +1,8 @@
+import { ActionMessage } from "@/components/action-message";
+import { Button } from "@/components/button";
+import { Card } from "@/components/card";
+import { Field, Input } from "@/components/field";
+import { BrandMark } from "@/components/icons";
 import { login } from "./actions";
 
 const ERRORS: Record<string, string> = {
@@ -5,46 +10,47 @@ const ERRORS: Record<string, string> = {
   invalid: "Невірний email або пароль.",
 };
 
+// Вхід без бічної панелі: одна картка 400px по центру сторінки (design-system.md, розділ 5).
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const { error } = await searchParams;
   const message = typeof error === "string" ? ERRORS[error] : undefined;
 
   return (
-    <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-6 py-16">
-      <h1 className="text-2xl font-semibold">Вхід</h1>
-      <form action={login} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          Email
-          <input
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Пароль
-          <input
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-          />
-        </label>
-        {message ? (
-          <p role="alert" className="text-sm text-red-600">
-            {message}
-          </p>
-        ) : null}
-        <button
-          type="submit"
-          className="rounded bg-foreground px-4 py-2 font-medium text-background"
-        >
-          Увійти
-        </button>
-      </form>
+    <main className="flex min-h-dvh w-full flex-1 items-center justify-center bg-page px-4 py-16">
+      <div className="flex w-full max-w-[400px] flex-col gap-4">
+        <div className="flex items-center gap-2.5 px-1 text-[15px] font-semibold tracking-[-0.01em]">
+          <BrandMark />
+          Practice scheduling
+        </div>
+        <Card id="login-title" title="Вхід" headingLevel={1}>
+        <form action={login} className="flex flex-col gap-4">
+          <Field label="Email" htmlFor="login-email">
+            <Input
+              id="login-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              aria-invalid={message ? true : undefined}
+            />
+          </Field>
+          <Field label="Пароль" htmlFor="login-password">
+            <Input
+              id="login-password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              aria-invalid={message ? true : undefined}
+            />
+          </Field>
+          {message ? <ActionMessage state={{ status: "error", message }} /> : null}
+          <Button type="submit" variant="primary" className="w-full">
+            Увійти
+          </Button>
+        </form>
+        </Card>
+      </div>
     </main>
   );
 }
