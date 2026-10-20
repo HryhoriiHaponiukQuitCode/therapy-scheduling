@@ -3,199 +3,222 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>therapy-scheduling — design v5 (mono + pastel, sidebar)</title>
+<title>therapy-scheduling — design v6 (airy glass)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --page:#f7f7f8; --surface:#ffffff; --subtle:#f4f4f5;
-  --ink:#111113; --muted:#5f6168; --border:#e6e6e9; --border-strong:#8b8d94;
-  --btn:#111113; --btn-hover:#2a2a2e; --on-btn:#ffffff;
-  --focus:#111113;
-  --success:#1e5b3f; --success-bg:#e5f3eb; --error:#9f2528; --error-bg:#fbeaea;
-  --free-fg:#1e5b3f; --free-bg:#e5f3eb; --held-fg:#6e4c0a; --held-bg:#faf0d7;
-  --confirmed-fg:#3b3878; --confirmed-bg:#ebeaf8; --expired-fg:#4f5157; --expired-bg:#efeff1;
-  --shadow:0 1px 2px rgba(17,17,19,.04);
-  --shadow-pop:0 1px 2px rgba(17,17,19,.06),0 12px 32px rgba(17,17,19,.10);
-  --r-sm:6px; --r-md:8px; --r-lg:12px;
-  --ui:Geist,system-ui,sans-serif; --mono:"Geist Mono",ui-monospace,monospace;
+  --bg-1:#eef2fd; --bg-2:#e9e7fb; --blob-a:#cddcff; --blob-b:#e2d9ff; --blob-c:#d4ecff;
+  --glass:rgba(255,255,255,.66); --glass-hi:rgba(255,255,255,.85); --glass-edge:rgba(255,255,255,.9);
+  --ink:#141a38; --muted:#535b7a; --line:rgba(20,26,56,.08); --border-strong:#7d86a3;
+  --navy:#1b2658; --on-navy:#ffffff; --blue:#2a5bd7; --focus:#2a5bd7;
+  --success:#1d6942; --success-bg:#e0f4e7; --error:#a3283a; --error-bg:#fde8ec;
+  --free-fg:#1d6942; --free-bg:#e0f4e7;
+  --held-fg:#76520a; --held-bg:#fbf0cf; --hatch:#f8ecc5;
+  --confirmed-fg:#2a3c9a; --confirmed-bg:#e4e9ff;
+  --expired-fg:#4f566b; --expired-bg:#eaedf3;
+  --shadow:0 1px 1px rgba(27,38,88,.03),0 18px 48px rgba(44,62,140,.08);
+  --shadow-pop:0 2px 4px rgba(27,38,88,.06),0 24px 56px rgba(44,62,140,.18);
+  --r-sm:10px; --r-md:14px; --r-lg:24px; --r-xl:28px; --pill:999px;
+  --font:"Manrope",system-ui,sans-serif;
 }
 [data-theme="dark"]{
-  --page:#0e0e10; --surface:#17171a; --subtle:#1e1e22;
-  --ink:#f2f2f3; --muted:#a2a3aa; --border:#2a2a2f; --border-strong:#74757c;
-  --btn:#f2f2f3; --btn-hover:#ffffff; --on-btn:#111113;
-  --focus:#f2f2f3;
-  --success:#a9dfc3; --success-bg:#16271e; --error:#f4a9a9; --error-bg:#2c1617;
-  --free-fg:#a9dfc3; --free-bg:#16271e; --held-fg:#ecd08f; --held-bg:#2a2210;
-  --confirmed-fg:#c3c1f2; --confirmed-bg:#212036; --expired-fg:#c4c5ca; --expired-bg:#232327;
-  --shadow:none; --shadow-pop:0 12px 32px rgba(0,0,0,.5);
+  --bg-1:#0b1024; --bg-2:#120f2a; --blob-a:#1b2a63; --blob-b:#2a1f5c; --blob-c:#123056;
+  --glass:rgba(255,255,255,.06); --glass-hi:rgba(255,255,255,.10); --glass-edge:rgba(255,255,255,.12);
+  --ink:#eef1ff; --muted:#a5acc8; --line:rgba(238,241,255,.10); --border-strong:#7a84a8;
+  --navy:#c9d6ff; --on-navy:#0d1330; --blue:#8fb0ff; --focus:#8fb0ff;
+  --success:#a3e3bd; --success-bg:#14301f; --error:#ffadb9; --error-bg:#3a1820;
+  --free-fg:#a3e3bd; --free-bg:#14301f;
+  --held-fg:#f0d488; --held-bg:#2e260d; --hatch:rgba(240,212,136,.10);
+  --confirmed-fg:#bcc8ff; --confirmed-bg:#1e2650;
+  --expired-fg:#c3c7d4; --expired-bg:#262b3d;
+  --shadow:0 18px 48px rgba(0,0,0,.35); --shadow-pop:0 24px 56px rgba(0,0,0,.55);
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:#e4e4e7;font-family:var(--ui);font-size:14px;line-height:20px;color:var(--ink);padding:24px 16px;-webkit-font-smoothing:antialiased}
-.label-top{max-width:1180px;margin:0 auto 12px;font:600 12px/16px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:#52525b}
-.frame{max-width:1180px;margin:0 auto 32px;background:var(--page);color:var(--ink);border-radius:16px;overflow:hidden;border:1px solid #d4d4d8}
+body{background:#cfd6ea;font-family:var(--font);font-size:14px;line-height:20px;color:var(--ink);padding:24px 16px;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.label-top{max-width:1240px;margin:0 auto 12px;font:700 12px/16px var(--font);letter-spacing:.08em;text-transform:uppercase;color:#3f4766}
+.frame{position:relative;max-width:1240px;margin:0 auto 36px;border-radius:28px;overflow:hidden;color:var(--ink);
+  background:
+    radial-gradient(520px 380px at 12% 8%,var(--blob-c),transparent 70%),
+    radial-gradient(620px 460px at 88% 18%,var(--blob-b),transparent 70%),
+    radial-gradient(700px 520px at 60% 100%,var(--blob-a),transparent 70%),
+    linear-gradient(160deg,var(--bg-1),var(--bg-2));
+  box-shadow:0 40px 90px rgba(27,38,88,.22)}
+.glass{background:var(--glass);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(24px) saturate(140%);backdrop-filter:blur(24px) saturate(140%);box-shadow:var(--shadow)}
 
-/* top bar */
-.topbar{height:64px;display:flex;align-items:center;gap:32px;padding:0 32px;background:var(--surface);border-bottom:1px solid var(--border)}
-.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:-.01em;white-space:nowrap}
-.nav{display:flex;gap:28px;height:100%;flex:1}
-.nav a{display:flex;align-items:center;height:100%;color:var(--muted);text-decoration:none;font-weight:500;border-bottom:2px solid transparent;padding-top:2px}
-.nav a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
-.who{display:flex;align-items:center;gap:14px;white-space:nowrap}
-.who .em{font-weight:500;font-size:13px}
-.who .rl{font-size:12px;color:var(--muted)}
+/* shell */
+.app{display:grid;grid-template-columns:96px minmax(0,1fr);min-height:900px}
+.rail{position:relative;z-index:6;display:flex;flex-direction:column;align-items:center;gap:14px;padding:28px 0 24px}
+.mark{width:48px;height:48px;margin-bottom:22px}
+.rail nav{display:flex;flex-direction:column;gap:14px}
+.rbtn{position:relative;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:var(--ink);text-decoration:none;border:1px solid var(--glass-edge);background:var(--glass);box-shadow:var(--shadow);cursor:pointer}
+.rbtn svg{width:22px;height:22px}
+.rbtn[aria-current="page"]{background:var(--navy);color:var(--on-navy);border-color:transparent;box-shadow:0 10px 24px rgba(27,38,88,.28);width:64px;height:64px}
+.rbtn .tip{z-index:20;position:absolute;left:calc(100% + 12px);top:50%;transform:translateY(-50%);white-space:nowrap;background:var(--navy);color:var(--on-navy);font:600 12px/1 var(--font);padding:8px 10px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .15s}
+.rbtn:hover .tip,.rbtn:focus-visible .tip,.rbtn.show-tip .tip{opacity:1}
+.rbtn:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+.rail .bottom{margin-top:auto;display:flex;flex-direction:column;gap:14px}
+.main{padding:28px 32px 40px 8px;display:flex;flex-direction:column;gap:24px;min-width:0}
 
-/* app shell with left sidebar */
-.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:820px}
-.side{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 12px 16px;gap:24px;align-self:stretch}
-.side .brand{padding:4px 10px}
-.side nav{display:flex;flex-direction:column;gap:2px}
-.side .navhead{font:600 11px/14px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px}
-.side nav a{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px;border-radius:var(--r-md);color:var(--muted);text-decoration:none;font-weight:500}
-.side nav a svg{width:18px;height:18px;flex:none}
-.side nav a:hover{background:var(--subtle);color:var(--ink)}
-.side nav a[aria-current="page"]{background:var(--subtle);color:var(--ink);font-weight:600}
-.side nav a:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
-.side .account{margin-top:auto;border-top:1px solid var(--border);padding:16px 10px 0;display:flex;flex-direction:column;gap:12px}
-.side .account .av{width:36px;height:36px;border-radius:50%;background:var(--subtle);border:1px solid var(--border);display:grid;place-items:center;font:600 12px/1 var(--ui);flex:none}
-.side .account .id{display:flex;align-items:center;gap:10px;min-width:0}
-.side .account .em{font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.side .account .rl{font-size:12px;color:var(--muted)}
-.side .account .btn{width:100%}
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+h1{font:400 44px/52px var(--font);letter-spacing:-.025em;margin:0}
+.sub{margin:2px 0 0;color:var(--muted)}
+.acct{display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;border-radius:var(--pill)}
+.acct .em{font-weight:600;font-size:13px;line-height:16px}
+.acct .rl{font-size:12px;color:var(--muted)}
+.ava{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:700 14px/1 var(--font);color:var(--navy);background:linear-gradient(135deg,#ffffff,#dfe6ff);border:1px solid var(--glass-edge)}
+[data-theme="dark"] .ava{background:linear-gradient(135deg,#2a3364,#1b2147)}
 
-/* page */
-.wrap{max-width:960px;width:100%;padding:40px 40px 48px;display:flex;flex-direction:column;gap:24px}
-.phead h1{font:600 26px/32px var(--ui);letter-spacing:-.02em;margin:0}
-.phead p{margin:4px 0 0;color:var(--muted)}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:28px}
-.chead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin-bottom:20px}
-.ctitle{display:flex;align-items:center;gap:10px;font:600 16px/22px var(--ui);letter-spacing:-.01em;margin:0}
-.ctitle svg{width:18px;height:18px;flex:none}
+/* columns */
+.cols{display:grid;grid-template-columns:360px minmax(0,1fr);gap:24px;align-items:start}
+.panel{border-radius:var(--r-xl);padding:26px}
+.ptitle{font:500 22px/28px var(--font);letter-spacing:-.01em;margin:0}
+.pdesc{margin:6px 0 0;color:var(--muted)}
 .cap{font-size:12px;line-height:16px;color:var(--muted)}
 
-/* label/value grid (як у референсі) */
-.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px 48px;margin:0}
-.kv div{display:flex;flex-direction:column;gap:4px}
-.kv dt{font-weight:600}
-.kv dd{margin:0;color:var(--muted)}
+/* therapist list (single choice, submits GET form) */
+.tlist{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.trow{width:100%;display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 12px 8px 8px;border-radius:var(--r-md);border:1px solid transparent;background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.trow:hover{background:var(--glass)}
+.trow[aria-pressed="true"]{background:var(--glass-hi);border-color:var(--glass-edge);box-shadow:var(--shadow)}
+.trow .ava{width:40px;height:40px;font-size:13px}
+.trow .nm{font-weight:600;display:block}
+.trow .meta{font-size:12px;color:var(--muted)}
+.trow .chk{margin-left:auto;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border-strong);display:grid;place-items:center;flex:none}
+.trow[aria-pressed="true"] .chk{background:var(--navy);border-color:var(--navy)}
+.trow[aria-pressed="true"] .chk::after{content:"";width:9px;height:5px;border-left:2px solid var(--on-navy);border-bottom:2px solid var(--on-navy);transform:rotate(-45deg) translate(1px,-1px)}
+.trow:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 
-/* controls */
-.row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+/* inline calendar */
+.calhead{display:flex;align-items:center;justify-content:space-between;margin:14px 0 8px}
+.calhead b{font:600 15px/20px var(--font)}
+.icb{width:44px;height:44px;border-radius:50%;border:1px solid var(--glass-edge);background:var(--glass);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.icb svg{width:16px;height:16px}
+.icb:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.dow,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;text-align:center}
+.days{row-gap:2px}
+.dow{font:600 11px/14px var(--font);color:var(--muted);margin-bottom:4px}
+.day{justify-self:center;width:100%;max-width:44px;aspect-ratio:1/1;height:auto;border:none;border-radius:50%;background:transparent;color:var(--ink);font:500 13px/1 var(--font);cursor:pointer;position:relative}
+.day:hover{background:var(--glass-hi)}
+.day.out{color:var(--muted);opacity:.5}
+.day.today::after{content:"";position:absolute;bottom:4px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--blue)}
+.day[aria-pressed="true"],.day[aria-selected="true"]{background:var(--navy);color:var(--on-navy);font-weight:700}
+.day[aria-pressed="true"]::after{background:var(--on-navy)}
+.day:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+
+/* main panel head */
+.mhead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}
 .field{display:flex;flex-direction:column;gap:6px}
 .field>.lbl{font-weight:600;font-size:13px}
 .anchor{position:relative}
-.ctl{min-height:44px;min-width:240px;width:100%;display:flex;align-items:center;gap:10px;padding:0 12px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-md);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
-.ctl .v{flex:1}
-.ctl .ph{color:var(--muted)}
-.ctl svg{width:16px;height:16px;flex:none;color:var(--muted)}
+.ctl{min-height:48px;min-width:260px;width:100%;display:flex;align-items:center;gap:10px;padding:0 8px 0 6px;border-radius:var(--pill);border:1px solid var(--border-strong);background:var(--glass-hi);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.ctl .ava{width:34px;height:34px;font-size:12px}
+.ctl .v{flex:1;font-weight:600}
+.ctl .ph{color:var(--muted);font-weight:500;padding-left:10px}
+.ctl .chev{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.ctl .chev svg{width:16px;height:16px}
 .ctl:focus-visible,.ctl.open{outline:2px solid var(--focus);outline-offset:2px}
-.ctl.invalid{border-color:var(--error)}
-input.ctl{cursor:text}
-.mono{font-family:var(--mono)}
+input.ctl{padding:0 18px;cursor:text;font-weight:500}
+input.ctl.invalid{border-color:var(--error)}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:var(--r-md);border:1px solid transparent;font:500 14px/1 var(--ui);cursor:pointer;white-space:nowrap}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:var(--pill);border:1px solid transparent;font:600 14px/1 var(--font);cursor:pointer;white-space:nowrap}
 .btn svg{width:16px;height:16px}
-.btn-primary{background:var(--btn);color:var(--on-btn)}
-.btn-secondary{background:var(--surface);color:var(--ink);border-color:var(--border-strong)}
-.btn-ghost{background:transparent;color:var(--ink);border-color:transparent;text-decoration:underline;text-underline-offset:3px;padding:0 8px}
-.btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.btn-primary{background:var(--navy);color:var(--on-navy);box-shadow:0 8px 20px rgba(27,38,88,.22)}
+.btn-secondary{background:var(--glass-hi);color:var(--navy);border-color:var(--navy)}
+.btn-glass{background:var(--glass-hi);color:var(--ink);border-color:var(--glass-edge);box-shadow:var(--shadow)}
+.btn:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 .btn[aria-busy="true"]{opacity:.7;cursor:progress}
 .spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:s .8s linear infinite}
 @keyframes s{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
 
 /* badges */
-.badge{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:var(--r-sm);font:500 12px/1 var(--ui)}
+.badge{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px 0 8px;border-radius:var(--pill);font:700 12px/1 var(--font)}
 .badge svg{width:12px;height:12px}
-.free{color:var(--free-fg);background:var(--free-bg)}
-.held{color:var(--held-fg);background:var(--held-bg)}
-.confirmed{color:var(--confirmed-fg);background:var(--confirmed-bg)}
-.expired{color:var(--expired-fg);background:var(--expired-bg)}
+.b-free{color:var(--free-fg);background:var(--free-bg)}
+.b-held{color:var(--held-fg);background:var(--held-bg)}
+.b-confirmed{color:var(--confirmed-fg);background:var(--confirmed-bg)}
+.b-expired{color:var(--expired-fg);background:var(--expired-bg)}
 
-/* messages */
-.msg{display:flex;gap:10px;align-items:flex-start;margin:0;padding:12px 14px;border-radius:var(--r-md);font-weight:500}
-.msg svg{width:18px;height:18px;flex:none;margin-top:1px}
+/* message toast */
+.msg{display:flex;align-items:center;gap:10px;margin:0;padding:10px 16px 10px 10px;border-radius:var(--pill);font-weight:600;width:fit-content;max-width:100%}
+.msg .dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--glass-hi)}
+.msg svg{width:16px;height:16px}
 .msg.ok{background:var(--success-bg);color:var(--success)}
 .msg.err{background:var(--error-bg);color:var(--error)}
 
-/* hold strip */
-.holdbar{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;padding:16px;border-radius:var(--r-md);background:var(--subtle);margin-bottom:16px}
-.holdbar .field{flex:1;min-width:240px}
-.holdbar .ctl{min-width:0}
+/* time grid */
+.grid{position:relative;margin-top:8px}
+.hr{display:grid;grid-template-columns:64px minmax(0,1fr);min-height:104px;border-top:1px solid var(--line)}
+.hr:last-child{border-bottom:1px solid var(--line)}
+.hr .h{padding-top:10px;color:var(--muted);font-weight:500}
+.cell{padding:8px 0 8px 8px}
+.scard{position:relative;height:100%;min-height:86px;border-radius:var(--r-lg);padding:14px 16px;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:10px 16px;overflow:hidden}
+.scard .info{display:flex;flex-direction:column;gap:4px;min-width:0;position:relative;z-index:1}
+.scard .nm{font-weight:600;font-size:15px;line-height:20px}
+.scard .tm{color:var(--muted);font-size:13px}
+.scard .act{position:relative;z-index:1;align-self:center}
+.s-free{border:1.5px dashed var(--border-strong);background:rgba(255,255,255,.28)}
+[data-theme="dark"] .s-free{background:rgba(255,255,255,.03)}
+.s-held{background:repeating-linear-gradient(135deg,var(--glass-hi) 0 10px,var(--hatch) 10px 12px);border:1px solid var(--glass-edge);box-shadow:var(--shadow)}
+.s-confirmed{background:var(--glass-hi);border:1px solid var(--glass-edge);box-shadow:var(--shadow)}
+.s-expired{background:var(--glass);border:1px solid var(--glass-edge)}
+.cell{position:relative;z-index:1}
+.now{position:absolute;left:56px;right:0;height:2px;background:var(--blue);z-index:0;pointer-events:none;opacity:.9}
+.now::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px rgba(42,91,215,.18)}
+.now span{position:absolute;left:-58px;top:8px;font:700 11px/14px var(--font);color:var(--blue);background:var(--glass-hi);padding:2px 8px;border-radius:var(--pill)}
 
-/* slot table */
-.tbl{width:100%;border-collapse:collapse}
-.tbl th{font:600 12px/16px var(--ui);color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
-.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);height:60px;vertical-align:middle}
-.tbl tr:last-child td{border-bottom:none}
-.tbl .t{font:500 15px/20px var(--mono);width:80px}
-.tbl .until{color:var(--muted);white-space:nowrap}
-.tbl .act{text-align:right;width:1%;white-space:nowrap}
-.tbl .none{color:var(--muted)}
-@media (max-width:720px){
-  .tbl thead{display:none}
-  .tbl,.tbl tbody,.tbl tr,.tbl td{display:block;width:auto}
-  .tbl tr{display:grid;grid-template-columns:64px 1fr;gap:4px 12px;padding:14px 0;border-bottom:1px solid var(--border)}
-  .tbl tr:last-child{border-bottom:none}
-  .tbl td{border:none;padding:0;height:auto}
-  .tbl .t{grid-row:1/span 4;width:auto;padding-top:2px}
-  .tbl .act{text-align:left;width:auto;margin-top:6px}
-  .tbl .none{display:none}
-}
+/* expired list */
+.elist{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.elist .scard{min-height:0;padding:12px 14px}
 
 /* popovers */
-.pop{position:absolute;top:calc(100% + 6px);left:0;z-index:3;min-width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-pop);padding:4px;margin:0;list-style:none}
-.opt{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px;border-radius:var(--r-sm);cursor:pointer}
-.opt .sub{margin-left:auto;color:var(--muted);font-size:12px}
-.opt.hover{background:var(--subtle)}
-.opt[aria-selected="true"]{font-weight:600}
-.opt[aria-selected="true"]::before{content:"";width:12px;height:7px;border-left:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(-45deg) translate(1px,-2px)}
-.opt:not([aria-selected="true"])::before{content:"";width:12px}
-.cal{width:300px;padding:12px}
-.calhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:600}
-.icb{width:44px;height:44px;border:none;border-radius:var(--r-md);background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
-.icb:hover{background:var(--subtle)}
-.icb svg{width:16px;height:16px}
-.dow,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
-.dow{font:600 11px/14px var(--ui);color:var(--muted);margin-bottom:4px}
-.day{height:38px;border:none;border-radius:var(--r-sm);background:transparent;color:var(--ink);font:500 13px/1 var(--mono);cursor:pointer}
-.day.out{color:var(--muted);opacity:.5}
-.day.today{box-shadow:inset 0 0 0 1px var(--border-strong)}
-.day[aria-selected="true"]{background:var(--btn);color:var(--on-btn)}
-.calfoot{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.pop{position:absolute;top:calc(100% + 8px);left:0;z-index:5;min-width:100%;border-radius:var(--r-lg);padding:6px;margin:0;list-style:none;background:var(--glass-hi);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);box-shadow:var(--shadow-pop)}
+.opt{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 10px;border-radius:var(--r-md);cursor:pointer;font-weight:500}
+.opt .ava{width:32px;height:32px;font-size:11px}
+.opt.hover{background:var(--glass)}
+.opt[aria-selected="true"]{background:var(--glass);font-weight:700}
+.opt[aria-selected="true"]::after{content:"";margin-left:auto;width:12px;height:7px;border-left:2px solid var(--navy);border-bottom:2px solid var(--navy);transform:rotate(-45deg) translate(2px,-2px)}
 
 /* empty */
-.empty{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:32px 16px;border:1px dashed var(--border-strong);border-radius:var(--r-lg)}
-.empty svg{width:28px;height:28px;color:var(--muted)}
+.empty{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:36px 16px;border-radius:var(--r-lg);border:1.5px dashed var(--border-strong)}
+.empty .eic{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--glass-hi);border:1px solid var(--glass-edge);color:var(--navy)}
+.empty .eic svg{width:24px;height:24px}
 .empty p{margin:0;font-weight:600}
 
 /* sheet */
 .sheet{padding:32px;display:grid;gap:36px}
-.sheet h3{font:600 12px/16px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.sheet h3{font:700 12px/16px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
 .rowx{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:10px}
-.sw{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:var(--surface);font-size:12px}
-.sw i{display:block;height:44px;border-bottom:1px solid var(--border)}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.sw{border-radius:var(--r-md);overflow:hidden;font-size:12px}
+.sw i{display:block;height:52px}
 .sw div{padding:8px 10px;line-height:16px}
-.sw code{font-family:var(--mono);color:var(--muted);font-size:11px}
+.sw code{color:var(--muted);font-size:11px;font-family:ui-monospace,monospace}
 .twocol{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:36px}
 
-@media (max-width:860px){
-  .app{grid-template-columns:1fr;min-height:0}
-  .side{position:static;min-height:0;border-right:none;border-bottom:1px solid var(--border);flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px;gap:8px}
-  .side .navhead{display:none}
-  .side nav{flex-direction:row;order:3;flex-basis:100%;overflow-x:auto}
-  .side .account{margin:0 0 0 auto;border:none;padding:0;flex-direction:row;align-items:center}
-  .side .account .id{display:none}
-  .side .account .btn{width:auto}
-}
-@media (max-width:720px){
-  .wrap{padding:24px 16px 32px}
-  .card{padding:20px}
+/* responsive */
+@media (max-width:1000px){.cols{grid-template-columns:1fr}}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr;min-height:0;padding-bottom:96px}
+  .rail{position:absolute;left:12px;right:12px;bottom:12px;z-index:10;flex-direction:row;justify-content:space-around;padding:8px;border-radius:var(--pill);background:var(--glass-hi);border:1px solid var(--glass-edge);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);box-shadow:var(--shadow-pop);gap:4px}
+  .rail .mark{display:none}
+  .rail nav{flex-direction:row;gap:4px}
+  .rail .bottom{margin:0;flex-direction:row}
+  .rbtn,.rbtn[aria-current="page"]{width:52px;height:52px;box-shadow:none}
+  .rbtn .tip{display:none}
+  .main{padding:20px 16px}
+  h1{font-size:34px;line-height:40px}
+  .panel{padding:20px;border-radius:var(--r-lg)}
   .ctl{min-width:0}
-  .row>.field{flex:1 1 100%}
+  .acct .em,.acct .rl{display:none}
+  .acct{padding:4px}
+  .hr{grid-template-columns:52px minmax(0,1fr)}
+  .scard .act{margin-right:0;flex-basis:100%}
   .sheet{padding:24px 16px}
 }
 </style>
@@ -203,256 +226,244 @@ input.ctl{cursor:text}
 <body>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <symbol id="i-free" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
-  <symbol id="i-held" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6V6l1.6 1" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
-  <symbol id="i-confirmed" viewBox="0 0 12 12"><path d="M2.5 6.3l2.2 2.2 4.8-5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
-  <symbol id="i-expired" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3.2 8.8l5.6-5.6" stroke="currentColor" stroke-width="1.4"/></symbol>
-  <symbol id="i-ok" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.8 9.2l2.2 2.2 4.2-4.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
-  <symbol id="i-err" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 5.5v4.2M9 12.3v.2" stroke="currentColor" stroke-width="1.8"/></symbol>
-  <symbol id="i-chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
-  <symbol id="i-cal" viewBox="0 0 18 18"><rect x="2.5" y="3.5" width="13" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 7.5h13M6 2v3M12 2v3" stroke="currentColor" stroke-width="1.4"/></symbol>
-  <symbol id="i-user" viewBox="0 0 18 18"><circle cx="9" cy="6.5" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3.5 15c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
-  <symbol id="i-filter" viewBox="0 0 18 18"><path d="M3 4.5h12M5.5 9h7M8 13.5h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
-  <symbol id="i-history" viewBox="0 0 18 18"><path d="M3.2 9a5.8 5.8 0 1 0 1.7-4.1M3 3v3h3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M9 6v3l2 1.3" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
-  <symbol id="i-home" viewBox="0 0 18 18"><path d="M3 8l6-4.5L15 8v6.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M7.5 15.5V11h3v4.5" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
-  <symbol id="i-users" viewBox="0 0 18 18"><circle cx="7" cy="6.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 14.5c.5-2.6 2.3-4 4.5-4s4 1.4 4.5 4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 4.2a2.6 2.6 0 0 1 0 5M13.5 10.8c1 .6 1.7 1.9 2 3.7" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
-  <symbol id="i-slots" viewBox="0 0 18 18"><rect x="2.5" y="3.5" width="13" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 7.5h13M6 2v3M12 2v3M6 10.5h2M10 10.5h2M6 13h2" stroke="currentColor" stroke-width="1.4"/></symbol>
-  <symbol id="i-sched" viewBox="0 0 18 18"><circle cx="9" cy="9" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M9 5.5V9l2.5 1.5" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
-  <symbol id="mark" viewBox="0 0 28 28"><rect width="28" height="28" rx="7" fill="#111113"/><rect x="7" y="8.5" width="14" height="12" rx="2.5" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M7 12.5h14M11 6.5v3M17 6.5v3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <linearGradient id="mk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9cc0ff"/><stop offset="1" stop-color="#5b7cf0"/></linearGradient>
+  <linearGradient id="mk2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3d9ff"/><stop offset="1" stop-color="#a99bff"/></linearGradient>
+  <symbol id="mark" viewBox="0 0 48 48"><circle cx="19" cy="22" r="13" fill="url(#mk)"/><circle cx="29" cy="27" r="11" fill="url(#mk2)" opacity=".9"/><circle cx="15" cy="17" r="4" fill="#fff" opacity=".7"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9.5" cy="8.5" r="3.3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 19c.7-3.4 3.1-5.2 6-5.2s5.3 1.8 6 5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M15.5 5.6a3.3 3.3 0 0 1 0 6.3M17.5 14c1.4.8 2.4 2.5 2.8 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8.5" cy="14" r="1" fill="currentColor"/><circle cx="12" cy="14" r="1" fill="currentColor"/><circle cx="15.5" cy="14" r="1" fill="currentColor"/><circle cx="8.5" cy="17" r="1" fill="currentColor"/><circle cx="12" cy="17" r="1" fill="currentColor"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-l" viewBox="0 0 16 16"><path d="M10 4l-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="i-r" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="b-free" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="b-held" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.7V6l1.6 1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+  <symbol id="b-confirmed" viewBox="0 0 12 12"><path d="M2.5 6.3l2.2 2.2 4.8-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="b-expired" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3.2 8.8l5.6-5.6" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 16 16"><path d="M3.5 8.3l2.8 2.8 6-6.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-err" viewBox="0 0 16 16"><path d="M8 3.5v5.5M8 12v.3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
 </defs></svg>
 
-<!-- ============ SLOTS ============ -->
-<p class="label-top">Варіант 5 — екран /slots, бічна панель персоналу</p>
+<!-- ================= SLOTS ================= -->
+<p class="label-top">Варіант 6 «Airy glass» — екран /slots (сьогодні, тож видно лінію «зараз»)</p>
 <div class="frame" data-theme="light">
   <div class="app">
-  <aside class="side" aria-label="Sidebar">
-    <div class="brand"><svg width="28" height="28" aria-hidden="true"><use href="#mark"/></svg>Practice scheduling</div>
-    <nav aria-label="Main">
-      <div class="navhead">Menu</div>
-      <a href="#"><svg aria-hidden="true"><use href="#i-home"/></svg>Home</a>
-      <a href="#"><svg aria-hidden="true"><use href="#i-users"/></svg>Clients</a>
-      <a href="#" aria-current="page"><svg aria-hidden="true"><use href="#i-slots"/></svg>Slots</a>
-    </nav>
-    <div class="account">
-      <div class="id"><span class="av" aria-hidden="true">S</span><span style="min-width:0"><span class="em" style="display:block">scheduler@example.test</span><span class="rl">scheduler</span></span></div>
-      <form><button class="btn btn-secondary" type="button">Вийти</button></form>
-    </div>
-  </aside>
-
-  <div class="wrap">
-    <div class="phead">
-      <h1>Slots</h1>
-      <p>Times in America/Los_Angeles.</p>
-    </div>
-
-    <form class="card" onsubmit="return false">
-      <div class="chead"><h2 class="ctitle"><svg aria-hidden="true"><use href="#i-filter"/></svg>Therapist and day</h2></div>
-      <div class="row">
-        <div class="field" style="flex:1 1 280px"><span class="lbl">Therapist</span>
-          <button type="button" class="ctl" aria-haspopup="listbox"><span class="v">Olena Koval</span><svg aria-hidden="true"><use href="#i-chev"/></svg></button>
-        </div>
-        <div class="field" style="flex:1 1 220px"><span class="lbl">Day</span>
-          <button type="button" class="ctl" aria-haspopup="dialog"><span class="v mono">2026-10-21</span><svg aria-hidden="true" viewBox="0 0 18 18"><use href="#i-cal"/></svg></button>
-        </div>
-        <button class="btn btn-primary" type="submit">Show</button>
+    <aside class="rail" aria-label="Sidebar">
+      <svg class="mark" aria-hidden="true"><use href="#mark"/></svg>
+      <nav aria-label="Main">
+        <a class="rbtn" href="#" aria-label="Home"><svg aria-hidden="true"><use href="#i-home"/></svg><span class="tip">Home</span></a>
+        <a class="rbtn show-tip" href="#" aria-label="Clients"><svg aria-hidden="true"><use href="#i-users"/></svg><span class="tip">Clients</span></a>
+        <a class="rbtn" href="#" aria-current="page" aria-label="Slots"><svg aria-hidden="true"><use href="#i-cal"/></svg><span class="tip">Slots</span></a>
+      </nav>
+      <div class="bottom">
+        <button class="rbtn" type="button" aria-label="Вийти"><svg aria-hidden="true"><use href="#i-out"/></svg><span class="tip">Вийти</span></button>
       </div>
-    </form>
+    </aside>
 
-    <section class="card" aria-labelledby="day-slots">
-      <div class="chead">
-        <h2 class="ctitle" id="day-slots"><svg aria-hidden="true"><use href="#i-cal"/></svg>Olena Koval — 2026-10-21</h2>
-      </div>
-      <div class="holdbar">
-        <div class="field"><span class="lbl">Client to hold a slot for</span>
-          <button type="button" class="ctl" aria-haspopup="listbox"><span class="v">Ivan Petrenko</span><svg aria-hidden="true"><use href="#i-chev"/></svg></button>
+    <main class="main">
+      <div class="top">
+        <div>
+          <h1>Slots</h1>
+          <p class="sub">Times in America/Los_Angeles.</p>
+        </div>
+        <div class="acct glass">
+          <span><span class="em" style="display:block">scheduler@example.test</span><span class="rl">scheduler</span></span>
+          <span class="ava" aria-hidden="true">S</span>
         </div>
       </div>
-      <p class="msg ok" role="status" style="margin-bottom:12px"><svg aria-hidden="true"><use href="#i-ok"/></svg>Slot held for 24 hours.</p>
-      <table class="tbl" data-testid="slot-list">
-        <thead><tr><th scope="col">Time</th><th scope="col">Status</th><th scope="col">Client</th><th scope="col">Held until</th><th scope="col"><span style="position:absolute;left:-9999px">Action</span></th></tr></thead>
-        <tbody>
-          <tr><td class="t">09:00</td><td><span class="badge free"><svg aria-hidden="true"><use href="#i-free"/></svg>Free</span></td><td class="none">—</td><td class="none">—</td><td class="act"><button class="btn btn-primary">Hold 09:00</button></td></tr>
-          <tr><td class="t">10:00</td><td><span class="badge held"><svg aria-hidden="true"><use href="#i-held"/></svg>Held</span></td><td>Maria Sydorenko</td><td class="until">Held until 2026-10-21 09:40</td><td class="act"><button class="btn btn-secondary">Confirm 10:00</button></td></tr>
-          <tr><td class="t">11:00</td><td><span class="badge confirmed"><svg aria-hidden="true"><use href="#i-confirmed"/></svg>Confirmed</span></td><td>Andrii Boiko</td><td class="none">—</td><td class="act"></td></tr>
-          <tr><td class="t">12:00</td><td><span class="badge free"><svg aria-hidden="true"><use href="#i-free"/></svg>Free</span></td><td class="none">—</td><td class="none">—</td><td class="act"><button class="btn btn-primary" aria-busy="true"><span class="spin" aria-hidden="true"></span>Hold 12:00</button></td></tr>
-        </tbody>
-      </table>
-    </section>
 
-    <section class="card" aria-labelledby="expired-holds">
-      <div class="chead" style="margin-bottom:4px"><h2 class="ctitle" id="expired-holds"><svg aria-hidden="true"><use href="#i-history"/></svg>Expired holds</h2></div>
-      <p class="cap" style="margin:0 0 8px">Upcoming slots of this therapist not confirmed within 24 hours — they are free again.</p>
-      <table class="tbl">
-        <tbody><tr><td class="t">13:00</td><td><span class="badge expired"><svg aria-hidden="true"><use href="#i-expired"/></svg>Expired</span></td><td>Sofiia Melnyk</td><td class="none" style="width:40%"></td><td class="act"></td></tr></tbody>
-      </table>
-    </section>
-  </div>
+      <div class="cols">
+        <!-- left column: GET form -->
+        <form class="side-col" style="display:flex;flex-direction:column;gap:24px" onsubmit="return false">
+          <section class="panel glass" aria-labelledby="th">
+            <h2 class="ptitle" id="th">Therapist</h2>
+            <ul class="tlist" role="list">
+              <li><button class="trow" name="therapist" value="t1" aria-pressed="true"><span class="ava" aria-hidden="true">OK</span><span><span class="nm">Olena Koval</span></span><span class="chk" aria-hidden="true"></span></button></li>
+              <li><button class="trow" name="therapist" value="t2" aria-pressed="false"><span class="ava" aria-hidden="true">DL</span><span><span class="nm">Dmytro Lysenko</span></span><span class="chk" aria-hidden="true"></span></button></li>
+              <li><button class="trow" name="therapist" value="t3" aria-pressed="false"><span class="ava" aria-hidden="true">IR</span><span><span class="nm">Iryna Romanenko</span></span><span class="chk" aria-hidden="true"></span></button></li>
+            </ul>
+          </section>
+          <section class="panel glass" aria-labelledby="dy">
+            <h2 class="ptitle" id="dy">Day</h2>
+            <div class="calhead">
+              <button type="button" class="icb" aria-label="Previous month"><svg aria-hidden="true"><use href="#i-l"/></svg></button>
+              <b>October 2026</b>
+              <button type="button" class="icb" aria-label="Next month"><svg aria-hidden="true"><use href="#i-r"/></svg></button>
+            </div>
+            <div class="dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+            <div class="days">
+              <button class="day out" name="date">28</button><button class="day out" name="date">29</button><button class="day out" name="date">30</button><button class="day" name="date">1</button><button class="day" name="date">2</button><button class="day" name="date">3</button><button class="day" name="date">4</button>
+              <button class="day" name="date">5</button><button class="day" name="date">6</button><button class="day" name="date">7</button><button class="day" name="date">8</button><button class="day" name="date">9</button><button class="day" name="date">10</button><button class="day" name="date">11</button>
+              <button class="day" name="date">12</button><button class="day" name="date">13</button><button class="day" name="date">14</button><button class="day" name="date">15</button><button class="day" name="date">16</button><button class="day" name="date">17</button><button class="day" name="date">18</button>
+              <button class="day" name="date">19</button><button class="day" name="date">20</button><button class="day today" name="date" value="2026-10-21" aria-pressed="true" aria-label="2026-10-21, today">21</button><button class="day" name="date">22</button><button class="day" name="date">23</button><button class="day" name="date">24</button><button class="day" name="date">25</button>
+              <button class="day" name="date">26</button><button class="day" name="date">27</button><button class="day" name="date">28</button><button class="day" name="date">29</button><button class="day" name="date">30</button><button class="day" name="date">31</button><button class="day out" name="date">1</button>
+            </div>
+          </section>
+        </form>
+
+        <!-- right column -->
+        <div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+          <section class="panel glass" aria-labelledby="day-slots">
+            <div class="mhead">
+              <div>
+                <h2 class="ptitle" id="day-slots">Olena Koval — 2026-10-21</h2>
+              </div>
+              <div class="field" style="flex:0 1 320px">
+                <span class="lbl">Client to hold a slot for</span>
+                <button type="button" class="ctl" aria-haspopup="listbox"><span class="ava" aria-hidden="true">IP</span><span class="v">Ivan Petrenko</span><span class="chev"><svg aria-hidden="true"><use href="#i-chev"/></svg></span></button>
+              </div>
+            </div>
+            <p class="msg ok" role="status"><span class="dot"><svg aria-hidden="true"><use href="#i-ok"/></svg></span>Slot held for 24 hours.</p>
+
+            <div class="grid" data-testid="slot-list">
+              <div class="now" style="top:45px" aria-hidden="true"><span>Now 09:26</span></div>
+              <div class="hr"><span class="h">09:00</span><div class="cell">
+                <div class="scard s-free"><div class="info"><span class="badge b-free"><svg aria-hidden="true"><use href="#b-free"/></svg>Free</span></div>
+                  <div class="act"><button class="btn btn-primary">Hold 09:00</button></div></div>
+              </div></div>
+              <div class="hr"><span class="h">10:00</span><div class="cell">
+                <div class="scard s-held"><div class="info"><span class="nm">Maria Sydorenko</span><span class="tm">Held until 2026-10-21 09:40</span><span><span class="badge b-held"><svg aria-hidden="true"><use href="#b-held"/></svg>Held</span></span></div>
+                  <div class="act"><button class="btn btn-secondary">Confirm 10:00</button></div></div>
+              </div></div>
+              <div class="hr"><span class="h">11:00</span><div class="cell">
+                <div class="scard s-confirmed"><div class="info"><span class="nm">Andrii Boiko</span><span><span class="badge b-confirmed"><svg aria-hidden="true"><use href="#b-confirmed"/></svg>Confirmed</span></span></div></div>
+              </div></div>
+              <div class="hr"><span class="h">12:00</span><div class="cell">
+                <div class="scard s-free"><div class="info"><span class="badge b-free"><svg aria-hidden="true"><use href="#b-free"/></svg>Free</span></div>
+                  <div class="act"><button class="btn btn-primary" aria-busy="true"><span class="spin" aria-hidden="true"></span>Hold 12:00</button></div></div>
+              </div></div>
+            </div>
+          </section>
+
+          <section class="panel glass" aria-labelledby="expired-holds">
+            <h2 class="ptitle" id="expired-holds">Expired holds</h2>
+            <p class="pdesc">Upcoming slots of this therapist not confirmed within 24 hours — they are free again.</p>
+            <ul class="elist" data-testid="expired-holds">
+              <li class="scard s-expired"><div class="info" style="flex-direction:row;align-items:center;gap:14px;flex-wrap:wrap"><b style="font-weight:600">13:00</b><span>Sofiia Melnyk</span><span class="badge b-expired"><svg aria-hidden="true"><use href="#b-expired"/></svg>Expired</span></div></li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </main>
   </div>
 </div>
 
-<!-- ============ HOME ============ -->
-<p class="label-top">Головна — бічна панель терапевта (пари «підпис / значення», як у референсі)</p>
-<div class="frame" data-theme="light">
-  <div class="app" style="min-height:420px">
-  <aside class="side" aria-label="Sidebar" style="min-height:420px">
-    <div class="brand"><svg width="28" height="28" aria-hidden="true"><use href="#mark"/></svg>Practice scheduling</div>
-    <nav aria-label="Main">
-      <div class="navhead">Menu</div>
-      <a href="#" aria-current="page"><svg aria-hidden="true"><use href="#i-home"/></svg>Home</a>
-      <a href="#"><svg aria-hidden="true"><use href="#i-sched"/></svg>My schedule</a>
-    </nav>
-    <div class="account">
-      <div class="id"><span class="av" aria-hidden="true">T</span><span style="min-width:0"><span class="em" style="display:block">therapist@example.test</span><span class="rl">therapist</span></span></div>
-      <form><button class="btn btn-secondary" type="button">Вийти</button></form>
-    </div>
-  </aside>
-  <div class="wrap">
-    <section class="card">
-      <div class="chead"><h2 class="ctitle"><svg aria-hidden="true"><use href="#i-user"/></svg>Проєкт команди</h2></div>
-      <dl class="kv">
-        <div><dt>Email</dt><dd>therapist@example.test</dd></div>
-        <div><dt>Роль</dt><dd>therapist</dd></div>
-      </dl>
-    </section>
-  </div>
-  </div>
-</div>
-
-<!-- ============ SHEET ============ -->
-<p class="label-top">Компоненти</p>
+<!-- ================= SHEET ================= -->
+<p class="label-top">Варіант 6 — компоненти</p>
 <div class="frame" data-theme="light">
   <div class="sheet">
     <div>
-      <h3>Основа · чорне й біле</h3>
+      <h3>Основа</h3>
       <div class="swatches">
-        <div class="sw"><i style="background:#111113"></i><div>ink / button<br><code>#111113 · 17.62:1</code></div></div>
-        <div class="sw"><i style="background:#5f6168"></i><div>muted<br><code>#5f6168 · 5.78:1</code></div></div>
-        <div class="sw"><i style="background:#8b8d94"></i><div>border-strong<br><code>#8b8d94 · 3.10:1</code></div></div>
-        <div class="sw"><i style="background:#e6e6e9"></i><div>border<br><code>#e6e6e9</code></div></div>
-        <div class="sw"><i style="background:#f7f7f8"></i><div>page<br><code>#f7f7f8</code></div></div>
-        <div class="sw"><i style="background:#ffffff"></i><div>surface<br><code>#ffffff</code></div></div>
+        <div class="sw glass"><i style="background:linear-gradient(160deg,#eef2fd,#e9e7fb)"></i><div>page gradient<br><code>#eef2fd → #e9e7fb</code></div></div>
+        <div class="sw glass"><i style="background:rgba(255,255,255,.66)"></i><div>glass 66%<br><code>blur 24px</code></div></div>
+        <div class="sw glass"><i style="background:#1b2658"></i><div>navy<br><code>#1b2658 · 14.34:1</code></div></div>
+        <div class="sw glass"><i style="background:#2a5bd7"></i><div>blue · focus/now<br><code>#2a5bd7 · 4.71:1</code></div></div>
+        <div class="sw glass"><i style="background:#141a38"></i><div>ink<br><code>#141a38 · 13.64:1</code></div></div>
+        <div class="sw glass"><i style="background:#535b7a"></i><div>muted<br><code>#535b7a · 5.35:1</code></div></div>
       </div>
+      <p class="cap" style="margin-top:10px">Контраст рахується по найтемнішій плямі фону під склом (#dfe6fa), тобто з запасом.</p>
     </div>
+
     <div>
-      <h3>Пастель · лише статуси й повідомлення</h3>
-      <div class="swatches">
-        <div class="sw"><i style="background:#e5f3eb"></i><div>mint · Free<br><code>#1e5b3f · 7.00:1</code></div></div>
-        <div class="sw"><i style="background:#faf0d7"></i><div>butter · Held<br><code>#6e4c0a · 6.85:1</code></div></div>
-        <div class="sw"><i style="background:#ebeaf8"></i><div>lavender · Confirmed<br><code>#3b3878 · 8.73:1</code></div></div>
-        <div class="sw"><i style="background:#efeff1"></i><div>stone · Expired<br><code>#4f5157 · 6.91:1</code></div></div>
-        <div class="sw"><i style="background:#fbeaea"></i><div>blush · error<br><code>#9f2528 · 6.52:1</code></div></div>
+      <h3>Статуси · пастель + фактура картки</h3>
+      <div class="rowx" style="gap:16px">
+        <span class="badge b-free"><svg aria-hidden="true"><use href="#b-free"/></svg>Free</span>
+        <span class="badge b-held"><svg aria-hidden="true"><use href="#b-held"/></svg>Held</span>
+        <span class="badge b-confirmed"><svg aria-hidden="true"><use href="#b-confirmed"/></svg>Confirmed</span>
+        <span class="badge b-expired"><svg aria-hidden="true"><use href="#b-expired"/></svg>Expired</span>
       </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px">
+        <div class="scard s-free" style="min-height:76px"><div class="info"><span class="nm">Free</span><span class="tm">пунктир, прозора</span></div></div>
+        <div class="scard s-held" style="min-height:76px"><div class="info"><span class="nm">Held</span><span class="tm">діагональна штриховка</span></div></div>
+        <div class="scard s-confirmed" style="min-height:76px"><div class="info"><span class="nm">Confirmed</span><span class="tm">суцільне скло</span></div></div>
+        <div class="scard s-expired" style="min-height:76px"><div class="info"><span class="nm">Expired</span><span class="tm">приглушене скло</span></div></div>
+      </div>
+      <p class="cap" style="margin-top:10px">Статус читається трьома незалежними ознаками: текст бейджа, його іконка і фактура картки (пунктир / штриховка / суцільне / приглушене скло). Контраст бейджів 5.80–7.87:1.</p>
     </div>
 
     <div class="twocol">
       <div>
-        <h3>Типографіка · Geist</h3>
-        <div style="font:600 26px/32px var(--ui);letter-spacing:-.02em">Slots</div>
-        <div style="font:600 16px/22px var(--ui);margin:8px 0">Expired holds</div>
-        <div><b style="font-weight:600">Held until</b> <span style="color:var(--muted)">2026-10-21 09:40</span></div>
-        <div style="font:500 15px/22px var(--mono);margin-top:6px">09:00 · 10:00 · 11:00</div>
-        <p class="cap" style="margin-top:8px">Три розміри, дві ваги (500/600). Підпис — ink 600, значення — muted 400.</p>
+        <h3>Типографіка · Manrope</h3>
+        <div style="font:400 44px/52px var(--font);letter-spacing:-.025em">Slots</div>
+        <div style="font:500 22px/28px var(--font);margin:6px 0">Expired holds</div>
+        <div style="font-weight:600;font-size:15px">Maria Sydorenko</div>
+        <div style="color:var(--muted)">Held until 2026-10-21 09:40</div>
+        <p class="cap" style="margin-top:8px">Заголовок сторінки — тонкий 400; панелі — 500; імена — 600. Цифри tabular-nums замість моноширинного шрифту.</p>
       </div>
       <div>
-        <h3>Статуси</h3>
+        <h3>Кнопки</h3>
         <div class="rowx">
-          <span class="badge free"><svg aria-hidden="true"><use href="#i-free"/></svg>Free</span>
-          <span class="badge held"><svg aria-hidden="true"><use href="#i-held"/></svg>Held</span>
-          <span class="badge confirmed"><svg aria-hidden="true"><use href="#i-confirmed"/></svg>Confirmed</span>
-          <span class="badge expired"><svg aria-hidden="true"><use href="#i-expired"/></svg>Expired</span>
+          <button class="btn btn-primary">Create client</button>
+          <button class="btn btn-secondary">Confirm 10:00</button>
+          <button class="btn btn-glass">Show</button>
+          <button class="btn btn-primary" aria-busy="true"><span class="spin" aria-hidden="true"></span>Creating…</button>
+          <button class="btn btn-primary" style="outline:2px solid var(--focus);outline-offset:3px">Focus</button>
         </div>
-        <p class="cap" style="margin-top:10px">Текст + іконка + пастельний фон. Без рамок і тіней.</p>
+        <p class="cap" style="margin-top:10px">Усі кнопки — пігулки. Темно-синя — основна дія, біла з синьою межею — другорядна, скляна — нейтральна.</p>
       </div>
-    </div>
-
-    <div>
-      <h3>Кнопки</h3>
-      <div class="rowx">
-        <button class="btn btn-primary">Create client</button>
-        <button class="btn btn-secondary">Confirm 10:00</button>
-        <button class="btn btn-primary" aria-busy="true"><span class="spin" aria-hidden="true"></span>Creating…</button>
-        <button class="btn btn-primary" style="outline:2px solid var(--focus);outline-offset:2px">Focus</button>
-        <button class="btn btn-ghost">Back</button>
-      </div>
-      <p class="cap" style="margin-top:10px">Дві кнопки на все: чорна — основна дія, біла з межею — другорядна.</p>
     </div>
 
     <div class="twocol">
       <div style="display:flex;flex-direction:column;gap:14px">
-        <h3 style="margin:0">Поля</h3>
+        <h3 style="margin:0">Поля й повідомлення</h3>
         <label class="field"><span class="lbl">Name</span><input class="ctl" value="Ivan Petrenko"></label>
         <label class="field"><span class="lbl">Email</span><input class="ctl invalid" value="ivan@" aria-invalid="true"></label>
-        <p class="msg err" role="alert"><svg aria-hidden="true"><use href="#i-err"/></svg>Enter the client's name and a valid email.</p>
+        <p class="msg err" role="alert"><span class="dot"><svg aria-hidden="true"><use href="#i-err"/></svg></span>Enter the client's name and a valid email.</p>
+        <p class="msg ok" role="status"><span class="dot"><svg aria-hidden="true"><use href="#i-ok"/></svg></span>Client "Ivan Petrenko" created.</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:14px">
-        <h3 style="margin:0">Повідомлення й порожній стан</h3>
-        <p class="msg ok" role="status"><svg aria-hidden="true"><use href="#i-ok"/></svg>Client "Ivan Petrenko" created.</p>
-        <p class="msg err" role="alert"><svg aria-hidden="true"><use href="#i-err"/></svg>Only schedulers and admins can hold slots.</p>
-        <div class="empty"><svg aria-hidden="true" viewBox="0 0 18 18"><use href="#i-cal"/></svg><p>No free slots on this day.</p></div>
-      </div>
-    </div>
-
-    <div class="twocol" style="align-items:start">
-      <div>
-        <h3>Select (власний)</h3>
-        <div class="field" style="min-height:240px"><span class="lbl">Client to hold a slot for</span>
+        <h3 style="margin:0">Select (власний) і порожній стан</h3>
+        <div class="field" style="min-height:236px"><span class="lbl">Client to hold a slot for</span>
           <div class="anchor">
-            <button type="button" class="ctl open" aria-haspopup="listbox" aria-expanded="true"><span class="v ph">Choose a client</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10l4-4 4 4"/></svg></button>
+            <button type="button" class="ctl open" aria-haspopup="listbox" aria-expanded="true"><span class="ph">Choose a client</span><span class="v"></span><span class="chev"><svg aria-hidden="true"><use href="#i-chev"/></svg></span></button>
             <ul class="pop" role="listbox" aria-label="Client to hold a slot for">
-              <li class="opt" role="option" aria-selected="false">Andrii Boiko</li>
-              <li class="opt" role="option" aria-selected="true">Ivan Petrenko</li>
-              <li class="opt hover" role="option" aria-selected="false">Maria Sydorenko</li>
+              <li class="opt" role="option" aria-selected="false"><span class="ava" aria-hidden="true">AB</span>Andrii Boiko</li>
+              <li class="opt" role="option" aria-selected="true"><span class="ava" aria-hidden="true">IP</span>Ivan Petrenko</li>
+              <li class="opt hover" role="option" aria-selected="false"><span class="ava" aria-hidden="true">MS</span>Maria Sydorenko</li>
             </ul>
           </div>
         </div>
-      </div>
-      <div>
-        <h3>DatePicker (власний)</h3>
-        <div class="field" style="min-height:480px"><span class="lbl">Day</span>
-          <div class="anchor" style="width:300px">
-            <button type="button" class="ctl open" aria-haspopup="dialog" aria-expanded="true" style="min-width:0"><span class="v mono">2026-10-21</span><svg aria-hidden="true" viewBox="0 0 18 18"><use href="#i-cal"/></svg></button>
-            <div class="pop cal" role="dialog" aria-label="Choose a day">
-              <div class="calhead">
-                <button class="icb" aria-label="Previous month"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 4l-4 4 4 4"/></svg></button>
-                <span>October 2026</span>
-                <button class="icb" aria-label="Next month"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4l4 4-4 4"/></svg></button>
-              </div>
-              <div class="dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
-              <div class="days" role="grid">
-                <button class="day out">28</button><button class="day out">29</button><button class="day out">30</button><button class="day">1</button><button class="day">2</button><button class="day">3</button><button class="day">4</button>
-                <button class="day">5</button><button class="day">6</button><button class="day">7</button><button class="day">8</button><button class="day">9</button><button class="day">10</button><button class="day">11</button>
-                <button class="day">12</button><button class="day">13</button><button class="day">14</button><button class="day">15</button><button class="day">16</button><button class="day">17</button><button class="day">18</button>
-                <button class="day">19</button><button class="day today" aria-label="2026-10-20, today">20</button><button class="day" aria-selected="true">21</button><button class="day">22</button><button class="day">23</button><button class="day">24</button><button class="day">25</button>
-                <button class="day">26</button><button class="day">27</button><button class="day">28</button><button class="day">29</button><button class="day">30</button><button class="day">31</button><button class="day out">1</button>
-              </div>
-              <div class="calfoot"><button class="btn btn-ghost">Today</button><button class="btn btn-ghost">Close</button></div>
-            </div>
-          </div>
+        <div class="empty" role="status">
+          <span class="eic" aria-hidden="true"><svg><use href="#i-cal"/></svg></span>
+          <p>No free slots on this day.</p>
         </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Бічна смуга</h3>
+      <div class="rowx" style="gap:18px">
+        <span class="rbtn" style="position:static"><svg aria-hidden="true"><use href="#i-home"/></svg></span>
+        <span class="rbtn" aria-current="page" style="position:static"><svg aria-hidden="true"><use href="#i-cal"/></svg></span>
+        <span class="rbtn" style="position:static"><svg aria-hidden="true"><use href="#i-clock"/></svg></span>
+        <span class="cap" style="max-width:420px">Круглі скляні кнопки 56px, активна — 64px темно-синя. Назва завжди в <code>aria-label</code> і видима підказка на hover/focus. На телефоні смуга стає плаваючою панеллю внизу.</span>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ============ DARK ============ -->
-<p class="label-top">Темна тема</p>
+<!-- ================= DARK ================= -->
+<p class="label-top">Варіант 6 — темна тема</p>
 <div class="frame" data-theme="dark">
   <div class="sheet">
     <div class="rowx">
-      <button class="btn btn-primary">Show</button>
+      <button class="btn btn-primary">Hold 09:00</button>
       <button class="btn btn-secondary">Confirm 10:00</button>
-      <span class="badge free"><svg aria-hidden="true"><use href="#i-free"/></svg>Free</span>
-      <span class="badge held"><svg aria-hidden="true"><use href="#i-held"/></svg>Held</span>
-      <span class="badge confirmed"><svg aria-hidden="true"><use href="#i-confirmed"/></svg>Confirmed</span>
-      <span class="badge expired"><svg aria-hidden="true"><use href="#i-expired"/></svg>Expired</span>
+      <span class="badge b-free"><svg aria-hidden="true"><use href="#b-free"/></svg>Free</span>
+      <span class="badge b-held"><svg aria-hidden="true"><use href="#b-held"/></svg>Held</span>
+      <span class="badge b-confirmed"><svg aria-hidden="true"><use href="#b-confirmed"/></svg>Confirmed</span>
+      <span class="badge b-expired"><svg aria-hidden="true"><use href="#b-expired"/></svg>Expired</span>
     </div>
-    <section class="card">
-      <table class="tbl"><tbody>
-        <tr><td class="t">10:00</td><td><span class="badge held"><svg aria-hidden="true"><use href="#i-held"/></svg>Held</span></td><td>Maria Sydorenko</td><td class="until">Held until 2026-10-21 09:40</td><td class="act"><button class="btn btn-secondary">Confirm 10:00</button></td></tr>
-        <tr><td class="t">11:00</td><td><span class="badge confirmed"><svg aria-hidden="true"><use href="#i-confirmed"/></svg>Confirmed</span></td><td>Andrii Boiko</td><td class="none">—</td><td class="act"></td></tr>
-      </tbody></table>
+    <section class="panel glass">
+      <div class="hr" style="border-top:none"><span class="h">10:00</span><div class="cell">
+        <div class="scard s-held"><div class="info"><span class="nm">Maria Sydorenko</span><span class="tm">Held until 2026-10-21 09:40</span><span><span class="badge b-held"><svg aria-hidden="true"><use href="#b-held"/></svg>Held</span></span></div>
+        <div class="act"><button class="btn btn-secondary">Confirm 10:00</button></div></div></div></div>
+      <div class="hr"><span class="h">11:00</span><div class="cell">
+        <div class="scard s-confirmed"><div class="info"><span class="nm">Andrii Boiko</span><span><span class="badge b-confirmed"><svg aria-hidden="true"><use href="#b-confirmed"/></svg>Confirmed</span></span></div></div></div></div>
     </section>
-    <p class="msg err" role="alert"><svg aria-hidden="true"><use href="#i-err"/></svg>This slot is no longer available.</p>
+    <p class="msg err" role="alert"><span class="dot"><svg aria-hidden="true"><use href="#i-err"/></svg></span>This slot is no longer available.</p>
   </div>
 </div>
 
