@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { signOut } from "@/app/login/actions";
 import { isStaff, type AppRole } from "@/lib/roles";
-import { Button } from "./button";
 import { BrandMark, HomeIcon, ScheduleIcon, SlotsIcon, UsersIcon } from "./icons";
 import { NavLink } from "./nav-link";
 import { ROUTE_STATUS_ID } from "./route-status-id";
+import { SubmitButton } from "./submit-button";
 
 type ShellUser = { email: string | null; role: AppRole | null };
 
@@ -61,9 +61,9 @@ export function Sidebar({ user }: { user: ShellUser }) {
           </span>
         </div>
         <form action={signOut}>
-          <Button type="submit" variant="secondary" className="w-full max-[860px]:w-auto">
+          <SubmitButton variant="secondary" className="w-full max-[860px]:w-auto">
             Вийти
-          </Button>
+          </SubmitButton>
         </form>
       </div>
     </aside>

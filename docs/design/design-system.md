@@ -85,6 +85,7 @@ Tailwind (`zinc-*`, `red-*`, `green-*`, `amber-*`, `bg-foreground` тощо) у 
 | `PageHeader` | server | `title`, `description?` |
 | `Card` | server | `title?`, `icon?`, `actions?`, `children`; `<section aria-labelledby>` |
 | `Button` | server | `variant: "primary" \| "secondary" \| "ghost"`, `pending?` (спінер + `aria-busy`, `disabled`), решта пропсів `<button>` (зокрема `form`, `name`, `value`) |
+| `SubmitButton` | client | `Button` для форм із server action без `useActionState` (вхід, «Вийти»): `pending` з `useFormStatus` |
 | `Field` | server | `label`, `error?`, `children`; підпис звʼязаний з контролом |
 | `Input` | server | межа `border-strong`, висота 44px, `aria-invalid` → межа `error` |
 | `Select` | client | власний, **без нативного `<select>`** (див. 4.1) |

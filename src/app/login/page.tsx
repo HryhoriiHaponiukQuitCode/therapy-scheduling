@@ -1,8 +1,8 @@
 import { ActionMessage } from "@/components/action-message";
-import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { Field, Input } from "@/components/field";
 import { BrandMark } from "@/components/icons";
+import { SubmitButton } from "@/components/submit-button";
 import { login } from "./actions";
 
 const ERRORS: Record<string, string> = {
@@ -45,9 +45,9 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
             />
           </Field>
           {message ? <ActionMessage state={{ status: "error", message }} /> : null}
-          <Button type="submit" variant="primary" className="w-full">
+          <SubmitButton variant="primary" className="w-full">
             Увійти
-          </Button>
+          </SubmitButton>
         </form>
         </Card>
       </div>
