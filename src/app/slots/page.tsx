@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser, isStaff } from "@/lib/roles";
+import { getRequestUser, isStaff } from "@/lib/roles";
 import { formatPracticeTime, hasFreeSlots, NO_FREE_SLOTS_MESSAGE } from "@/lib/slots";
 import { CONFIRM_FORM_ID, HOLD_FORM_ID } from "@/lib/holds";
 import { ActionMessage } from "@/components/action-message";
-import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/button";
 import { Card } from "@/components/card";
 import { DatePicker } from "@/components/date-picker";
@@ -23,17 +22,17 @@ import { HoldSlotForm } from "./hold-slot-form";
 // Вигляд — design-system.md, розділ 5: картки «Therapist and day», «<Терапевт> — <дата>», «Expired holds».
 export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
   const supabase = await createClient();
-  const user = await getCurrentUser(supabase);
+  const user = await getRequestUser();
   if (!user) {
     redirect("/login");
   }
 
   if (!isStaff(user.role)) {
     return (
-      <AppShell user={user}>
+      <>
         <PageHeader title="Slots" />
         <p className="m-0">Only schedulers and admins can view therapists&apos; slots.</p>
-      </AppShell>
+      </>
     );
   }
 
@@ -68,7 +67,7 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
   }));
 
   return (
-    <AppShell user={user}>
+    <>
       <PageHeader title="Slots" description="Times in America/Los_Angeles." />
 
       <form method="get">
@@ -157,6 +156,6 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
           />
         </Card>
       ) : null}
-    </AppShell>
+    </>
   );
 }

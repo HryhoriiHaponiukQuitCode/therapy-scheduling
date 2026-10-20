@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -16,8 +16,20 @@ export function NavLink({ href, icon, children }: { href: string; icon: ReactNod
         active ? "bg-subtle font-semibold text-ink" : "text-muted"
       }`}
     >
-      {icon}
+      <NavIcon icon={icon} />
       {children}
     </Link>
+  );
+}
+
+// Поки перехід на цей пункт триває (useLinkStatus) — спінер замість іконки, того ж розміру 18px: без зсуву макета.
+function NavIcon({ icon }: { icon: ReactNode }) {
+  const { pending } = useLinkStatus();
+  if (!pending) return icon;
+  return (
+    <span
+      aria-hidden
+      className="size-[18px] flex-none animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none"
+    />
   );
 }

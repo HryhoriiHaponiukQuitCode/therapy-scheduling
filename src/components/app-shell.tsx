@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 import { signOut } from "@/app/login/actions";
-import { isStaff, type AppRole } from "@/lib/roles";
+import { getRequestUser, isStaff, type AppRole } from "@/lib/roles";
 import { Button } from "./button";
 import { BrandMark, HomeIcon, ScheduleIcon, SlotsIcon, UsersIcon } from "./icons";
 import { NavLink } from "./nav-link";
@@ -79,4 +80,14 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
       </main>
     </div>
   );
+}
+
+// AppShell для layout розділу (/clients, /slots, /my-schedule): меню лишається на місці, поки loading.tsx
+// розділу показує скелетон контенту. Користувач — той самий, що й у сторінки (getRequestUser, React cache).
+export async function SignedInShell({ children }: { children: ReactNode }) {
+  const user = await getRequestUser();
+  if (!user) {
+    redirect("/login");
+  }
+  return <AppShell user={user}>{children}</AppShell>;
 }
