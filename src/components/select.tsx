@@ -57,12 +57,16 @@ export function Select({
     setOpen(true);
   };
 
-  const choose = (index: number) => {
+  // Єдина точка фіксації значення: і прихований input, і onChange бачать той самий вибір (Enter, клік, Tab).
+  const commit = (index: number) => {
     const option = options[index];
-    if (option) {
-      setValue(option.value);
-      onChange?.(option.value);
-    }
+    if (!option) return;
+    setValue(option.value);
+    onChange?.(option.value);
+  };
+
+  const choose = (index: number) => {
+    commit(index);
     setOpen(false);
     triggerRef.current?.focus();
   };
@@ -104,8 +108,7 @@ export function Select({
         return;
       case "Tab": {
         // Як у нативного select: Tab фіксує підсвічений варіант і пускає фокус далі.
-        const option = options[active];
-        if (option) setValue(option.value);
+        commit(active);
         setOpen(false);
         return;
       }
