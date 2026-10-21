@@ -1,25 +1,26 @@
-import { Card } from "@/components/card";
-import { UserIcon, UsersIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
+import { Panel } from "@/components/panel";
 import { LoadingStatus } from "@/components/route-status";
 import { Skeleton, SkeletonField, SkeletonRows } from "@/components/skeleton";
 
-// Миттєвий стан переходу на /clients: ті самі картки, що й на сторінці, з скелетонами замість даних.
+// Миттєвий стан переходу на /clients: ті самі панелі, що й на сторінці, зі скелетонами замість даних.
 export default function ClientsLoading() {
   return (
     <>
       <LoadingStatus />
       <PageHeader title="Clients" />
-      <Card title="New client" icon={<UserIcon />}>
-        <div className="flex flex-col gap-4">
-          <SkeletonField />
-          <SkeletonField />
-          <Skeleton className="h-11 w-36" />
-        </div>
-      </Card>
-      <Card title="All clients" icon={<UsersIcon />}>
-        <SkeletonRows rows={4} columns={["w-32", "w-48"]} />
-      </Card>
+      <div className="grid grid-cols-[360px_minmax(0,1fr)] items-start gap-6 max-[1000px]:grid-cols-1">
+        <Panel title="New client">
+          <div className="flex flex-col gap-4">
+            <SkeletonField />
+            <SkeletonField />
+            <Skeleton className="h-12 w-36" />
+          </div>
+        </Panel>
+        <Panel title="All clients">
+          <SkeletonRows rows={4} columns={["size-10 flex-none", "h-4 w-32", "h-4 w-48"]} />
+        </Panel>
+      </div>
     </>
   );
 }

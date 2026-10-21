@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
 
-// Поле: підпис 13/18, 600, звʼязаний з контролом через htmlFor (для Select і DatePicker — їхній тригер-кнопка).
+// Поле (розділ 4): підпис 13/18, 600 над контролом, звʼязаний через htmlFor (для Select — його тригер-кнопка).
 export function Field({
   label,
   htmlFor,
@@ -25,10 +25,10 @@ export function Field({
   );
 }
 
+// Контрол-пігулка 48px: glass-hi, межа border-strong, aria-invalid → межа error.
 export const controlClass =
-  "flex min-h-11 w-full items-center gap-2.5 rounded-md border border-border-strong bg-surface px-3 text-left text-sm text-ink aria-invalid:border-error";
+  "flex min-h-12 w-full items-center gap-2.5 rounded-full border border-border-strong bg-glass-hi px-[18px] text-left text-sm font-medium text-ink aria-invalid:border-error";
 
-// Текстове поле: межа border-strong, 44px, aria-invalid → межа error (розділ 4).
 export function Input({ className = "", ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${controlClass} ${className}`} />;
 }

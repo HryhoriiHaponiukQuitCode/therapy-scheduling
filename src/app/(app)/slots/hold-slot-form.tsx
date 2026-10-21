@@ -1,38 +1,62 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import { ActionMessage } from "@/components/action-message";
 import { Field } from "@/components/field";
 import { Select } from "@/components/select";
-import { HOLD_FORM_ID } from "@/lib/holds";
+import { holdFormId } from "@/lib/holds";
 import { holdSlot, type HoldSlotState } from "./actions";
 import type { ClientOption } from "./data";
 
 const initialState: HoldSlotState = { status: "idle" };
 
-// Одна форма утримання на сторінку: клієнт вибирається один раз, а кнопки Hold у рядках вільних слотів
-// надсилають цю форму з атрибутом form і передають slot_start як значення кнопки (AC-HOLD-02, AC-HOLD-10).
-// Форма лишається змонтованою після утримання, тож повідомлення про успіх видно.
-// Вигляд — смуга subtle з власним Select (design-system.md, розділ 5); client_id — прихованим полем Select.
-export function HoldSlotForm(props: { therapistId: string; clients: ClientOption[] }) {
-  const [state, formAction, pending] = useActionState(holdSlot, initialState);
+// Утримання на /slots: клієнт вибирається один раз (Select «Client to hold a slot for»), а на кожного терапевта —
+// своя форма з прихованими therapist_id і client_id; кнопки Hold його колонки надсилають її через атрибут form і
+// передають slot_start як значення кнопки (AC-HOLD-02, AC-HOLD-10). Поля server action ті самі, що й раніше.
+// Форми лишаються змонтованими після утримання, тож повідомлення про успіх видно; показуємо результат лише
+// останньої відправленої форми, інші — порожні live-області (ActionMessage не демонтуємо).
+// Вигляд (design-system.md, розділ 5): заголовок панелі зліва, Select справа, під ними ActionMessage.
+export function HoldSlotForm(props: { heading: ReactNode; therapistIds: string[]; clients: ClientOption[] }) {
+  const [clientId, setClientId] = useState("");
+  const [lastTherapist, setLastTherapist] = useState<string | null>(null);
 
   return (
-    <form id={HOLD_FORM_ID} action={formAction} className="flex flex-col gap-3" aria-busy={pending}>
-      <input type="hidden" name="therapist_id" value={props.therapistId} />
-      <div className="flex flex-wrap items-end gap-4 rounded-md bg-subtle p-4">
-        <Field label="Client to hold a slot for" htmlFor="hold-client" className="min-w-0 flex-1 basis-60">
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        {props.heading}
+        <Field label="Client to hold a slot for" htmlFor="hold-client" className="min-w-0 flex-[0_1_320px] max-[760px]:flex-auto">
           <Select
             id="hold-client"
-            name="client_id"
             placeholder="Choose a client"
             options={props.clients.map((client) => ({ value: client.id, label: client.name }))}
+            onChange={setClientId}
           />
         </Field>
       </div>
-      {/* ActionMessage не демонтуємо під час pending: інакше результат дії не оголошується. */}
+      {/* Без gap: порожні live-області форм не мають додавати відступів. */}
+      <div className="flex flex-col">
+        {props.therapistIds.map((therapistId) => (
+          <TherapistHoldForm
+            key={therapistId}
+            therapistId={therapistId}
+            clientId={clientId}
+            shown={lastTherapist === therapistId}
+            onSubmit={() => setLastTherapist(therapistId)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TherapistHoldForm(props: { therapistId: string; clientId: string; shown: boolean; onSubmit: () => void }) {
+  const [state, formAction, pending] = useActionState(holdSlot, initialState);
+  return (
+    <form id={holdFormId(props.therapistId)} action={formAction} onSubmit={props.onSubmit} aria-busy={pending} className="contents">
+      <input type="hidden" name="therapist_id" value={props.therapistId} />
+      <input type="hidden" name="client_id" value={props.clientId} />
       {pending ? <p className="m-0 text-sm text-muted">Holding…</p> : null}
-      <ActionMessage state={state} />
+      <ActionMessage state={props.shown ? state : initialState} />
     </form>
   );
 }

@@ -1,109 +1,180 @@
 @import "tailwindcss";
 
-/* Дизайн-система «Mono + pastel» — docs/design/design-system.md (розділ 2).
-   Біле й чорне — основа; пастель лише для статусів слотів і повідомлень про результат дії. */
+/* Дизайн-система «Airy glass» — docs/design/design-system.md (розділ 2).
+   Повітряний градієнт із плямами, скляні панелі, темно-синя основна дія; статус — текст + іконка + фактура. */
 :root {
-  --page: #f7f7f8;
-  --surface: #ffffff;
-  --subtle: #f4f4f5;
-  --ink: #111113;
-  --muted: #5f6168;
-  --border: #e6e6e9;
-  --border-strong: #8b8d94;
-  --btn: #111113;
-  --btn-hover: #2a2a2e;
-  --on-btn: #ffffff;
-  --focus: #111113;
-  --success: #1e5b3f;
-  --success-bg: #e5f3eb;
-  --error: #9f2528;
-  --error-bg: #fbeaea;
-  --status-free-fg: #1e5b3f;
-  --status-free-bg: #e5f3eb;
-  --status-held-fg: #6e4c0a;
-  --status-held-bg: #faf0d7;
-  --status-confirmed-fg: #3b3878;
-  --status-confirmed-bg: #ebeaf8;
-  --status-expired-fg: #4f5157;
-  --status-expired-bg: #efeff1;
-  --shadow-card-value: 0 1px 2px rgba(17, 17, 19, 0.04);
-  --shadow-pop-value: 0 1px 2px rgba(17, 17, 19, 0.06), 0 12px 32px rgba(17, 17, 19, 0.1);
+  --bg-1: #eef2fd;
+  --bg-2: #e9e7fb;
+  --blob-a: #cddcff;
+  --blob-b: #e2d9ff;
+  --blob-c: #d4ecff;
+  --glass: rgba(255, 255, 255, 0.66);
+  --glass-hi: rgba(255, 255, 255, 0.85);
+  --glass-edge: rgba(255, 255, 255, 0.9);
+  --line: rgba(20, 26, 56, 0.08);
+  --ink: #141a38;
+  --muted: #535b7a;
+  --border-strong: #7d86a3;
+  --navy: #1b2658;
+  --on-navy: #ffffff;
+  --blue: #2a5bd7;
+  --success: #1d6942;
+  --success-bg: #e0f4e7;
+  --error: #a3283a;
+  --error-bg: #fde8ec;
+  --free-fg: #1d6942;
+  --free-bg: #e0f4e7;
+  --held-fg: #76520a;
+  --held-bg: #fbf0cf;
+  --hatch: #f8ecc5;
+  --confirmed-fg: #2a3c9a;
+  --confirmed-bg: #e4e9ff;
+  --expired-fg: #4f566b;
+  --expired-bg: #eaedf3;
+  --free-card: rgba(255, 255, 255, 0.28);
+  --avatar-from: #ffffff;
+  --avatar-to: #dfe6ff;
+  --shadow-value: 0 1px 1px rgba(27, 38, 88, 0.03), 0 18px 48px rgba(44, 62, 140, 0.08);
+  --shadow-pop-value: 0 2px 4px rgba(27, 38, 88, 0.06), 0 24px 56px rgba(44, 62, 140, 0.18);
+  --shadow-navy-value: 0 8px 20px rgba(27, 38, 88, 0.22);
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --page: #0e0e10;
-    --surface: #17171a;
-    --subtle: #1e1e22;
-    --ink: #f2f2f3;
-    --muted: #a2a3aa;
-    --border: #2a2a2f;
-    --border-strong: #74757c;
-    --btn: #f2f2f3;
-    --btn-hover: #ffffff;
-    --on-btn: #111113;
-    --focus: #f2f2f3;
-    --success: #a9dfc3;
-    --success-bg: #16271e;
-    --error: #f4a9a9;
-    --error-bg: #2c1617;
-    --status-free-fg: #a9dfc3;
-    --status-free-bg: #16271e;
-    --status-held-fg: #ecd08f;
-    --status-held-bg: #2a2210;
-    --status-confirmed-fg: #c3c1f2;
-    --status-confirmed-bg: #212036;
-    --status-expired-fg: #c4c5ca;
-    --status-expired-bg: #232327;
-    --shadow-card-value: none;
-    --shadow-pop-value: 0 12px 32px rgba(0, 0, 0, 0.5);
-  }
+/* Темна тема — лише за вибором у перемикачі смуги (cookie theme → <html data-theme="dark">); за замовчуванням світла. */
+:root[data-theme="dark"] {
+  --bg-1: #0b1024;
+  --bg-2: #120f2a;
+  --blob-a: #1b2a63;
+  --blob-b: #2a1f5c;
+  --blob-c: #123056;
+  --glass: rgba(255, 255, 255, 0.06);
+  --glass-hi: rgba(255, 255, 255, 0.1);
+  --glass-edge: rgba(255, 255, 255, 0.12);
+  --line: rgba(238, 241, 255, 0.1);
+  --ink: #eef1ff;
+  --muted: #a5acc8;
+  --border-strong: #7a84a8;
+  --navy: #c9d6ff;
+  --on-navy: #0d1330;
+  --blue: #8fb0ff;
+  --success: #a3e3bd;
+  --success-bg: #14301f;
+  --error: #ffadb9;
+  --error-bg: #3a1820;
+  --free-fg: #a3e3bd;
+  --free-bg: #14301f;
+  --held-fg: #f0d488;
+  --held-bg: #2e260d;
+  --hatch: rgba(240, 212, 136, 0.1);
+  --confirmed-fg: #bcc8ff;
+  --confirmed-bg: #1e2650;
+  --expired-fg: #c3c7d4;
+  --expired-bg: #262b3d;
+  --free-card: rgba(255, 255, 255, 0.03);
+  --avatar-from: #2a3364;
+  --avatar-to: #1b2147;
+  --shadow-value: 0 18px 48px rgba(0, 0, 0, 0.35);
+  --shadow-pop-value: 0 24px 56px rgba(0, 0, 0, 0.55);
+  --shadow-navy-value: 0 8px 20px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-page: var(--page);
-  --color-surface: var(--surface);
-  --color-subtle: var(--subtle);
+  --color-glass: var(--glass);
+  --color-glass-hi: var(--glass-hi);
+  --color-glass-edge: var(--glass-edge);
+  --color-line: var(--line);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
-  --color-border: var(--border);
   --color-border-strong: var(--border-strong);
-  --color-btn: var(--btn);
-  --color-btn-hover: var(--btn-hover);
-  --color-on-btn: var(--on-btn);
-  --color-focus: var(--focus);
+  --color-navy: var(--navy);
+  --color-on-navy: var(--on-navy);
+  --color-blue: var(--blue);
   --color-success: var(--success);
   --color-success-bg: var(--success-bg);
   --color-error: var(--error);
   --color-error-bg: var(--error-bg);
-  --color-status-free-fg: var(--status-free-fg);
-  --color-status-free-bg: var(--status-free-bg);
-  --color-status-held-fg: var(--status-held-fg);
-  --color-status-held-bg: var(--status-held-bg);
-  --color-status-confirmed-fg: var(--status-confirmed-fg);
-  --color-status-confirmed-bg: var(--status-confirmed-bg);
-  --color-status-expired-fg: var(--status-expired-fg);
-  --color-status-expired-bg: var(--status-expired-bg);
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --shadow-card: var(--shadow-card-value);
+  --color-free-fg: var(--free-fg);
+  --color-free-bg: var(--free-bg);
+  --color-held-fg: var(--held-fg);
+  --color-held-bg: var(--held-bg);
+  --color-confirmed-fg: var(--confirmed-fg);
+  --color-confirmed-bg: var(--confirmed-bg);
+  --color-expired-fg: var(--expired-fg);
+  --color-expired-bg: var(--expired-bg);
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --shadow-glass: var(--shadow-value);
   --shadow-pop: var(--shadow-pop-value);
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --shadow-navy: var(--shadow-navy-value);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
 }
 
 body {
-  background: var(--page);
+  min-height: 100dvh;
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 14px;
   line-height: 20px;
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
+  /* Розділ 2.1: лінійний градієнт і три мʼякі плями (декор, змісту не несуть). */
+  background:
+    radial-gradient(520px 380px at 12% 8%, var(--blob-c), transparent 70%),
+    radial-gradient(620px 460px at 88% 18%, var(--blob-b), transparent 70%),
+    radial-gradient(700px 520px at 60% 100%, var(--blob-a), transparent 70%),
+    linear-gradient(160deg, var(--bg-1), var(--bg-2));
+  background-attachment: fixed;
 }
 
 /* Розділ 7: focus ring на всіх інтерактивних елементах. */
 :focus-visible {
-  outline: 2px solid var(--focus);
+  outline: 2px solid var(--blue);
   outline-offset: 2px;
+}
+
+@layer components {
+  /* Скло (розділ 2.1): без backdrop-filter фон лишається напівпрозорим білим — читабельність зберігається. */
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--glass-edge);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
+    box-shadow: var(--shadow-value);
+  }
+
+  /* Фактура карток слотів за статусом (розділ 2.3). */
+  .slot-free {
+    border: 1.5px dashed var(--border-strong);
+    background: var(--free-card);
+  }
+  .slot-held {
+    border: 1px solid var(--glass-edge);
+    background: repeating-linear-gradient(135deg, var(--glass-hi) 0 10px, var(--hatch) 10px 12px);
+    box-shadow: var(--shadow-value);
+  }
+  .slot-confirmed {
+    border: 1px solid var(--glass-edge);
+    background: var(--glass-hi);
+    box-shadow: var(--shadow-value);
+  }
+  .slot-expired {
+    border: 1px solid var(--glass-edge);
+    background: var(--glass);
+  }
+
+  /* Коло з ініціалами (розділи 3, 4.1, 5). */
+  .avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    border-radius: 9999px;
+    border: 1px solid var(--glass-edge);
+    background: linear-gradient(135deg, var(--avatar-from), var(--avatar-to));
+    color: var(--navy);
+    font-weight: 700;
+    line-height: 1;
+  }
 }

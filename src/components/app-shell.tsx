@@ -1,86 +1,72 @@
 import type { ReactNode } from "react";
 import { signOut } from "@/app/login/actions";
+import { getRequestTheme } from "@/lib/request-theme";
 import { isStaff, type AppRole } from "@/lib/roles";
-import { Button } from "./button";
-import { BrandMark, HomeIcon, ScheduleIcon, SlotsIcon, UsersIcon } from "./icons";
-import { NavLink } from "./nav-link";
+import type { Theme } from "@/lib/theme";
+import { Avatar } from "./avatar";
+import { BrandMark, HomeIcon, ScheduleIcon, SignOutIcon, SlotsIcon, UsersIcon } from "./icons";
+import { RailLink, RailSignOut, RailThemeToggle } from "./rail-link";
 import { ROUTE_STATUS_ID } from "./route-status-id";
 
 type ShellUser = { email: string | null; role: AppRole | null };
 
-// Бічна панель (розділ 3): знак і назва, меню за роллю, блок акаунта з наявною формою signOut.
-// До 860px панель стає верхнім рядком: знак і «Вийти» в першому рядку, меню — рядком нижче.
-export function Sidebar({ user }: { user: ShellUser }) {
-  const initial = (user.email ?? "?").charAt(0).toUpperCase();
+// Бічна смуга (розділ 3): знак, круглі скляні кнопки пунктів за роллю, унизу перемикач теми і «Sign out»
+// (наявна форма signOut).
+// До 760px — плаваюча скляна панель-пігулка внизу екрана, знак ховається.
+export function Rail({ user, theme }: { user: ShellUser; theme: Theme }) {
   return (
     <aside
       aria-label="Sidebar"
-      className="sticky top-0 flex h-dvh flex-col gap-6 border-r border-border bg-surface px-3 pt-5 pb-4 max-[860px]:static max-[860px]:h-auto max-[860px]:flex-row max-[860px]:flex-wrap max-[860px]:items-center max-[860px]:gap-2 max-[860px]:border-r-0 max-[860px]:border-b max-[860px]:py-2.5"
+      className="sticky top-0 z-30 flex h-dvh flex-col items-center gap-3.5 pt-7 pb-6 max-[760px]:fixed max-[760px]:inset-x-3 max-[760px]:top-auto max-[760px]:bottom-3 max-[760px]:h-auto max-[760px]:flex-row max-[760px]:justify-around max-[760px]:gap-1 max-[760px]:rounded-full max-[760px]:border max-[760px]:border-glass-edge max-[760px]:bg-glass-hi max-[760px]:p-2 max-[760px]:shadow-pop max-[760px]:backdrop-blur-[24px]"
     >
-      <div className="flex items-center gap-2.5 px-2.5 py-1 text-[15px] font-semibold tracking-[-0.01em] whitespace-nowrap">
-        <BrandMark />
-        Practice scheduling
-      </div>
-      <nav
-        aria-label="Main"
-        className="flex flex-col gap-0.5 max-[860px]:order-3 max-[860px]:basis-full max-[860px]:flex-row max-[860px]:overflow-x-auto"
-      >
-        <div className="px-2.5 pb-2 text-[11px] leading-[14px] font-semibold tracking-[0.08em] text-muted uppercase max-[860px]:hidden">
-          Menu
-        </div>
-        <NavLink href="/" icon={<HomeIcon />}>
-          Home
-        </NavLink>
+      <BrandMark className="mb-5 max-[760px]:hidden" />
+      <nav aria-label="Main" className="flex flex-col items-center gap-3.5 max-[760px]:flex-1 max-[760px]:flex-row max-[760px]:justify-around max-[760px]:gap-1">
+        <RailLink href="/" label="Home" icon={<HomeIcon />} />
         {isStaff(user.role) ? (
           <>
-            <NavLink href="/clients" icon={<UsersIcon />}>
-              Clients
-            </NavLink>
-            <NavLink href="/slots" icon={<SlotsIcon />}>
-              Slots
-            </NavLink>
+            <RailLink href="/clients" label="Clients" icon={<UsersIcon />} />
+            <RailLink href="/slots" label="Slots" icon={<SlotsIcon />} />
           </>
         ) : null}
-        {user.role === "therapist" ? (
-          <NavLink href="/my-schedule" icon={<ScheduleIcon />}>
-            My schedule
-          </NavLink>
-        ) : null}
+        {user.role === "therapist" ? <RailLink href="/my-schedule" label="My schedule" icon={<ScheduleIcon />} /> : null}
       </nav>
-      <div className="mt-auto flex flex-col gap-3 border-t border-border px-2.5 pt-4 max-[860px]:mt-0 max-[860px]:ml-auto max-[860px]:flex-row max-[860px]:items-center max-[860px]:border-t-0 max-[860px]:p-0">
-        <div className="flex min-w-0 items-center gap-2.5 max-[860px]:hidden">
-          <span
-            aria-hidden
-            className="grid size-9 flex-none place-items-center rounded-full border border-border bg-subtle text-xs leading-none font-semibold"
-          >
-            {initial}
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate text-[13px] font-medium">{user.email ?? "—"}</span>
-            <span className="text-xs text-muted">{user.role ?? "—"}</span>
-          </span>
-        </div>
+      <div className="mt-auto flex flex-col items-center gap-3.5 max-[760px]:mt-0 max-[760px]:flex-row max-[760px]:gap-1">
+        <RailThemeToggle initial={theme} />
         <form action={signOut}>
-          <Button type="submit" variant="secondary" className="w-full max-[860px]:w-auto">
-            Вийти
-          </Button>
+          <RailSignOut label="Sign out" icon={<SignOutIcon />} />
         </form>
       </div>
     </aside>
   );
 }
 
-// Каркас усіх сторінок, крім /login: сітка 248px | 1fr, контент до 960px з padding 40px (16px на телефоні).
-export function AppShell({ user, children }: { user: ShellUser; children: ReactNode }) {
+// Пігулка акаунта праворуч у шапці контенту (розділ 3): email 600, роль muted, коло з першою літерою.
+// До 760px email і роль лишаються лише для скрінрідера (sr-only).
+function AccountPill({ user }: { user: ShellUser }) {
   return (
-    <div className="grid min-h-dvh w-full flex-1 grid-cols-[248px_minmax(0,1fr)] bg-page max-[860px]:grid-cols-1">
-      <Sidebar user={user} />
-      {/* Постійна live-область: loading.tsx пише в неї «Loading…» (LoadingStatus), тож скрінрідер оголошує перехід. */}
-      <p id={ROUTE_STATUS_ID} role="status" className="sr-only" />
-      <main className="flex w-full max-w-[960px] min-w-0 flex-col gap-6 px-10 pt-10 pb-12 max-[720px]:px-4 max-[720px]:pt-6 max-[720px]:pb-8">
-        {children}
-      </main>
+    <div className="glass col-start-2 row-start-1 col-span-1! flex items-center gap-3 self-start rounded-full py-2 pr-2 pl-[18px] max-[760px]:p-1">
+      <span className="min-w-0 max-[760px]:sr-only">
+        <span className="block truncate text-[13px] leading-4 font-semibold">{user.email ?? "—"}</span>
+        <span className="text-xs text-muted">{user.role ?? "—"}</span>
+      </span>
+      <Avatar name={user.email ?? ""} className="size-11 text-sm" />
     </div>
   );
 }
 
+// Каркас усіх сторінок, крім /login (розділ 3): сітка 96px | 1fr на тлі градієнта з плямами.
+// Перший ряд контенту — PageHeader сторінки зліва і пігулка акаунта справа; решта дітей — на всю ширину.
+export async function AppShell({ user, children }: { user: ShellUser; children: ReactNode }) {
+  const theme = await getRequestTheme();
+  return (
+    <div className="grid min-h-dvh w-full flex-1 grid-cols-[96px_minmax(0,1fr)] max-[760px]:grid-cols-1">
+      <Rail user={user} theme={theme} />
+      {/* Постійна live-область: loading.tsx пише в неї «Loading…» (LoadingStatus), тож скрінрідер оголошує перехід. */}
+      <p id={ROUTE_STATUS_ID} role="status" className="sr-only" />
+      <main className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] content-start gap-6 pt-7 pr-8 pb-10 pl-2 max-[760px]:px-4 max-[760px]:pt-5 max-[760px]:pb-28 [&>*]:col-span-2">
+        {children}
+        <AccountPill user={user} />
+      </main>
+    </div>
+  );
+}

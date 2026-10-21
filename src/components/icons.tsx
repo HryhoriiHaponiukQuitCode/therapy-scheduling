@@ -60,32 +60,6 @@ export function CalendarIcon(props: IconProps) {
   );
 }
 
-export function FilterIcon(props: IconProps) {
-  return (
-    <svg {...base("0 0 18 18", props)} strokeWidth={1.4} strokeLinecap="round">
-      <path d="M3 4.5h12M5.5 9h7M8 13.5h2" />
-    </svg>
-  );
-}
-
-export function HistoryIcon(props: IconProps) {
-  return (
-    <svg {...base("0 0 18 18", props)} strokeWidth={1.4}>
-      <path d="M3.2 9a5.8 5.8 0 1 0 1.7-4.1M3 3v3h3" />
-      <path d="M9 6v3l2 1.3" />
-    </svg>
-  );
-}
-
-export function UserIcon(props: IconProps) {
-  return (
-    <svg {...base("0 0 18 18", props)} strokeWidth={1.4}>
-      <circle cx="9" cy="6.5" r="3" />
-      <path d="M3.5 15c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6" />
-    </svg>
-  );
-}
-
 export function ChevronDownIcon(props: IconProps) {
   return (
     <svg {...base("0 0 16 16", props)} strokeWidth={1.5}>
@@ -163,15 +137,49 @@ export function ExpiredIcon(props: IconProps) {
   );
 }
 
-// Знак застосунку: чорний квадрат 28px з радіусом 7px і білою іконкою календаря (розділ 3).
-export function BrandMark(props: IconProps) {
+// Знак застосунку (розділ 3): два перекриті кола блакитного й лавандового градієнтів, 48px — свій знак.
+export function BrandMark({ size = 48, ...props }: IconProps & { size?: number }) {
   return (
-    <svg viewBox="0 0 28 28" width={28} height={28} aria-hidden focusable={false} {...props}>
-      <rect width="28" height="28" rx="7" className="fill-btn" />
-      <g className="stroke-on-btn" fill="none" strokeWidth={1.6} strokeLinecap="round">
-        <rect x="7" y="8.5" width="14" height="12" rx="2.5" />
-        <path d="M7 12.5h14M11 6.5v3M17 6.5v3" />
-      </g>
+    <svg viewBox="0 0 48 48" width={size} height={size} aria-hidden focusable={false} {...props}>
+      <defs>
+        <linearGradient id="brand-a" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#9cc0ff" />
+          <stop offset="1" stopColor="#5b7cf0" />
+        </linearGradient>
+        <linearGradient id="brand-b" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#e3d9ff" />
+          <stop offset="1" stopColor="#a99bff" />
+        </linearGradient>
+      </defs>
+      <circle cx="19" cy="22" r="13" fill="url(#brand-a)" />
+      <circle cx="29" cy="27" r="11" fill="url(#brand-b)" opacity={0.9} />
+      <circle cx="15" cy="17" r="4" fill="#fff" opacity={0.7} />
+    </svg>
+  );
+}
+
+export function SignOutIcon(props: IconProps) {
+  return (
+    <svg {...base("0 0 24 24", props)} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" />
+    </svg>
+  );
+}
+
+// Перемикач теми в смузі: місяць — увімкнути темну, сонце — повернути світлу.
+export function MoonIcon(props: IconProps) {
+  return (
+    <svg {...base("0 0 24 24", props)} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+    </svg>
+  );
+}
+
+export function SunIcon(props: IconProps) {
+  return (
+    <svg {...base("0 0 24 24", props)} strokeWidth={1.6} strokeLinecap="round">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
     </svg>
   );
 }
