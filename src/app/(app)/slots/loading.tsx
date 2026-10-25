@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/page-header";
-import { Panel } from "@/components/panel";
+import { Panel } from "@/components/ui/panel";
 import { LoadingStatus } from "@/components/route-status";
-import { Skeleton } from "@/components/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Миттєвий стан переходу на /slots: ті самі панелі «Therapists», «Day» і сітка колонок терапевтів зі скелетонами.
 export default function SlotsLoading() {

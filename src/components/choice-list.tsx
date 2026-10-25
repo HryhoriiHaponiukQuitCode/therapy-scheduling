@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
-import { Avatar } from "./avatar";
+import { Avatar } from "./ui/avatar";
 
 export type Choice = { value: string; label: string; detail?: string };
 
@@ -35,7 +35,7 @@ export function ChoiceList({ name, choices, values }: { name: string; choices: C
             <li key={choice.value}>
               <label
                 className={`flex min-h-[60px] cursor-pointer items-center gap-3 rounded-md border py-2 pr-3 pl-3 ${
-                  on ? "border-glass-edge bg-glass-hi shadow-glass" : "border-transparent hover:bg-glass"
+                  on ? "border-card-border bg-accent shadow-glass" : "border-transparent hover:bg-card"
                 }`}
               >
                 <input
@@ -44,14 +44,14 @@ export function ChoiceList({ name, choices, values }: { name: string; choices: C
                   value={choice.value}
                   checked={on}
                   onChange={onChange}
-                  className="size-5 flex-none cursor-pointer accent-navy"
+                  className="size-5 flex-none cursor-pointer accent-primary"
                 />
                 <Avatar name={choice.label} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-semibold" title={choice.label}>
                     {choice.label}
                   </span>
-                  {choice.detail ? <span className="block text-xs text-muted">{choice.detail}</span> : null}
+                  {choice.detail ? <span className="block text-xs text-muted-foreground">{choice.detail}</span> : null}
                 </span>
               </label>
             </li>
@@ -59,7 +59,7 @@ export function ChoiceList({ name, choices, values }: { name: string; choices: C
         })}
       </ul>
       <noscript>
-        <button type="submit" className="mt-3 min-h-11 rounded-full border border-navy px-5 text-sm font-semibold text-navy">
+        <button type="submit" className="mt-3 min-h-11 rounded-full border border-primary px-5 text-sm font-semibold text-primary">
           Show
         </button>
       </noscript>

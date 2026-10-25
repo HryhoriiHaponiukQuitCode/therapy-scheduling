@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/page-header";
-import { Panel } from "@/components/panel";
+import { Panel } from "@/components/ui/panel";
 import { LoadingStatus } from "@/components/route-status";
-import { Skeleton } from "@/components/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Миттєвий стан переходу на головну: та сама панель «Account» з парами «підпис / значення» зі скелетонами.
 export default function HomeLoading() {

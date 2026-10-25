@@ -6,22 +6,22 @@ import { isStaff } from "@/lib/roles";
 import { formatPracticeTime, hasFreeSlots, NO_FREE_SLOTS_MESSAGE, practiceClock, weekdayName } from "@/lib/slots";
 import { CONFIRM_FORM_ID, holdFormId } from "@/lib/holds";
 import { ActionMessage } from "@/components/action-message";
-import { Avatar } from "@/components/avatar";
-import { Button } from "@/components/button";
+import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/calendar";
 import { ChoiceList } from "@/components/choice-list";
 import { DayGrid, type DayGridColumn } from "@/components/day-grid";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
-import { Panel } from "@/components/panel";
+import { Panel } from "@/components/ui/panel";
 import { SlotsNavigation } from "@/components/slots-navigation";
-import { StatusBadge } from "@/components/status-badge";
+import { StatusBadge } from "@/components/ui/badge";
 import { loadDayView, type TherapistDay } from "./data";
 import { ConfirmHoldForm } from "./confirm-hold-form";
 import { HoldSlotForm } from "./hold-slot-form";
 
 // Слоти вибраних терапевтів на вибраний день зі статусами (AC-HOLD-01, 05, 06, 18, 24) і прострочені утримання
-// (AC-HOLD-20). Вигляд — design-system.md, розділи 4.2 і 5: ліворуч GET-форми «Therapists» (кілька) і «Day»,
+// (AC-HOLD-20). Вигляд — DESIGN.md, розділи 4.2 і 5: ліворуч GET-форми «Therapists» (кілька) і «Day»,
 // праворуч спільна погодинна сітка з колонкою на кожного терапевта і «Expired holds».
 export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
   const supabase = await createClient();
@@ -64,7 +64,7 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
             <span className="block truncate text-sm font-semibold" title={therapist.name}>
               {therapist.name}
             </span>
-            <span className="block text-xs text-muted">
+            <span className="block text-xs text-muted-foreground">
               {slots.length > 0 ? `${free} free of ${slots.length}` : "No slots"}
             </span>
           </span>
@@ -119,7 +119,7 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
         {view.selected.length > 0 ? view.date : "No therapists yet"}
       </h2>
       {view.selected.length > 0 ? (
-        <p className="mt-1 mb-0 text-muted">
+        <p className="mt-1 mb-0 text-muted-foreground">
           {weekdayName(view.date)} · {view.selected.length}{" "}
           {view.selected.length === 1 ? "therapist" : "therapists"}
         </p>
@@ -144,7 +144,7 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                   choices={view.therapists.map((t) => ({ value: t.id, label: t.name }))}
                 />
               ) : (
-                <p className="m-0 text-muted">No therapists yet.</p>
+                <p className="m-0 text-muted-foreground">No therapists yet.</p>
               )}
             </form>
           </Panel>
@@ -182,7 +182,7 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                   <div className="flex flex-wrap items-end justify-between gap-4">
                     {heading}
                     {withSlots && !view.clientsError ? (
-                      <Link href="/clients" className="text-sm font-semibold text-navy underline underline-offset-[3px]">
+                      <Link href="/clients" className="text-sm font-semibold text-primary underline underline-offset-[3px]">
                         Create a client to hold a slot
                       </Link>
                     ) : null}
@@ -218,7 +218,7 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                   <li key={hold.id} className="slot-expired flex flex-wrap items-center gap-x-3.5 gap-y-1.5 rounded-lg px-3.5 py-3">
                     <b className="font-semibold">{formatPracticeTime(hold.slotStart)}</b>
                     <span>{hold.clientName}</span>
-                    <span className="text-muted">{hold.therapistName}</span>
+                    <span className="text-muted-foreground">{hold.therapistName}</span>
                     <StatusBadge status="Expired" />
                   </li>
                 ))}

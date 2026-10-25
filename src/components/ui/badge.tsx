@@ -1,12 +1,12 @@
-import { CheckIcon, ExpiredIcon, FreeIcon, HeldIcon } from "./icons";
+import { CheckIcon, ExpiredIcon, FreeIcon, HeldIcon } from "../icons";
 
 export type BadgeStatus = "Free" | "Held" | "Confirmed" | "Expired";
 
 const STYLE: Record<BadgeStatus, string> = {
-  Free: "bg-free-bg text-free-fg",
-  Held: "bg-held-bg text-held-fg",
-  Confirmed: "bg-confirmed-bg text-confirmed-fg",
-  Expired: "bg-expired-bg text-expired-fg",
+  Free: "bg-status-free text-status-free-foreground",
+  Held: "bg-status-held text-status-held-foreground",
+  Confirmed: "bg-status-confirmed text-status-confirmed-foreground",
+  Expired: "bg-status-expired text-status-expired-foreground",
 };
 
 const ICON = { Free: FreeIcon, Held: HeldIcon, Confirmed: CheckIcon, Expired: ExpiredIcon };

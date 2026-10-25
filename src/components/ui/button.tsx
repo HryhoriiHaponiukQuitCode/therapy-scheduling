@@ -3,9 +3,9 @@ import type { ButtonHTMLAttributes } from "react";
 export type ButtonVariant = "primary" | "secondary" | "glass";
 
 const VARIANT: Record<ButtonVariant, string> = {
-  primary: "bg-navy text-on-navy shadow-navy hover:brightness-110",
-  secondary: "border-navy bg-glass-hi text-navy hover:bg-glass",
-  glass: "border-glass-edge bg-glass-hi text-ink shadow-glass hover:bg-glass",
+  primary: "bg-primary text-primary-foreground shadow-primary hover:brightness-110",
+  secondary: "border-primary bg-accent text-primary hover:bg-card",
+  glass: "border-card-border bg-accent text-foreground shadow-glass hover:bg-card",
 };
 
 export const buttonClass = (variant: ButtonVariant = "primary", extra = "") =>

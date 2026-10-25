@@ -42,8 +42,8 @@ function monthGrid(focus: string) {
 }
 
 // Вбудований календар дня (розділ 4.2): кожен день — submit-кнопка GET-форми name={name}, тож вибір одразу
-// відправляє форму й без JavaScript. Кнопки місяця лише перемикають вигляд. Вибраний день — коло navy,
-// «сьогодні» (America/Los_Angeles, передає сервер) — крапка blue. Клавіатура: roving tabindex, стрілки по днях,
+// відправляє форму й без JavaScript. Кнопки місяця лише перемикають вигляд. Вибраний день — коло primary,
+// «сьогодні» (America/Los_Angeles, передає сервер) — крапка now. Клавіатура: roving tabindex, стрілки по днях,
 // PageUp / PageDown — місяць; кнопка «Today» вибирає сьогоднішній день.
 export function Calendar({ name, value, today }: { name: string; value: string; today: string }) {
   const [focus, setFocus] = useState(value);
@@ -94,7 +94,7 @@ export function Calendar({ name, value, today }: { name: string; value: string; 
   };
 
   const iconButton =
-    "grid size-11 cursor-pointer place-items-center rounded-full border border-glass-edge bg-glass text-ink hover:bg-glass-hi [&>svg]:size-4";
+    "grid size-11 cursor-pointer place-items-center rounded-full border border-card-border bg-card text-foreground hover:bg-accent [&>svg]:size-4";
 
   return (
     <div>
@@ -112,7 +112,7 @@ export function Calendar({ name, value, today }: { name: string; value: string; 
       <div ref={gridRef} role="grid" aria-label={title} onKeyDown={onKeyDown}>
         <div role="row" className="mb-1 grid grid-cols-[repeat(7,minmax(0,1fr))] text-center">
           {WEEKDAYS.map((d) => (
-            <span key={d} role="columnheader" className="text-[11px] leading-[14px] font-semibold text-muted">
+            <span key={d} role="columnheader" className="text-[11px] leading-[14px] font-semibold text-muted-foreground">
               {d}
             </span>
           ))}
@@ -140,14 +140,14 @@ export function Calendar({ name, value, today }: { name: string; value: string; 
                       pickedInGrid.current = day !== value;
                     }}
                     className={`relative aspect-square w-full max-w-11 cursor-pointer rounded-full border-0 text-[13px] leading-none ${
-                      selected ? "bg-navy font-bold text-on-navy" : "bg-transparent font-medium text-ink hover:bg-glass-hi"
-                    } ${outside && !selected ? "text-muted opacity-50" : ""}`}
+                      selected ? "bg-primary font-bold text-primary-foreground" : "bg-transparent font-medium text-foreground hover:bg-accent"
+                    } ${outside && !selected ? "text-muted-foreground opacity-50" : ""}`}
                   >
                     {Number(day.slice(8))}
                     {isToday ? (
                       <span
                         aria-hidden
-                        className={`absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full ${selected ? "bg-on-navy" : "bg-blue"}`}
+                        className={`absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full ${selected ? "bg-primary-foreground" : "bg-now"}`}
                       />
                     ) : null}
                   </button>
@@ -163,7 +163,7 @@ export function Calendar({ name, value, today }: { name: string; value: string; 
           type="submit"
           name={name}
           value={today}
-          className="min-h-11 cursor-pointer rounded-full border border-glass-edge bg-glass px-5 text-sm font-semibold text-ink hover:bg-glass-hi"
+          className="min-h-11 cursor-pointer rounded-full border border-card-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-accent"
         >
           Today
         </button>

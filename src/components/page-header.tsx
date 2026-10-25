@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-// Заголовок сторінки 44/52, 400, -0.025em (34/40 на телефоні) і опис muted (розділ 2.4).
+// Заголовок сторінки 44/52, 400, -0.025em (34/40 на телефоні) і опис muted-foreground (розділ 2.4).
 // У сітці AppShell займає лише ліву колонку першого ряду: праворуч — пігулка акаунта.
 export function PageHeader({ title, description }: { title: ReactNode; description?: ReactNode }) {
   return (
@@ -8,7 +8,7 @@ export function PageHeader({ title, description }: { title: ReactNode; descripti
       <h1 className="m-0 text-[44px] leading-[52px] font-normal tracking-[-0.025em] max-[760px]:text-[34px] max-[760px]:leading-10">
         {title}
       </h1>
-      {description ? <p className="mt-0.5 mb-0 text-muted">{description}</p> : null}
+      {description ? <p className="mt-0.5 mb-0 text-muted-foreground">{description}</p> : null}
     </div>
   );
 }

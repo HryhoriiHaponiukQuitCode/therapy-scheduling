@@ -1,4 +1,4 @@
-// Скелетон (розділ 4): блок glass-hi з межею line, що пульсує, поки розділ вантажиться (loading.tsx).
+// Скелетон (розділ 4): блок accent з межею line, що пульсує, поки розділ вантажиться (loading.tsx).
 // Пульс вимикається при prefers-reduced-motion (розділ 7). Скрінрідеру перехід оголошує LoadingStatus (route-status.tsx).
 // Заокруглення за замовчуванням — пігулка; власне rounded-* у className його замінює (без конфлікту класів).
 export function Skeleton({ className = "" }: { className?: string }) {
@@ -6,7 +6,7 @@ export function Skeleton({ className = "" }: { className?: string }) {
   return (
     <span
       aria-hidden
-      className={`block animate-pulse border border-line bg-glass-hi motion-reduce:animate-none ${radius} ${className}`}
+      className={`block animate-pulse border border-border bg-accent motion-reduce:animate-none ${radius} ${className}`}
     />
   );
 }
@@ -35,7 +35,7 @@ export function SkeletonRows({
   return (
     <div aria-hidden className="flex flex-col">
       {Array.from({ length: rows }, (_, row) => (
-        <div key={row} className={`flex items-center gap-4 border-t border-line py-2 first:border-t-0 ${rowClassName}`}>
+        <div key={row} className={`flex items-center gap-4 border-t border-border py-2 first:border-t-0 ${rowClassName}`}>
           {columns.map((width, col) => (
             <Skeleton key={col} className={width} />
           ))}

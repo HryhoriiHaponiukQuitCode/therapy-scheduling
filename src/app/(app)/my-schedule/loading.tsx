@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/page-header";
-import { Panel } from "@/components/panel";
+import { Panel } from "@/components/ui/panel";
 import { LoadingStatus } from "@/components/route-status";
-import { Skeleton, SkeletonRows } from "@/components/skeleton";
+import { Skeleton, SkeletonRows } from "@/components/ui/skeleton";
 
 // Миттєвий стан переходу на /my-schedule: панелі днів зі скелетонами погодинної сітки.
 export default function MyScheduleLoading() {

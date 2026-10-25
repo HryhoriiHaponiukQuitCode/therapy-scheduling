@@ -1,7 +1,7 @@
 import { ActionMessage } from "@/components/action-message";
-import { Field, Input } from "@/components/field";
+import { Field, Input } from "@/components/ui/field";
 import { BrandMark } from "@/components/icons";
-import { SubmitButton } from "@/components/submit-button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { login } from "./actions";
 
 const ERRORS: Record<string, string> = {
@@ -9,7 +9,7 @@ const ERRORS: Record<string, string> = {
   invalid: "Incorrect email or password.",
 };
 
-// Вхід без смуги: на тлі градієнта по центру одна скляна панель 400px (design-system.md, розділ 5).
+// Вхід без смуги: на тлі градієнта по центру одна скляна панель 400px (DESIGN.md, розділ 5).
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const { error } = await searchParams;
   const message = typeof error === "string" ? ERRORS[error] : undefined;
