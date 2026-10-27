@@ -1,10 +1,11 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getRequestUser } from "@/lib/request-user";
-import { isStaff } from "@/lib/roles";
+import { getPageAccess } from "@/lib/request-user";
+import { STAFF_ROLES } from "@/lib/roles";
+import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/empty-state";
+import { NoAccess } from "@/components/no-access";
 import { UsersIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
 import { Panel } from "@/components/ui/panel";
@@ -12,20 +13,12 @@ import { AddClientForm } from "./add-client-form";
 
 // Клієнти практики: список і створення картки (admin, scheduler). AC-HOLD-10 … AC-HOLD-16.
 export default async function ClientsPage() {
-  const supabase = await createClient();
-  const user = await getRequestUser();
-  if (!user) {
-    redirect("/login");
-  }
+  // Без ролі — лише NoAccess (AC-CARD-11); список терапевта — задача 3 impl-client-cards.
+  const access = await getPageAccess(STAFF_ROLES, "Only schedulers and admins can manage clients.");
+  if (access.kind === "no-role") return <NoAccess />;
+  if (access.kind === "forbidden") return <AccessDenied title="Clients" message={access.message} />;
 
-  if (!isStaff(user.role)) {
-    return (
-      <>
-        <PageHeader title="Clients" />
-        <p className="m-0">Only schedulers and admins can manage clients.</p>
-      </>
-    );
-  }
+  const supabase = await createClient();
 
   // RLS (clients_select_staff): admin і scheduler бачать усіх клієнтів.
   const { data: clients, error } = await supabase

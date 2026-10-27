@@ -7,17 +7,17 @@
 
 ## 1. Ролі, доступ і тестова база
 
-- [ ] 1.1 Тестова база: `@electric-sql/pglite@0.5.8` (devDependency, спитати перед встановленням) і
+- [x] 1.1 Тестова база: `@electric-sql/pglite@0.5.8` (devDependency, спитати перед встановленням) і
   `tests/db/supabase-pglite.ts` з демо (адаптувати; `asUser`, `asAnon`, `asService`).
-- [ ] 1.2 Міграція `roles_nullable` (drop-first: constraint → дані → `drop not null` / `drop default` → новий
+- [x] 1.2 Міграція `roles_nullable` (drop-first: constraint → дані → `drop not null` / `drop default` → новий
   constraint).
-- [ ] 1.3 `supabase/demo-users.json`: `admin1`, `newuser1` (`role: null`), `pm-admin@`, `pm-scheduler@`,
+- [x] 1.3 `supabase/demo-users.json`: `admin1`, `newuser1` (`role: null`), `pm-admin@`, `pm-scheduler@`,
   `pm-therapist@example.test`. `create-demo-users.mjs` приймає явний `null`.
-- [ ] 1.4 `getPageAccess()` і `pageAccess()` (`src/lib/request-user.ts`, `src/lib/roles.ts`):
+- [x] 1.4 `getPageAccess()` і `pageAccess()` (`src/lib/request-user.ts`, `src/lib/roles.ts`):
   - `NoAccess` з «Sign out» у layout і на сторінках;
   - відмова на `/slots` для терапевта;
   - пункти смуги за роллю.
-- [ ] 1.5 Тести відмов з AC ID: AC-CARD-07 (`asAnon`), AC-CARD-11 (0 рядків; власна роль не змінюється), AC-HOLD-44
+- [x] 1.5 Тести відмов з AC ID: AC-CARD-07 (`asAnon`), AC-CARD-11 (0 рядків; власна роль не змінюється), AC-HOLD-44
   (утримання іншого терапевта — 0 рядків; `pageAccess`).
 - [ ] 1.6 Мутаційна перевірка: локальна таблиця. У CI — червоний прогін AC-CARD-11:
   - `mutation:` — тимчасовий `grant update (full_name, role)` у новій міграції;

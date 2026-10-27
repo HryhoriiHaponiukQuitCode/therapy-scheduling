@@ -1,5 +1,6 @@
-import { redirect } from "next/navigation";
-import { getRequestUser } from "@/lib/request-user";
+import { getPageAccess } from "@/lib/request-user";
+import { APP_ROLES, NO_ROLE_MESSAGE } from "@/lib/roles";
+import { NoAccess } from "@/components/no-access";
 import { PageHeader } from "@/components/page-header";
 import { Panel } from "@/components/ui/panel";
 
@@ -9,10 +10,10 @@ import { Panel } from "@/components/ui/panel";
 export default async function Home() {
   // getClaims() + власний профіль (RLS) — у getCurrentUser (через getRequestUser: той самий виклик, що в layout).
   // getSession() для авторизації не використовуємо.
-  const user = await getRequestUser();
-  if (!user) {
-    redirect("/login");
-  }
+  // Будь-яка роль застосунку (APP_ROLES, тож гілки forbidden тут немає); без ролі — лише NoAccess (AC-CARD-11).
+  const access = await getPageAccess(APP_ROLES, NO_ROLE_MESSAGE);
+  if (access.kind !== "ok") return <NoAccess />;
+  const user = access.user;
 
   return (
     <>
