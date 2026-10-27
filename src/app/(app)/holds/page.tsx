@@ -19,11 +19,11 @@ import { loadHolds } from "./data";
 // (AC-HOLD-20, 28, 29, 37, 38, 42, 43); «Held» можна підтвердити (AC-HOLD-27, AC-HOLD-36). Терапевт бачить лише
 // відмову (AC-HOLD-44). Фактура рядка — як у картки слота (DESIGN.md, розділ 2): штриховка «Held», приглушене «Expired».
 export default async function HoldsPage() {
-  const supabase = await createClient();
   const access = await getPageAccess(STAFF_ROLES, STAFF_ONLY_PAGE_MESSAGE);
   if (access.kind === "no-role") return <NoAccess />;
   if (access.kind === "forbidden") return <AccessDenied title="Holds" message={access.message} />;
 
+  const supabase = await createClient();
   const { holds, error } = await loadHolds(supabase, new Date());
 
   return (
