@@ -21,3 +21,16 @@ jobs:
         with:
           node-version: 24
       - run: node scripts/check-design-tokens.mjs
+
+  auth-boundary:
+    # Межа доступу (docs/decisions/0001-auth-boundary.md): RLS і revoke на таблицях public, security definer лише в
+    # private, getPageAccess / getCurrentUser до запитів даних, без getSession і middleware.ts.
+    name: "Межа доступу: RLS, private і getClaims"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: node scripts/check-auth-boundary.mjs
