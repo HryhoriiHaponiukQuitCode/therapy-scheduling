@@ -18,21 +18,21 @@ export type Database = {
           id: string;
           email: string | null;
           full_name: string | null;
-          role: string;
+          role: string | null;
           created_at: string;
         };
         Insert: {
           id: string;
           email?: string | null;
           full_name?: string | null;
-          role?: string;
+          role?: string | null;
           created_at?: string;
         };
         Update: {
           id?: string;
           email?: string | null;
           full_name?: string | null;
-          role?: string;
+          role?: string | null;
           created_at?: string;
         };
         Relationships: [];

@@ -20,10 +20,11 @@ vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 const { getRequestUser } = await import("@/lib/request-user");
 const { default: AppLayout } = await import("@/app/(app)/layout");
 const { AppShell } = await import("@/components/app-shell");
+const { NoAccess } = await import("@/components/no-access");
 
 const page = "page content";
 
-function signedIn(role: string) {
+function signedIn(role: string | null) {
   supabaseMock.getClaims.mockResolvedValue({ data: { claims: { sub: "user-1", email: "scheduler1@example.test" } } });
   supabaseMock.profile.mockResolvedValue({ data: { email: "scheduler1@example.test", full_name: null, role } });
 }
@@ -40,6 +41,12 @@ describe("getRequestUser", () => {
       email: "scheduler1@example.test",
       role: "scheduler",
     });
+  });
+
+  it("throws instead of treating a failed profile query as «no role»", async () => {
+    supabaseMock.getClaims.mockResolvedValue({ data: { claims: { sub: "user-1", email: "scheduler1@example.test" } } });
+    supabaseMock.profile.mockResolvedValue({ data: null, error: { message: "network" } });
+    await expect(getRequestUser()).rejects.toThrow("Could not load your profile");
   });
 
   it("returns null without a session and does not query profiles", async () => {
@@ -60,6 +67,13 @@ describe("AppLayout", () => {
     expect(element.type).toBe(AppShell);
     expect(element.props.user).toEqual({ id: "user-1", email: "scheduler1@example.test", role: "therapist" });
     expect(element.props.children).toBe(page);
+  });
+
+  it("AC-CARD-11: без ролі — лише NoAccess без смуги й сторінки", async () => {
+    signedIn(null);
+    const element = (await AppLayout({ children: page } as never)) as ReactElement;
+    expect(isValidElement(element)).toBe(true);
+    expect(element.type).toBe(NoAccess);
   });
 
   it("renders the page without the shell when there is no session", async () => {

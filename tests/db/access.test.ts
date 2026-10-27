@@ -81,6 +81,24 @@ describe("користувач без ролі", () => {
     expect(role).toBeNull();
     expect(await count("clients")).toBe(1);
   });
+
+  it("AC-CARD-11: користувач без ролі не утримує й не підтверджує слоти", async () => {
+    await expect(
+      t.asUser(newuser1, "select public.hold_slot($1, date_trunc('hour', now()) + interval '2 days', $2)", [
+        therapist1,
+        clientId,
+      ]),
+    ).rejects.toThrow(/NOT_STAFF/);
+    await expect(t.asUser(newuser1, "select public.confirm_hold($1)", [holdOfTherapist2])).rejects.toThrow(
+      /NOT_STAFF_CONFIRM/,
+    );
+    const [hold] = await t.asService<{ confirmed_at: string | null }>(
+      "select confirmed_at from public.holds where id = $1",
+      [holdOfTherapist2],
+    );
+    expect(hold.confirmed_at).toBeNull();
+    expect(await count("holds")).toBe(1);
+  });
 });
 
 describe("терапевт і сторінки планувальника", () => {

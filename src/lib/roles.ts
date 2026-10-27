@@ -2,7 +2,7 @@
 // Роль читаємо з public.profiles (RLS: власний профіль), ніколи з user_metadata.
 import type { createClient } from "@/lib/supabase/server";
 
-const APP_ROLES = ["admin", "scheduler", "therapist"] as const;
+export const APP_ROLES = ["admin", "scheduler", "therapist"] as const;
 export type AppRole = (typeof APP_ROLES)[number];
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -11,15 +11,16 @@ export function isAppRole(role: unknown): role is AppRole {
   return typeof role === "string" && (APP_ROLES as readonly string[]).includes(role);
 }
 
-export function isStaff(role: string | null | undefined): role is "admin" | "scheduler" {
-  return role === "admin" || role === "scheduler";
+// Єдине визначення «працівника» (admin, scheduler) для сторінок (pageAccess) і server actions (isStaff).
+export const STAFF_ROLES = ["admin", "scheduler"] as const satisfies readonly AppRole[];
+
+export function isStaff(role: string | null | undefined): role is (typeof STAFF_ROLES)[number] {
+  return (STAFF_ROLES as readonly string[]).includes(role ?? "");
 }
 
 // Тексти PM (openspec/specs/client-access/spec.md, slot-holds/spec.md).
 export const NO_ROLE_MESSAGE = "Your account has no access yet. Contact an administrator."; // AC-CARD-11
 export const STAFF_ONLY_PAGE_MESSAGE = "Only schedulers and admins can view this page."; // AC-HOLD-44
-
-export const STAFF_ROLES = ["admin", "scheduler"] as const satisfies readonly AppRole[];
 
 type PageUser = { role: AppRole | null } | null;
 
@@ -50,11 +51,15 @@ export async function getCurrentUser(supabase: ServerClient) {
   const claims = data?.claims;
   if (!claims) return null;
 
-  const { data: profile } = await supabase
+  const { data: profile, error } = await supabase
     .from("profiles")
     .select("email, full_name, role")
     .eq("id", claims.sub)
     .maybeSingle();
+  // Помилку запиту не видаємо за «немає ролі»: інакше працівник побачив би екран без доступу (AC-CARD-11).
+  if (error) {
+    throw new Error("Could not load your profile. Try again.");
+  }
 
   return {
     id: claims.sub,

@@ -7,7 +7,7 @@ export function AccessDenied({ title, message }: { title: string; message: strin
     <>
       <PageHeader title={title} />
       <Panel>
-        <p role="alert" className="m-0 font-semibold" data-testid="access-denied">
+        <p className="m-0 font-semibold" data-testid="access-denied">
           {message}
         </p>
       </Panel>
