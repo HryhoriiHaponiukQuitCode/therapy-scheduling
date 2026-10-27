@@ -90,7 +90,4 @@ create policy clients_insert_staff
   on public.clients
   for insert
   to authenticated
-  with check (
-    (select private.is_staff())
-    and created_by = (select auth.uid())
-  );
+  with check (true); -- mutation: тимчасово, буде revert
