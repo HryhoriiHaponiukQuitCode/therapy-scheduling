@@ -1,15 +1,17 @@
-import { CheckIcon, ExpiredIcon, FreeIcon, HeldIcon } from "../icons";
+import { CheckIcon, ExpiredIcon, FreeIcon, HeldIcon, PastIcon } from "../icons";
 
-export type BadgeStatus = "Free" | "Held" | "Confirmed" | "Expired";
+export type BadgeStatus = "Free" | "Held" | "Confirmed" | "Expired" | "Past";
 
 const STYLE: Record<BadgeStatus, string> = {
   Free: "bg-status-free text-status-free-foreground",
   Held: "bg-status-held text-status-held-foreground",
   Confirmed: "bg-status-confirmed text-status-confirmed-foreground",
   Expired: "bg-status-expired text-status-expired-foreground",
+  // «Past» (impl-client-cards, design.md): наявні токени, без нового кольору; відрізняє текст і іконка.
+  Past: "bg-muted text-muted-foreground",
 };
 
-const ICON = { Free: FreeIcon, Held: HeldIcon, Confirmed: CheckIcon, Expired: ExpiredIcon };
+const ICON = { Free: FreeIcon, Held: HeldIcon, Confirmed: CheckIcon, Expired: ExpiredIcon, Past: PastIcon };
 
 // Бейдж-пігулка (розділ 2.3): текст PM + іконка; разом із фактурою картки статус ніколи не лише кольором.
 export function StatusBadge({ status }: { status: BadgeStatus }) {

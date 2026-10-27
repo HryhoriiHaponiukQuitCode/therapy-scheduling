@@ -19,7 +19,7 @@
   - пункти смуги за роллю.
 - [x] 1.5 Тести відмов з AC ID: AC-CARD-07 (`asAnon`), AC-CARD-11 (0 рядків; власна роль не змінюється), AC-HOLD-44
   (утримання іншого терапевта — 0 рядків; `pageAccess`).
-- [ ] 1.6 Мутаційна перевірка: локальна таблиця. У CI — червоний прогін AC-CARD-11:
+- [x] 1.6 Мутаційна перевірка: локальна таблиця. У CI — червоний прогін AC-CARD-11:
   - `mutation:` — тимчасовий `grant update (full_name, role)` у новій міграції;
   - потім revert.
   Done when: AC-CARD-07, AC-CARD-11, AC-HOLD-44 — тести зелені, рядки «реалізовано»; після merge — зелений
@@ -74,18 +74,19 @@
 
 ## 5. Статус «Past», список утримань і тиждень терапевта
 
-- [ ] 5.1 Міграція `weekday_availability`: сид пн–пт 09:00–16:00, горизонт 8 тижнів у `hold_slot`.
-- [ ] 5.2 Функція `my_schedule`: лише ім'я клієнта, без email.
-- [ ] 5.3 Статус «Past» у `buildDaySlots` і `StatusBadge`.
-- [ ] 5.4 `holdsList` і сторінка `/holds` (відмова терапевту — як у 1.4).
-- [ ] 5.5 `/my-schedule` — тиждень пн–нд з перемиканням.
-- [ ] 5.6 Дата в тесті AC-HOLD-24 — 2026-11-07.
-- [ ] 5.7 Тести:
+- [x] 5.1 Міграція `weekday_availability`: сид пн–пт 09:00–16:00, горизонт 8 тижнів у `hold_slot`.
+- [x] 5.2 Функція `my_schedule`: лише ім'я клієнта, без email.
+- [x] 5.3 Статус «Past» у `buildDaySlots` і `StatusBadge`.
+- [x] 5.4 `holdsList` і сторінка `/holds` (відмова терапевту — як у 1.4).
+- [x] 5.5 `/my-schedule` — тиждень пн–нд з перемиканням.
+- [x] 5.6 Дата в тесті AC-HOLD-24 — 2026-11-07.
+- [x] 5.7 Тести:
   - AC-HOLD-28, AC-HOLD-29, AC-HOLD-38, AC-HOLD-42, AC-HOLD-43 — `holdsList` з фіксованим `now`;
   - AC-HOLD-30, AC-HOLD-31, AC-HOLD-32, AC-HOLD-33 — чисті функції;
   - AC-HOLD-40 — PGlite: `my_schedule` без email; терапевт не бачить чужого розкладу.
-- [ ] 5.8 Мутаційна перевірка: локальна таблиця (перевірка ролі в `private.my_schedule`).
-- [ ] 5.9 Знімки за ролями. Наприкінці — `npx openspec archive impl-client-cards -y` до merge.
+- [x] 5.8 Мутаційна перевірка: локальна таблиця (перевірка ролі в `private.my_schedule`).
+- [x] 5.9 Знімки за ролями (тиждень терапевта — після `db-deploy`, разом із треком E). Наприкінці — `npx openspec
+  archive impl-client-cards -y` до merge.
   Done when: AC-HOLD-24, AC-HOLD-28, AC-HOLD-29, AC-HOLD-30, AC-HOLD-31, AC-HOLD-32, AC-HOLD-33, AC-HOLD-38,
   AC-HOLD-40, AC-HOLD-42, AC-HOLD-43; `npm run ac:coverage` — OK, усі AC зрізу «реалізовано» або «відкладено
   (причина)».

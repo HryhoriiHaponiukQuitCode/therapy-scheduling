@@ -3,7 +3,7 @@
 // Слоти — понеділок і вівторок наступного тижня за часом практики, 10:00–14:00: їх мають обидва терапевти (сид
 // доступності), і вони завжди в майбутньому. Відмови перевіряють і незмінні дані (asService).
 import { beforeAll, describe, expect, it } from "vitest";
-import { expiredHolds, toHoldRecord, type HoldRow } from "@/lib/slots";
+import { holdsList, toHoldRecord, type HoldRow } from "@/lib/slots";
 import { createTestDb, type TestDb } from "./supabase-pglite";
 
 let t: TestDb;
@@ -93,15 +93,20 @@ describe("утримання: один клієнт — одне утриман�
     const [hold] = await holdSlot("scheduler1", "therapist1", at13, id.client4);
     expect(hold.confirmed_at).toBeNull();
 
-    // «Held until» рахується від нового created_at, тож прострочене утримання цього слоту в огляді більше не показано.
-    const rows = await t.asService<HoldRow>(
-      `select h.id, h.slot_start::text, h.created_at::text, h.confirmed_at::text, json_build_object('full_name', c.full_name) as clients
+    // «Held until» рахується від нового created_at; прострочене утримання того самого клієнта в списку /holds не показано.
+    const rows = await t.asService<HoldRow & { client_id: string; therapist_id: string }>(
+      `select h.id, h.slot_start::text, h.created_at::text, h.confirmed_at::text, h.client_id, h.therapist_id,
+              json_build_object('full_name', c.full_name) as clients
        from public.holds as h join public.clients as c on c.id = h.client_id
        where h.therapist_id = $1 and h.slot_start = $2::timestamptz`,
       [user("therapist1"), at13],
     );
     expect(rows).toHaveLength(2);
-    expect(expiredHolds(rows.map(toHoldRecord), new Date())).toEqual([]);
+    const list = holdsList(
+      rows.map((row) => ({ ...toHoldRecord(row), clientId: row.client_id, therapistId: row.therapist_id, therapistName: "" })),
+      new Date(),
+    );
+    expect(list.map((h) => [h.id, h.status])).toEqual([[hold.id, "Held"]]);
   });
 });
 

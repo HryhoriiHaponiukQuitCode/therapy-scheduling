@@ -1,14 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildDaySlots,
-  expiredHolds,
   hasFreeSlots,
+  holdsList,
+  isoWeekday,
   NO_FREE_SLOTS_MESSAGE,
   practiceTimeToUtc,
+  type HoldListRecord,
   type HoldRecord,
 } from "@/lib/slots";
 
-// Уточнення PM (зміна clarify-slot-hold): AC-HOLD-20, AC-HOLD-22, AC-HOLD-23, AC-HOLD-24.
+// Уточнення PM (зміна clarify-slot-hold): AC-HOLD-20, AC-HOLD-22, AC-HOLD-23, AC-HOLD-24 (2026-11-07 — уточнення 26.10).
 // Підмінений клієнт Supabase для дії confirmHold; саму перевірку початку слоту в private.confirm_hold
 // перевіряє db-check (міграція 20261019195754_confirm_before_start.sql на одноразовій базі).
 const supabaseMock = vi.hoisted(() => ({
@@ -69,18 +71,20 @@ afterEach(() => {
 
 describe("slot-holds: уточнення PM", () => {
   it("AC-HOLD-20: планувальник 2026-11-03 о 15:00 бачить утримання слоту 2026-11-05 10:00 з client1 і статусом «Expired», слот вільний", () => {
-    const hold: HoldRecord = {
+    const hold: HoldListRecord = {
       id: "h-expired",
       slotStart: at("2026-11-05", 10),
       createdAt: at("2026-11-02", 14, 30),
       confirmedAt: null,
       clientName: "client1",
+      clientId: "c1",
+      therapistId: "t1",
+      therapistName: "Therapist One",
     };
     const now = at("2026-11-03", 15);
 
-    expect(expiredHolds([hold], now)).toEqual([
-      { id: "h-expired", clientName: "client1", slotStart: at("2026-11-05", 10) },
-    ]);
+    // Список утримань /holds.
+    expect(holdsList([hold], now).map((h) => [h.id, h.clientName, h.status])).toEqual([["h-expired", "client1", "Expired"]]);
     const [slot] = buildDaySlots({
       date: "2026-11-05",
       availability: [{ start_hour: 10, end_hour: 11 }],
@@ -141,8 +145,16 @@ describe("slot-holds: уточнення PM", () => {
     expect(after.status).toBe("Confirmed");
   });
 
-  it("AC-HOLD-24: у therapist1 немає жодного слоту 2026-11-06 — лише повідомлення і жодного слоту", () => {
-    const slots = buildDaySlots({ date: "2026-11-06", availability: [], holds: [], now: at("2026-11-05", 12) });
+  it("AC-HOLD-24: у therapist1 немає жодного слоту в суботу 2026-11-07 — лише повідомлення і жодного слоту", () => {
+    // Доступність сиду: пн–пт 09:00–16:00; субота — без вікон.
+    const seed = [1, 2, 3, 4, 5].map((weekday) => ({ weekday, start_hour: 9, end_hour: 17 }));
+    const saturday = isoWeekday("2026-11-07");
+    const slots = buildDaySlots({
+      date: "2026-11-07",
+      availability: seed.filter((window) => window.weekday === saturday),
+      holds: [],
+      now: at("2026-11-05", 12),
+    });
 
     expect(slots).toEqual([]);
     expect(hasFreeSlots(slots)).toBe(false);

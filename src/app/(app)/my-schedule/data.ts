@@ -3,29 +3,32 @@ import {
   addDays,
   buildDaySlots,
   isoWeekday,
+  isPracticeDate,
   practiceDate,
-  practiceTimeToUtc,
-  toHoldRecord,
   type DaySlot,
+  type HoldRecord,
 } from "@/lib/slots";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
 
-export const SCHEDULE_DAYS = 7;
-
 export type ScheduleDay = { date: string; slots: DaySlot[] };
 
-// Розклад терапевта на 7 днів від сьогодні (AC-HOLD-09; період — власне припущення з docs/spec-reading.md).
-// Лише власні слоти й утримання: фільтр за власним id та email і RLS (holds_select_own_therapist).
-// Прострочені утримання не показуються, їхні слоти — вільні (AC-HOLD-21, buildDaySlots).
+// Понеділок тижня, у який потрапляє дата (тиждень пн–нд, AC-HOLD-30).
+export function weekStartOf(date: string): string {
+  return addDays(date, 1 - isoWeekday(date));
+}
+
+// Розклад терапевта на тиждень пн–нд за часом практики (AC-HOLD-30, AC-HOLD-31): поточний або той, у який
+// потрапляє GET-параметр week. Утримання й сеанси — функцією my_schedule: лише власні, з іменем клієнта без email
+// (AC-HOLD-09, AC-HOLD-40), «Held» — до прострочення, навіть коли слот уже почався (AC-HOLD-42); прострочених
+// немає, їхні слоти — вільні або «Past» (AC-HOLD-21, buildDaySlots).
 export async function loadMySchedule(
   supabase: ServerClient,
-  user: { id: string; email: string },
+  user: { email: string },
   now: Date,
-): Promise<{ days: ScheduleDay[]; error: boolean }> {
-  const today = practiceDate(now);
-  const from = practiceTimeToUtc(today, 0).toISOString();
-  const to = practiceTimeToUtc(addDays(today, SCHEDULE_DAYS), 0).toISOString();
+  week?: string,
+): Promise<{ weekStart: string; days: ScheduleDay[]; error: boolean }> {
+  const weekStart = weekStartOf(isPracticeDate(week) ? week : practiceDate(now));
 
   const [availability, holds] = await Promise.all([
     supabase
@@ -33,22 +36,23 @@ export async function loadMySchedule(
       .select("weekday, start_hour, end_hour")
       // Без урахування регістру, як у RLS і hold_slot; % і _ екрануємо, щоб ilike був точним збігом.
       .ilike("therapist_email", user.email.replace(/[\\%_]/g, (ch) => `\\${ch}`)),
-    supabase
-      .from("holds")
-      .select("id, slot_start, created_at, confirmed_at, clients(full_name)")
-      .eq("therapist_id", user.id)
-      .gte("slot_start", from)
-      .lt("slot_start", to),
+    supabase.rpc("my_schedule", { p_from: weekStart, p_to: addDays(weekStart, 7) }),
   ]);
 
   if (availability.error || holds.error) {
-    return { days: [], error: true };
+    return { weekStart, days: [], error: true };
   }
 
-  const records = holds.data.map(toHoldRecord);
+  const records: HoldRecord[] = holds.data.map((row) => ({
+    id: row.id,
+    slotStart: new Date(row.slot_start),
+    createdAt: new Date(row.created_at),
+    confirmedAt: row.confirmed_at ? new Date(row.confirmed_at) : null,
+    clientName: row.client_name,
+  }));
 
-  const days = Array.from({ length: SCHEDULE_DAYS }, (_, i) => {
-    const date = addDays(today, i);
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const date = addDays(weekStart, i);
     const weekday = isoWeekday(date);
     return {
       date,
@@ -62,5 +66,5 @@ export async function loadMySchedule(
     };
   });
 
-  return { days, error: false };
+  return { weekStart, days, error: false };
 }

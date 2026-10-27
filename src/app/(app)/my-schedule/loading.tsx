@@ -8,7 +8,7 @@ export default function MyScheduleLoading() {
   return (
     <>
       <LoadingStatus />
-      <PageHeader title="My schedule" description="Next 7 days, times in America/Los_Angeles." />
+      <PageHeader title="My schedule" description="Times in America/Los_Angeles." />
       {Array.from({ length: 3 }, (_, day) => (
         <Panel key={day}>
           <Skeleton className="mb-5 h-7 w-36" />

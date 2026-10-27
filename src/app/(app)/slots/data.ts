@@ -3,13 +3,11 @@ import { childGuardianLabel, CLIENT_OPTIONS_LIMIT, CLIENT_SEARCH_MAX, clientSear
 import {
   addDays,
   buildDaySlots,
-  expiredHolds,
   isoWeekday,
   isPracticeDate,
   practiceDate,
   practiceTimeToUtc,
   type DaySlot,
-  type ExpiredHold,
   type HoldRow,
   toHoldRecord,
 } from "@/lib/slots";
@@ -53,7 +51,6 @@ export function toSelectOptions(clients: ClientOption[]): { value: string; label
 }
 
 export type TherapistDay = { therapist: Therapist; slots: DaySlot[] };
-export type TherapistExpiredHold = ExpiredHold & { therapistId: string; therapistName: string };
 
 // Утримання одного терапевта з рядків запиту на кількох.
 function recordsOf(rows: (HoldRow & { therapist_id: string })[], therapistId: string) {
@@ -66,7 +63,6 @@ export type DayView = {
   date: string;
   today: string; // «сьогодні» в America/Los_Angeles — для Calendar
   days: TherapistDay[]; // колонка на кожного вибраного терапевта, у порядку списку
-  expired: TherapistExpiredHold[];
   q: string; // пошук клієнта для утримання (AC-CARD-02)
   clients: ClientOption[];
   clientsTruncated: boolean; // знайдено більше за CLIENT_OPTIONS_LIMIT — показано перших
@@ -85,7 +81,7 @@ export function selectTherapists(therapists: Therapist[], ids: string[]): Therap
 }
 
 // Дані сторінки /slots: терапевти, доступність вибраного дня й утримання кожного вибраного терапевта, клієнти
-// для утримання (AC-HOLD-01, 05, 06, 18, 24; AC-HOLD-10 — вибір клієнта; AC-HOLD-20 — прострочені утримання).
+// для утримання (AC-HOLD-01, 05, 06, 18, 24, 32, 33; AC-HOLD-10 — вибір клієнта). Список утримань — /holds.
 // Запити — по одному на всіх вибраних (in), далі групуємо за терапевтом.
 // RLS: admin і scheduler бачать профілі терапевтів і всі утримання.
 export async function loadDayView(
@@ -110,7 +106,7 @@ export async function loadDayView(
     email: p.email ?? "",
   }));
   const selected = selectTherapists(therapists, params.therapists);
-  const empty = { therapists, selected, date, today, days: [], expired: [], q, clients: [], clientsTruncated: false, clientsError: false };
+  const empty = { therapists, selected, date, today, days: [], q, clients: [], clientsTruncated: false, clientsError: false };
 
   if (profilesError || selected.length === 0) {
     return { ...empty, error: Boolean(profilesError) };
@@ -120,7 +116,7 @@ export async function loadDayView(
   const dayStart = practiceTimeToUtc(date, 0).toISOString();
   const dayEnd = practiceTimeToUtc(addDays(date, 1), 0).toISOString();
 
-  const [availability, holds, clients, upcoming] = await Promise.all([
+  const [availability, holds, clients] = await Promise.all([
     supabase
       .from("therapist_availability")
       .select("therapist_email, start_hour, end_hour")
@@ -133,19 +129,6 @@ export async function loadDayView(
       .gte("slot_start", dayStart)
       .lt("slot_start", dayEnd),
     clientsQuery(supabase, q),
-    // AC-HOLD-20: огляд прострочених утримань терапевтів на майбутні слоти, незалежно від вибраного дня;
-    // запит і ліміт 200 — на кожного терапевта, як і для одного.
-    Promise.all(
-      ids.map((id) =>
-        supabase
-          .from("holds")
-          .select("id, therapist_id, slot_start, created_at, confirmed_at, clients(full_name)")
-          .eq("therapist_id", id)
-          .gt("slot_start", now.toISOString())
-          .order("slot_start")
-          .limit(200),
-      ),
-    ),
   ]);
 
   // Без клієнтів не працює лише вибір для утримання — статуси слотів однаково показуємо.
@@ -163,26 +146,12 @@ export async function loadDayView(
     }),
   }));
 
-  // expiredHolds — по кожному терапевту окремо: «зайнятий» слот рахується лише в межах його розкладу.
-  const expired: TherapistExpiredHold[] = upcoming.some((result) => result.error)
-    ? []
-    : selected
-        .flatMap((therapist, index) =>
-          expiredHolds((upcoming[index].data ?? []).map(toHoldRecord), now).map((hold) => ({
-            ...hold,
-            therapistId: therapist.id,
-            therapistName: therapist.name,
-          })),
-        )
-        .sort((a, b) => a.slotStart.getTime() - b.slotStart.getTime());
-
   return {
     therapists,
     selected,
     date,
     today,
     days,
-    expired,
     q,
     clients: clients.error ? [] : toClientOptions(clients.data.slice(0, CLIENT_OPTIONS_LIMIT)),
     clientsTruncated: !clients.error && clients.data.length > CLIENT_OPTIONS_LIMIT,
