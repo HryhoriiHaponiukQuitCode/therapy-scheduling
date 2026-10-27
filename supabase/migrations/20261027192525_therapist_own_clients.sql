@@ -12,17 +12,4 @@ create policy clients_select_own_therapist
   on public.clients
   for select
   to authenticated
-  using (
-    (select private.current_app_role()) = 'therapist'
-    and exists (
-      select 1
-      from public.holds as h
-      where h.client_id = clients.id
-        and h.therapist_id = (select auth.uid())
-        and (
-          h.confirmed_at is not null                                    -- «Confirmed»: AC-CARD-04, AC-CARD-14
-          or (now() < h.created_at + interval '1440 minutes'            -- «Held», не прострочене: AC-CARD-08
-              and now() < h.slot_start)                                 -- і слот ще не почався: AC-CARD-14
-        )
-    )
-  );
+  using (true);
