@@ -25,4 +25,3 @@ comment on column public.profiles.role is
 
 -- Права не змінюються: authenticated оновлює лише full_name власного профілю (grant update (full_name)),
 -- тож роль собі не поставить ніхто. private.is_staff() для null повертає false, private.current_app_role() — null.
-grant update (full_name, role) on table public.profiles to authenticated; -- mutation: тимчасово, буде revert
