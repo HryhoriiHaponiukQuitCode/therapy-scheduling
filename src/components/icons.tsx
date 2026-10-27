@@ -1,4 +1,4 @@
-// Inline SVG іконки дизайн-системи (docs/design/design-system.md, розділ 4): stroke, currentColor, без залежностей.
+// Inline SVG іконки дизайн-системи (DESIGN.md, розділ 4): stroke, currentColor, без залежностей.
 import type { SVGProps } from "react";
 
 type IconProps = SVGProps<SVGSVGElement>;
@@ -137,23 +137,24 @@ export function ExpiredIcon(props: IconProps) {
   );
 }
 
-// Знак застосунку (розділ 3): два перекриті кола блакитного й лавандового градієнтів, 48px — свій знак.
+// Знак застосунку (DESIGN.md, розділ 2): два перекриті кола блакитного й лавандового градієнтів, 48px — свій знак;
+// кольори — токени --brand-* з globals.css, однакові в обох темах.
 export function BrandMark({ size = 48, ...props }: IconProps & { size?: number }) {
   return (
     <svg viewBox="0 0 48 48" width={size} height={size} aria-hidden focusable={false} {...props}>
       <defs>
         <linearGradient id="brand-a" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#9cc0ff" />
-          <stop offset="1" stopColor="#5b7cf0" />
+          <stop offset="0" stopColor="var(--brand-a-from)" />
+          <stop offset="1" stopColor="var(--brand-a-to)" />
         </linearGradient>
         <linearGradient id="brand-b" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#e3d9ff" />
-          <stop offset="1" stopColor="#a99bff" />
+          <stop offset="0" stopColor="var(--brand-b-from)" />
+          <stop offset="1" stopColor="var(--brand-b-to)" />
         </linearGradient>
       </defs>
       <circle cx="19" cy="22" r="13" fill="url(#brand-a)" />
       <circle cx="29" cy="27" r="11" fill="url(#brand-b)" opacity={0.9} />
-      <circle cx="15" cy="17" r="4" fill="#fff" opacity={0.7} />
+      <circle cx="15" cy="17" r="4" fill="var(--brand-shine)" opacity={0.7} />
     </svg>
   );
 }

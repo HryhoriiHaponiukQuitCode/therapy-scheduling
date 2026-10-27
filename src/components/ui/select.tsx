@@ -2,13 +2,13 @@
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { Avatar } from "./avatar";
-import { controlClass } from "./field";
-import { ChevronDownIcon } from "./icons";
+import { controlClass } from "./input";
+import { ChevronDownIcon } from "../icons";
 
 export type SelectOption = { value: string; label: string };
 
 // Власний Select (розділ 4.1): патерн WAI-ARIA «select-only combobox», без нативного <select>.
-// Тригер — пігулка 48px з колом ініціалів вибраного; спливаюча панель glass-hi, варіанти 48px з ініціалами.
+// Тригер — пігулка 48px з колом ініціалів вибраного; спливаюча панель accent, варіанти 48px з ініціалами.
 // Значення йде у форму через <input type="hidden" name=…>, тож імена полів (therapist, client_id) не змінюються.
 // Підпис — <label htmlFor={id}> у Field (кнопка — labelable-елемент).
 export function Select({
@@ -138,13 +138,13 @@ export function Select({
         aria-activedescendant={open ? `${listId}-${active}` : undefined}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={onKeyDown}
-        className={`${controlClass} cursor-pointer py-0 pr-2 ${selected ? "pl-1.5" : "pl-4"} ${open ? "outline-2 outline-offset-2 outline-blue" : ""}`}
+        className={`${controlClass} cursor-pointer py-0 pr-2 ${selected ? "pl-1.5" : "pl-4"} ${open ? "outline-2 outline-offset-2 outline-ring" : ""}`}
       >
         {selected ? <Avatar name={selected.label} className="size-[34px] text-xs" /> : null}
-        <span className={`flex-1 truncate ${selected ? "font-semibold" : "text-muted"}`}>
+        <span className={`flex-1 truncate ${selected ? "font-semibold" : "text-muted-foreground"}`}>
           {selected ? selected.label : (placeholder ?? "")}
         </span>
-        <span aria-hidden className="grid size-[34px] flex-none place-items-center rounded-full text-muted">
+        <span aria-hidden className="grid size-[34px] flex-none place-items-center rounded-full text-muted-foreground">
           <ChevronDownIcon className={`size-4 ${open ? "rotate-180" : ""}`} />
         </span>
       </button>
@@ -153,7 +153,7 @@ export function Select({
           id={listId}
           role="listbox"
           aria-labelledby={id}
-          className="absolute top-[calc(100%+8px)] left-0 z-20 m-0 max-h-80 min-w-full list-none overflow-y-auto rounded-lg border border-glass-edge bg-glass-hi p-1.5 shadow-pop backdrop-blur-[24px]"
+          className="absolute top-[calc(100%+8px)] left-0 z-20 m-0 max-h-80 min-w-full list-none overflow-y-auto rounded-lg border border-card-border bg-accent p-1.5 shadow-pop backdrop-blur-[24px]"
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;
@@ -168,13 +168,13 @@ export function Select({
                 onPointerEnter={() => setActive(index)}
                 // Активний (клавіатура, наведення) — фон і рамка; вибраний — жирний текст і галочка, без фону.
                 className={`flex min-h-12 cursor-pointer items-center gap-2.5 rounded-md px-2.5 font-medium ${
-                  index === active ? "bg-glass ring-1 ring-border-strong ring-inset" : ""
+                  index === active ? "bg-card ring-1 ring-input ring-inset" : ""
                 } ${isSelected ? "font-bold" : ""}`}
               >
                 <Avatar name={option.label} className="size-8 text-[11px]" />
                 <span className="flex-1">{option.label}</span>
                 {isSelected ? (
-                  <svg aria-hidden viewBox="0 0 12 12" className="size-3.5 flex-none text-navy" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <svg aria-hidden viewBox="0 0 12 12" className="size-3.5 flex-none text-primary" fill="none" stroke="currentColor" strokeWidth={2}>
                     <path d="M2 6.5l2.5 2.5L10 3.5" />
                   </svg>
                 ) : null}

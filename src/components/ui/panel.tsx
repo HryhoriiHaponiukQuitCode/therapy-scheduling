@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 // Скляна панель (розділ 4): радіус 28px (24px на телефоні), padding 26px (20px); <section aria-labelledby>.
-// Заголовок 22/28, 500; опис muted; дії праворуч. labelledBy — коли заголовок рендерить дитина (форма утримання).
+// Заголовок 22/28, 500; опис muted-foreground; дії праворуч. labelledBy — коли заголовок рендерить дитина (форма утримання).
 export function Panel({
   id,
   title,
@@ -32,7 +32,7 @@ export function Panel({
               <h2 id={headingId} className="m-0 text-[22px] leading-7 font-medium tracking-[-0.01em]">
                 {title}
               </h2>
-              {description ? <p className="mt-1.5 mb-0 text-muted">{description}</p> : null}
+              {description ? <p className="mt-1.5 mb-0 text-muted-foreground">{description}</p> : null}
             </div>
           ) : null}
           {actions}

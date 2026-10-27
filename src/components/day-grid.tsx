@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { BadgeStatus } from "./status-badge";
+import type { BadgeStatus } from "./ui/badge";
 import { SlotCard } from "./slot-card";
 
 export type DayGridSlot = {
@@ -25,7 +25,7 @@ const label = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
 // ширші за панель — прокручуються в ній, сторінка — ні). Години — від найранішого до найпізнішого слота всіх
 // колонок, у клітинці — SlotCard. Семантика — таблиця (role="table"): скрінрідер чує терапевта й годину клітинки.
 // Кожен рядок — справжній бокс із subgrid (не display: contents, з яким старі Safari губили роль рядка).
-// Лінія «зараз» (лише сьогодні) — 2px blue з точкою через усі колонки, під картками; час «HH:MM» — пігулка blue
+// Лінія «зараз» (лише сьогодні) — 2px now з точкою через усі колонки, під картками; час «HH:MM» — пігулка now
 // у колонці годин на рівні лінії. До першої години — по верхньому краю сітки, після останньої — по нижньому.
 export function DayGrid({
   columns,
@@ -61,7 +61,7 @@ export function DayGrid({
   }
 
   const row = "relative col-span-full grid grid-cols-subgrid";
-  const cell = "relative z-[1] min-w-0 border-line";
+  const cell = "relative z-[1] min-w-0 border-border";
   return (
     <div className="-mx-1 overflow-x-auto px-1 pb-1">
       <div
@@ -99,7 +99,7 @@ export function DayGrid({
 
         {range.map((hour, index) => (
           <div key={hour} role="row" className={row}>
-            <span role="rowheader" className={`${cell} border-t pt-2.5 text-sm font-medium text-muted`}>
+            <span role="rowheader" className={`${cell} border-t pt-2.5 text-sm font-medium text-muted-foreground`}>
               {label(hour)}
             </span>
             {columns.map((column) => {
@@ -121,10 +121,10 @@ export function DayGrid({
             {index === nowIndex && now ? (
               // Без z-index у самого шару: лінія (z-0) лягає під клітинки (z-[1]), пігулка (z-[2]) — над підписами годин.
               <div aria-hidden className="pointer-events-none absolute inset-x-0 h-0.5" style={{ top: `${nowTop}%` }}>
-                <span className="absolute right-0 left-16 z-0 h-0.5 bg-blue opacity-90" />
-                <span className="absolute -top-1 left-16 z-0 -ml-[5px] size-2.5 rounded-full bg-blue shadow-[0_0_0_4px_color-mix(in_srgb,var(--blue)_18%,transparent)]" />
+                <span className="absolute right-0 left-16 z-0 h-0.5 bg-now opacity-90" />
+                <span className="absolute -top-1 left-16 z-0 -ml-[5px] size-2.5 rounded-full bg-now shadow-[0_0_0_4px_color-mix(in_srgb,var(--now)_18%,transparent)]" />
                 {/* Пігулка часу — у колонці годин (ширина < 64px), поверх підписів годин: не залазить у колонки. */}
-                <span className="absolute top-1/2 left-1 z-[2] -translate-y-1/2 rounded-full bg-blue px-1.5 py-0.5 text-[11px] leading-[14px] font-bold text-on-navy">
+                <span className="absolute top-1/2 left-1 z-[2] -translate-y-1/2 rounded-full bg-now px-1.5 py-0.5 text-[11px] leading-[14px] font-bold text-primary-foreground">
                   {now.time}
                 </span>
               </div>

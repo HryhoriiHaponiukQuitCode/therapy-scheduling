@@ -22,8 +22,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      data-theme={theme}
-      className={`${manrope.variable} h-full antialiased`}
+      className={`${manrope.variable} h-full antialiased${theme === "dark" ? " dark" : ""}`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

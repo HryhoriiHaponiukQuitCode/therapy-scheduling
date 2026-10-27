@@ -2,8 +2,8 @@
 
 import { useActionState, useState, type ReactNode } from "react";
 import { ActionMessage } from "@/components/action-message";
-import { Field } from "@/components/field";
-import { Select } from "@/components/select";
+import { Field } from "@/components/ui/field";
+import { Select } from "@/components/ui/select";
 import { holdFormId } from "@/lib/holds";
 import { holdSlot, type HoldSlotState } from "./actions";
 import type { ClientOption } from "./data";
@@ -15,7 +15,7 @@ const initialState: HoldSlotState = { status: "idle" };
 // передають slot_start як значення кнопки (AC-HOLD-02, AC-HOLD-10). Поля server action ті самі, що й раніше.
 // Форми лишаються змонтованими після утримання, тож повідомлення про успіх видно; показуємо результат лише
 // останньої відправленої форми, інші — порожні live-області (ActionMessage не демонтуємо).
-// Вигляд (design-system.md, розділ 5): заголовок панелі зліва, Select справа, під ними ActionMessage.
+// Вигляд (DESIGN.md, розділ 5): заголовок панелі зліва, Select справа, під ними ActionMessage.
 export function HoldSlotForm(props: { heading: ReactNode; therapistIds: string[]; clients: ClientOption[] }) {
   const [clientId, setClientId] = useState("");
   const [lastTherapist, setLastTherapist] = useState<string | null>(null);
@@ -55,7 +55,7 @@ function TherapistHoldForm(props: { therapistId: string; clientId: string; shown
     <form id={holdFormId(props.therapistId)} action={formAction} onSubmit={props.onSubmit} aria-busy={pending} className="contents">
       <input type="hidden" name="therapist_id" value={props.therapistId} />
       <input type="hidden" name="client_id" value={props.clientId} />
-      {pending ? <p className="m-0 text-sm text-muted">Holding…</p> : null}
+      {pending ? <p className="m-0 text-sm text-muted-foreground">Holding…</p> : null}
       <ActionMessage state={props.shown ? state : initialState} />
     </form>
   );

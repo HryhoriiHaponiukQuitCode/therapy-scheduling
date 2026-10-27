@@ -2,8 +2,8 @@
 
 import { useActionState } from "react";
 import { ActionMessage } from "@/components/action-message";
-import { Button } from "@/components/button";
-import { Field, Input } from "@/components/field";
+import { Button } from "@/components/ui/button";
+import { Field, Input } from "@/components/ui/field";
 import {
   CLIENT_DUPLICATE_MESSAGE,
   CLIENT_EMAIL_MAX,

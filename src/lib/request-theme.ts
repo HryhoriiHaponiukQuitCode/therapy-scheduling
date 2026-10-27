@@ -1,4 +1,4 @@
-// Тема поточного запиту з cookie: кореневий layout ставить її в <html data-theme>, AppShell передає перемикачу.
+// Тема поточного запиту з cookie: кореневий layout ставить клас .dark на <html>, AppShell передає перемикачу.
 // React cache — cookie читається один раз на запит.
 import { cookies } from "next/headers";
 import { cache } from "react";

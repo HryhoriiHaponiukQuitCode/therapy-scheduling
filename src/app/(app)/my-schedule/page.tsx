@@ -7,11 +7,11 @@ import { DayGrid } from "@/components/day-grid";
 import { EmptyState } from "@/components/empty-state";
 import { CalendarIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
-import { Panel } from "@/components/panel";
+import { Panel } from "@/components/ui/panel";
 import { loadMySchedule } from "./data";
 
 // Розклад терапевта: власні слоти, утримання й сеанси на 7 днів (AC-HOLD-09, AC-HOLD-21).
-// Вигляд — панель на кожен день із погодинною сіткою DayGrid (одна колонка без шапки) без дій (design-system.md, розділ 5).
+// Вигляд — панель на кожен день із погодинною сіткою DayGrid (одна колонка без шапки) без дій (DESIGN.md, розділ 5).
 export default async function MySchedulePage() {
   const supabase = await createClient();
   const user = await getRequestUser();

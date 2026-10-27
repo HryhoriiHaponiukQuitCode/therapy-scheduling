@@ -4,7 +4,7 @@ import { ErrorIcon, SuccessIcon } from "./icons";
 // Спільне для форм клієнтів, утримання й підтвердження, щоб доступність і вигляд не розходилися.
 // aria-live явно не задаємо: alert — неявно assertive, status — polite. Елемент тримаємо змонтованим,
 // щоб програми читання з екрана оголошували зміну тексту.
-// Вигляд — пігулка success-bg / error-bg з круглою іконкою (design-system.md, розділ 4).
+// Вигляд — пігулка success-surface / destructive-surface з круглою іконкою (DESIGN.md, розділ 4).
 export type ActionResult =
   | { status: "idle" }
   | { status: "error"; message: string }
@@ -13,7 +13,7 @@ export type ActionResult =
 export function ActionMessage({ state }: { state: ActionResult }) {
   const isError = state.status === "error";
   const shown = state.status !== "idle";
-  const tone = isError ? "bg-error-bg text-error" : "bg-success-bg text-success";
+  const tone = isError ? "bg-destructive-surface text-destructive" : "bg-success-surface text-success";
   return (
     <p
       role={isError ? "alert" : "status"}
@@ -25,7 +25,7 @@ export function ActionMessage({ state }: { state: ActionResult }) {
     >
       {shown ? (
         <>
-          <span aria-hidden className="grid size-7 flex-none place-items-center rounded-full bg-glass-hi">
+          <span aria-hidden className="grid size-7 flex-none place-items-center rounded-full bg-accent">
             {isError ? <ErrorIcon className="size-4" /> : <SuccessIcon className="size-4" />}
           </span>
           <span>{state.message}</span>

@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/page-header";
-import { Panel } from "@/components/panel";
+import { Panel } from "@/components/ui/panel";
 import { LoadingStatus } from "@/components/route-status";
-import { Skeleton, SkeletonField, SkeletonRows } from "@/components/skeleton";
+import { Skeleton, SkeletonField, SkeletonRows } from "@/components/ui/skeleton";
 
 // Миттєвий стан переходу на /clients: ті самі панелі, що й на сторінці, зі скелетонами замість даних.
 export default function ClientsLoading() {

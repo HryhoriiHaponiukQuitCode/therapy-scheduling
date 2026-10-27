@@ -28,7 +28,7 @@ OpenSpec 1.14.1 (devDependency + глобальний CLI тієї ж версі
 
 - `npm run dev` · `npm run build` (має показати `ƒ Proxy (Middleware)`) · `npm run lint` (0 warnings)
 - `npm run typecheck` (`next typegen && tsc --noEmit`) · `npm test` (Vitest)
-- `npm run spec:validate` · `npm run spec:check` · `npm run ac:coverage`
+- `npm run spec:validate` · `npm run spec:check` · `npm run ac:coverage` · `npm run check:design` (лише токени, `DESIGN.md`)
 - `node scripts/check-migration-order.mjs` — нова міграція новіша за `origin/main`, застосовані не змінено (у CI — `db-check`)
 - `npx supabase migration new <назва>` → SQL → PR. Застосовує міграції у вашу базу ЛИШЕ CI (`db-deploy` після merge у `main`)
 - Типи БД: готовий `database.types.ts` — у Summary прогону job `db-check` (Docker не потрібен); або `npm run db:types`
@@ -131,6 +131,19 @@ OpenSpec 1.14.1 (devDependency + глобальний CLI тієї ж версі
   репозиторію `koldovsky/2026-quitcode-06-leave-portal-demo`): `security invoker`, або `security definer` лише в
   схемі `private` з `set search_path = ''`.
 - Авторизація на сервері — `supabase.auth.getClaims()`, ніколи `getSession()`.
+
+## Дизайн-система
+
+Правила вигляду — `DESIGN.md` (корінь; `CLAUDE.md` імпортує його). Інтерфейс лише англійською.
+
+- Кольори — лише семантичні утиліти токенів (`bg-primary`, `text-muted-foreground`, `border-input`,
+  `bg-status-held` …): жодних hex, `bg-[#…]`, `text-[oklch(…)]`, сирих палітр (`zinc-500`, `bg-white`) і кольорів у
+  `style={{ … }}`. Виняток — коментар `design-ok: <причина>` у тому самому рядку, поодинокий і з реальною причиною.
+- Кнопки, поля, підписи, бейджі, панелі, Select — лише з `@/components/ui`; сторінка не має власних `<button>` чи
+  `<input>` зі стилями. Новий примітив — у `src/components/ui/` на токенах.
+- Новий токен — спершу в `DESIGN.md` (розділ 9: таблиця й контраст), потім у `src/app/globals.css` (`:root`, `.dark`,
+  `@theme inline`). Темна тема — клас `.dark` на `<html>`, варіант `dark:` відповідає йому.
+- Перевірка — `npm run check:design` (у CI — `.github/workflows/architecture.yml`, job «Дизайн-система: лише токени»).
 
 ## Секрети
 
