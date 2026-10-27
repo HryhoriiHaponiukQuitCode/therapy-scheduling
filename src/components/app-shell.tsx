@@ -22,12 +22,9 @@ export function Rail({ user, theme }: { user: ShellUser; theme: Theme }) {
       <BrandMark className="mb-5 max-[760px]:hidden" />
       <nav aria-label="Main" className="flex flex-col items-center gap-3.5 max-[760px]:flex-1 max-[760px]:flex-row max-[760px]:justify-around max-[760px]:gap-1">
         <RailLink href="/" label="Home" icon={<HomeIcon />} />
-        {isStaff(user.role) ? (
-          <>
-            <RailLink href="/clients" label="Clients" icon={<UsersIcon />} />
-            <RailLink href="/slots" label="Slots" icon={<SlotsIcon />} />
-          </>
-        ) : null}
+        {/* Клієнти — усім ролям: терапевт бачить лише своїх (AC-CARD-04); слоти — лише admin і scheduler (AC-HOLD-44). */}
+        {user.role ? <RailLink href="/clients" label="Clients" icon={<UsersIcon />} /> : null}
+        {isStaff(user.role) ? <RailLink href="/slots" label="Slots" icon={<SlotsIcon />} /> : null}
         {user.role === "therapist" ? <RailLink href="/my-schedule" label="My schedule" icon={<ScheduleIcon />} /> : null}
       </nav>
       <div className="mt-auto flex flex-col items-center gap-3.5 max-[760px]:mt-0 max-[760px]:flex-row max-[760px]:gap-1">
