@@ -1,7 +1,8 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getPageAccess } from "@/lib/request-user";
-import { APP_ROLES, NO_ROLE_MESSAGE } from "@/lib/roles";
+import { APP_ROLES } from "@/lib/roles";
 import { isClientId, missingCardMessage, NOT_PROVIDED } from "@/lib/clients";
 import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
@@ -14,8 +15,9 @@ import { Panel } from "@/components/ui/panel";
 // адміністратор — будь-яку картку, терапевт — лише свого клієнта. Немає рядка → для терапевта «You don't have access
 // to this client.» і для чужої, і для неіснуючої картки (AC-CARD-05, 08, 14, 16); для інших — «doesn't exist».
 export default async function ClientCardPage({ params }: PageProps<"/clients/[id]">) {
-  const access = await getPageAccess(APP_ROLES, NO_ROLE_MESSAGE);
-  if (access.kind !== "ok") return <NoAccess />;
+  const access = await getPageAccess(APP_ROLES);
+  if (access.kind === "no-role") return <NoAccess />;
+  if (access.kind === "forbidden") return <AccessDenied title="Client" message={access.message} />;
   const role = access.user.role;
 
   const { id } = await params;
@@ -67,12 +69,12 @@ export default async function ClientCardPage({ params }: PageProps<"/clients/[id
       >
         <dl className="m-0 grid grid-cols-[minmax(0,180px)_minmax(0,1fr)] gap-x-6 gap-y-4" data-testid="client-card">
           {rows.map(([label, value]) => (
-            <div key={label} className="contents">
+            <Fragment key={label}>
               <dt className="text-[13px] font-semibold text-muted-foreground">{label}</dt>
               <dd className={`m-0 break-all ${value ? "font-semibold" : "text-muted-foreground"}`}>
                 {value ?? NOT_PROVIDED}
               </dd>
-            </div>
+            </Fragment>
           ))}
         </dl>
       </Panel>

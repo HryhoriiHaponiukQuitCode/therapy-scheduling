@@ -6,6 +6,7 @@ import {
   CLIENT_NO_ACCESS_MESSAGE,
   CLIENT_NOT_FOUND_MESSAGE,
   emptyClientsMessage,
+  isClientId,
   missingCardMessage,
 } from "@/lib/clients";
 import { createTestDb, type TestDb } from "./supabase-pglite";
@@ -57,6 +58,8 @@ beforeAll(async () => {
   await hold(user("therapist2"), id.client9, `${HOUR} + interval '2 days'`, "now() - interval '1 hour'");
   // client10 — «Held» у therapist1, не прострочене, але слот уже почався (початок цієї години).
   await hold(therapist1, id.client10, HOUR, "now() - interval '2 hours'");
+  // client6 — ще й «Confirmed» у newuser1 (без ролі): наприклад, роль у колишнього терапевта забрали.
+  await hold(user("newuser1"), id.client6, `${HOUR} - interval '1 day'`, "now() - interval '2 days'", true);
 }, 60_000);
 
 describe("терапевт", () => {
@@ -113,6 +116,12 @@ describe("терапевт", () => {
   });
 });
 
+describe("без ролі", () => {
+  it("AC-CARD-11: користувач без ролі не бачить картки навіть з утриманням, де він терапевт", async () => {
+    expect(await t.asUser(user("newuser1"), "select id from public.clients")).toHaveLength(0);
+  });
+});
+
 describe("планувальник і адміністратор", () => {
   it("AC-CARD-10: scheduler2 і admin1 бачать усі картки, у картці дитини — дані опікуна", async () => {
     for (const email of ["scheduler2", "admin1"]) {
@@ -133,6 +142,9 @@ describe("планувальник і адміністратор", () => {
     expect(missingCardMessage("scheduler")).toBe(CLIENT_NOT_FOUND_MESSAGE);
     expect(missingCardMessage("admin")).toBe("This client card doesn't exist.");
     expect(missingCardMessage("therapist")).toBe(CLIENT_NO_ACCESS_MESSAGE);
+    // Посилання з не-UUID — картки немає без запиту до бази (інакше Postgres відповів би 22P02).
+    expect(isClientId(missing)).toBe(true);
+    for (const bad of ["abc", "client6", `${missing}x`, ""]) expect(isClientId(bad)).toBe(false);
   });
 
   it("AC-CARD-15: у практиці ще немає карток — порожній список і повідомлення PM", async () => {

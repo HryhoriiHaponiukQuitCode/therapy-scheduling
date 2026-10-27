@@ -3,6 +3,8 @@
 -- підтверджений сеанс «Confirmed» — без обмеження в часі (зокрема минулий). Прострочене утримання — ні.
 -- Політику зрізу 1 (20261019204522_therapist_clients.sql) замінюємо: застосовані міграції не редагуємо.
 -- Утримання терапевт і так бачить лише власні (holds_select_own_therapist), тож підзапит — під його RLS.
+-- Роль перевіряємо окремо (один раз на запит): без ролі чи з іншою роллю утримання, де користувач — therapist_id,
+-- картки не відкривають (AC-CARD-11); для admin і scheduler політика хибна незалежно від утримань (їм — clients_select_staff).
 
 drop policy clients_select_own_therapist on public.clients;
 
@@ -11,7 +13,8 @@ create policy clients_select_own_therapist
   for select
   to authenticated
   using (
-    exists (
+    (select private.current_app_role()) = 'therapist'
+    and exists (
       select 1
       from public.holds as h
       where h.client_id = clients.id

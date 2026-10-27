@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getPageAccess } from "@/lib/request-user";
-import { APP_ROLES, isStaff, NO_ROLE_MESSAGE } from "@/lib/roles";
+import { APP_ROLES, isStaff } from "@/lib/roles";
 import { emptyClientsMessage } from "@/lib/clients";
+import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/empty-state";
@@ -16,8 +17,9 @@ import { buttonClass } from "@/components/ui/button";
 // therapist — лише свої (AC-CARD-04, AC-CARD-08, AC-CARD-09, AC-CARD-14). Хто чий — вирішує RLS
 // (clients_select_staff, clients_select_own_therapist), сторінка лише вибирає тексти й дії за роллю.
 export default async function ClientsPage() {
-  const access = await getPageAccess(APP_ROLES, NO_ROLE_MESSAGE);
-  if (access.kind !== "ok") return <NoAccess />;
+  const access = await getPageAccess(APP_ROLES);
+  if (access.kind === "no-role") return <NoAccess />;
+  if (access.kind === "forbidden") return <AccessDenied title="Clients" message={access.message} />;
   const role = access.user.role;
   const staff = isStaff(role);
 
