@@ -57,9 +57,9 @@
 | AC-HOLD-23 | підтвердження за хвилину до початку — «Confirmed» | `src/app/(app)/slots/actions.ts` (confirmHold), `supabase/migrations/20261019195754_confirm_before_start.sql` | `tests/clarify.test.ts` | реалізовано |
 | AC-HOLD-20 | планувальник бачить прострочене утримання «Expired» | `src/lib/slots.ts` (expiredHolds), `src/app/(app)/slots/page.tsx` | `tests/clarify.test.ts` | реалізовано |
 | AC-HOLD-21 | прострочене утримання не в розкладі терапевта | `src/app/(app)/my-schedule/data.ts` (loadMySchedule), `src/lib/slots.ts` (buildDaySlots) | `tests/my-schedule.test.ts` | реалізовано |
-| AC-HOLD-25 | утримання клієнта, що перетинається з його «Held» в іншого терапевта, — відмова | — | — | відкладено (чекає реалізації) |
-| AC-HOLD-26 | прострочене утримання клієнта не заважає новому на той самий час | — | — | відкладено (чекає реалізації) |
-| AC-HOLD-27 | scheduler2 підтверджує утримання, створене scheduler1 | — | — | відкладено (чекає реалізації) |
+| AC-HOLD-25 | утримання клієнта, що перетинається з його «Held» в іншого терапевта, — відмова | `supabase/migrations/20261027195559_hold_slot_client_busy.sql` (`private.hold_slot`: CLIENT_BUSY), `src/lib/holds.ts` (HOLD_MESSAGES), `src/app/(app)/slots/actions.ts` (holdSlot) | `tests/db/hold-rules.test.ts`, `tests/holds.test.ts` | реалізовано |
+| AC-HOLD-26 | прострочене утримання клієнта не заважає новому на той самий час | `supabase/migrations/20261027195559_hold_slot_client_busy.sql` (`private.hold_slot`) | `tests/db/hold-rules.test.ts` | реалізовано |
+| AC-HOLD-27 | scheduler2 підтверджує утримання, створене scheduler1 | `supabase/migrations/20261019195754_confirm_before_start.sql` (`private.confirm_hold`), `src/app/(app)/slots/actions.ts` (confirmHold) | `tests/db/hold-rules.test.ts` | реалізовано |
 | AC-HOLD-28 | прострочене утримання видно планувальнику за хвилину до початку слоту | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-29 | прострочене утримання не показується з моменту початку слоту | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-30 | терапевт бачить поточний тиждень пн–нд з усіма слотами й статусами | — | — | відкладено (чекає реалізації) |
@@ -68,15 +68,15 @@
 | AC-HOLD-33 | «No free slots on this day.» серед «Past», «Held» і «Confirmed» | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-34 | дублікат email з великими літерами й пробілами — відмова | `src/lib/clients.ts` (validateClientCard) (нормалізація), індекс `clients_email_lower_key` | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
 | AC-HOLD-35 | email зберігається й показується малими літерами без пробілів | `src/lib/clients.ts` (validateClientCard); `supabase/migrations/20261027190554_client_cards.sql` (`clients_email_normalized`) | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
-| AC-HOLD-36 | повторне чи одночасне підтвердження — «This hold is already confirmed.» | — | — | відкладено (чекає реалізації) |
-| AC-HOLD-37 | повторне утримання простроченого слоту за тим самим клієнтом | — | — | відкладено (чекає реалізації) |
+| AC-HOLD-36 | повторне чи одночасне підтвердження — «This hold is already confirmed.» | `supabase/migrations/20261019195754_confirm_before_start.sql` (`private.confirm_hold`: HOLD_CONFIRMED), `src/lib/holds.ts` (CONFIRM_MESSAGES) | `tests/db/hold-rules.test.ts` | реалізовано |
+| AC-HOLD-37 | повторне утримання простроченого слоту за тим самим клієнтом | `supabase/migrations/20261027195559_hold_slot_client_busy.sql` (`private.hold_slot`), `src/lib/slots.ts` (expiredHolds) | `tests/db/hold-rules.test.ts` | реалізовано |
 | AC-HOLD-38 | список утримань — лише «Held» і «Expired» за часом слоту | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-39 | інші некоректні email — картку не створено | `src/lib/clients.ts` (validateClientCard) | `tests/clients.test.ts` | реалізовано |
 | AC-HOLD-40 | у розкладі терапевта — ім'я клієнта без email (без речення про список клієнтів) | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-41 | ім'я лише з пробілів — порожнє; пробіли по краях прибираються | `src/lib/clients.ts` (validateClientCard); `supabase/migrations/20261027190554_client_cards.sql` (`clients_full_name_trimmed`) | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
 | AC-HOLD-42 | утримання «Held», чий слот почався, не показується в списку | — | — | відкладено (чекає реалізації) |
 | AC-CARD-01 | картка дорослого з анкети з усіма даними; вибір під час утримання — наявний список клієнтів на /slots | `src/app/(app)/clients/actions.ts` (createClientCard), `src/app/(app)/clients/new/` (page, ClientCardForm), `supabase/migrations/20261027190554_client_cards.sql` | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
-| AC-CARD-02 | картка дитини з опікуном; під час утримання дитину знаходять за email опікуна, біля неї — email опікуна | — | — | відкладено (чекає реалізації) |
+| AC-CARD-02 | картка дитини з опікуном; під час утримання дитину знаходять за email опікуна, біля неї — email опікуна | `src/app/(app)/slots/page.tsx` (пошук `q`), `src/app/(app)/slots/data.ts` (loadDayView, toClientOptions, toSelectOptions), `src/lib/clients.ts` (clientSearchFilter), `src/components/ui/select.tsx` (hint); картка — `src/app/(app)/clients/actions.ts` (createClientCard) | `tests/client-search.test.ts`, `tests/clients.test.ts` | реалізовано |
 | AC-CARD-03 | картка дитини без імені чи email опікуна — відмова, дані лишаються | `src/lib/clients.ts` (validateClientCard); `supabase/migrations/20261027190554_client_cards.sql` (`clients_contact_by_type`, `clients_guardian_email_format`) | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
 | AC-CARD-04 | терапевт бачить картки лише своїх клієнтів («Held» до початку слоту, «Confirmed» без обмеження) | `src/app/(app)/clients/page.tsx`, `src/app/(app)/clients/[id]/page.tsx`; RLS `clients_select_own_therapist` (`supabase/migrations/20261027192525_therapist_own_clients.sql`) | `tests/db/client-access.test.ts` | реалізовано |
 | AC-CARD-05 | картка клієнта іншого терапевта — «You don't have access to this client.» | `src/app/(app)/clients/[id]/page.tsx`, `src/lib/clients.ts` (missingCardMessage); RLS `clients_select_own_therapist` (`supabase/migrations/20261027192525_therapist_own_clients.sql`) | `tests/db/client-access.test.ts` | реалізовано |

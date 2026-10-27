@@ -1,5 +1,6 @@
 // Утримання слоту: перевірки до запиту в базу й тексти повідомлень PM (openspec/specs/slot-holds/spec.md).
-// Ті самі правила повторює функція private.hold_slot (міграція 20261019111956_hold_slot.sql) — вона остаточна.
+// Ті самі правила повторює функція private.hold_slot (міграції 20261019111956_hold_slot.sql,
+// 20261027195559_hold_slot_client_busy.sql) — вона остаточна.
 
 export const HOLD_MESSAGES = {
   SLOT_UNAVAILABLE: "This slot is no longer available.", // AC-HOLD-03, AC-HOLD-04, AC-HOLD-17
@@ -7,6 +8,7 @@ export const HOLD_MESSAGES = {
   NOT_STAFF: "Only schedulers and admins can hold slots.", // AC-HOLD-08
   SLOT_UNKNOWN: "This slot is not in the therapist's availability.",
   CLIENT_UNKNOWN: "Choose a client.",
+  CLIENT_BUSY: "This client already has a hold or session at this time.", // AC-HOLD-25
 } as const;
 
 export type HoldErrorCode = keyof typeof HOLD_MESSAGES;

@@ -4,10 +4,12 @@ import { getPageAccess } from "@/lib/request-user";
 import { STAFF_ONLY_PAGE_MESSAGE, STAFF_ROLES } from "@/lib/roles";
 import { formatPracticeTime, hasFreeSlots, NO_FREE_SLOTS_MESSAGE, practiceClock, weekdayName } from "@/lib/slots";
 import { CONFIRM_FORM_ID, holdFormId } from "@/lib/holds";
+import { CLIENT_SEARCH_MAX, MORE_CLIENTS_MESSAGE, noClientMatchMessage } from "@/lib/clients";
 import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Field, Input } from "@/components/ui/field";
 import { Calendar } from "@/components/calendar";
 import { ChoiceList } from "@/components/choice-list";
 import { DayGrid, type DayGridColumn } from "@/components/day-grid";
@@ -37,9 +39,12 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
   const view = await loadDayView(supabase, {
     therapists: Array.isArray(therapistParam) ? therapistParam : therapistParam ? [therapistParam] : [],
     date: typeof params.date === "string" ? params.date : undefined,
+    q: typeof params.q === "string" ? params.q : undefined,
   });
 
   const canHold = !view.clientsError && view.clients.length > 0;
+  // Форма утримання з пошуком — і коли пошук нічого не знайшов: інакше не було б де змінити запит.
+  const showHoldForm = !view.clientsError && (view.clients.length > 0 || view.q !== "");
   const withSlots = view.days.some((day) => day.slots.length > 0);
   // AC-HOLD-24: терапевт без жодного слоту цього дня — лише повідомлення в його колонці, його прострочених
   // утримань у панелі «Expired holds» не показуємо.
@@ -120,6 +125,29 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
     </div>
   );
 
+  // AC-CARD-02: пошук клієнта за ім'ям, email або email опікуна — GET-параметр q, вибрані терапевти й день лишаються.
+  const search = (
+    <form method="get" action="/slots" data-navigate="" role="search" className="flex min-w-0 flex-[1_1_280px] items-end gap-2">
+      {view.selected.map((t) => (
+        <input key={t.id} type="hidden" name="therapist" value={t.id} />
+      ))}
+      <input type="hidden" name="date" value={view.date} />
+      <Field label="Find a client" htmlFor="client-search" className="min-w-0 flex-1">
+        <Input
+          id="client-search"
+          type="search"
+          name="q"
+          defaultValue={view.q}
+          maxLength={CLIENT_SEARCH_MAX}
+          placeholder="Name, email or guardian email"
+        />
+      </Field>
+      <Button type="submit" variant="glass">
+        Search
+      </Button>
+    </form>
+  );
+
   return (
     <>
       <PageHeader title="Slots" description="Times in America/Los_Angeles." />
@@ -130,6 +158,7 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
             {/* Зміна вибору одразу відправляє форму; поточний день — прихованим полем. */}
             <form method="get" action="/slots" data-navigate="">
               <input type="hidden" name="date" value={view.date} />
+              {view.q ? <input type="hidden" name="q" value={view.q} /> : null}
               {view.therapists.length > 0 ? (
                 <ChoiceList
                   name="therapist"
@@ -147,6 +176,7 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
               {view.selected.map((t) => (
                 <input key={t.id} type="hidden" name="therapist" value={t.id} />
               ))}
+              {view.q ? <input type="hidden" name="q" value={view.q} /> : null}
               <Calendar name="date" value={view.date} today={view.today} />
             </form>
           </Panel>
@@ -163,11 +193,20 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
               <div className="flex flex-col gap-4">
                 {/* Форми монтуємо для вибраного дня зі слотами завжди, а не лише коли є що утримати чи
                     підтвердити: після останньої дії revalidatePath прибрав би форму разом із повідомленням про результат. */}
-                {withSlots && canHold ? (
-                  // key: новий день чи набір терапевтів — новий стан форми (без чужого повідомлення).
+                {withSlots && showHoldForm ? (
+                  // key: новий день, набір терапевтів чи пошук — новий стан форми (без чужого повідомлення й без
+                  // вибраного клієнта, якого вже немає серед знайдених).
                   <HoldSlotForm
-                    key={`${view.date}-${view.selected.map((t) => t.id).join()}`}
+                    key={`${view.date}-${view.selected.map((t) => t.id).join()}-${view.q}`}
                     heading={heading}
+                    search={search}
+                    notice={
+                      view.clients.length === 0
+                        ? noClientMatchMessage(view.q)
+                        : view.clientsTruncated
+                          ? MORE_CLIENTS_MESSAGE
+                          : null
+                    }
                     therapistIds={view.days.filter((day) => day.slots.length > 0).map((day) => day.therapist.id)}
                     clients={view.clients}
                   />
