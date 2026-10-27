@@ -47,13 +47,13 @@
 
 ## 3. Список і картка клієнта за роллю
 
-- [ ] 3.1 Міграція `therapist_own_clients`: перестворена `clients_select_own_therapist` («Held» лише до початку слоту,
+- [x] 3.1 Міграція `therapist_own_clients`: перестворена `clients_select_own_therapist` («Held» лише до початку слоту,
   «Confirmed» — без обмеження).
-- [ ] 3.2 `/clients` за роллю, порожні стани обох ролей.
-- [ ] 3.3 `/clients/[id]`: «Not provided», `clientCardMessage` для неіснуючої та чужої картки.
-- [ ] 3.4 Тести відмов з AC ID: AC-CARD-05, AC-CARD-08, AC-CARD-14 (PGlite, 0 рядків, дані незмінні), AC-CARD-16
+- [x] 3.2 `/clients` за роллю, порожні стани обох ролей.
+- [x] 3.3 `/clients/[id]`: «Not provided», `clientCardMessage` для неіснуючої та чужої картки.
+- [x] 3.4 Тести відмов з AC ID: AC-CARD-05, AC-CARD-08, AC-CARD-14 (PGlite, 0 рядків, дані незмінні), AC-CARD-16
   (`clientCardMessage`).
-- [ ] 3.5 Тести дозволених дій: AC-CARD-04, AC-CARD-09, AC-CARD-10, AC-CARD-15.
+- [x] 3.5 Тести дозволених дій: AC-CARD-04, AC-CARD-09, AC-CARD-10, AC-CARD-15.
 - [ ] 3.6 Мутаційна перевірка: локальна таблиця. У CI — червоний прогін AC-CARD-05:
   - `mutation:` — `using (true)` у `clients_select_own_therapist`;
   - потім revert.

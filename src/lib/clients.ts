@@ -137,3 +137,31 @@ export function clientInsertErrorMessage(error: { code?: string; message?: strin
   if (error.code === INSUFFICIENT_PRIVILEGE) return CLIENT_FORBIDDEN_MESSAGE;
   return "Could not create the client. Try again.";
 }
+
+// ── Список і картка за роллю (client-access/spec.md) ─────────────────────────
+export const NO_CLIENTS_STAFF_MESSAGE = "No clients yet. Create a client card from an intake form."; // AC-CARD-15
+export const NO_CLIENTS_THERAPIST_MESSAGE =
+  "No clients yet. Clients appear here when a scheduler holds a slot with you."; // AC-CARD-09
+export const CLIENT_NOT_FOUND_MESSAGE = "This client card doesn't exist."; // AC-CARD-16
+export const CLIENT_NO_ACCESS_MESSAGE = "You don't have access to this client."; // AC-CARD-05, 08, 14, 16
+export const NOT_PROVIDED = "Not provided"; // поля карток зрізу 1
+
+type CardViewerRole = "admin" | "scheduler" | "therapist";
+
+// Порожній список: різний текст для терапевта й для планувальника чи адміністратора.
+export function emptyClientsMessage(role: CardViewerRole): string {
+  return role === "therapist" ? NO_CLIENTS_THERAPIST_MESSAGE : NO_CLIENTS_STAFF_MESSAGE;
+}
+
+// Картку не видно (RLS не повернула рядок): планувальнику й адміністратору — «не існує»; терапевту — те саме, що й для
+// чужої картки, щоб за відповіддю не можна було дізнатися, які картки існують (AC-CARD-16).
+export function missingCardMessage(role: CardViewerRole): string {
+  return role === "therapist" ? CLIENT_NO_ACCESS_MESSAGE : CLIENT_NOT_FOUND_MESSAGE;
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Посилання з не-UUID — картки точно немає (без запиту, який упав би з 22P02).
+export function isClientId(value: string): boolean {
+  return UUID_PATTERN.test(value);
+}
