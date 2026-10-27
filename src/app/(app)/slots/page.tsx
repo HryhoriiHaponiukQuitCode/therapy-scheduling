@@ -4,7 +4,7 @@ import { getPageAccess } from "@/lib/request-user";
 import { STAFF_ONLY_PAGE_MESSAGE, STAFF_ROLES } from "@/lib/roles";
 import { formatPracticeTime, hasFreeSlots, NO_FREE_SLOTS_MESSAGE, practiceClock, weekdayName } from "@/lib/slots";
 import { CONFIRM_FORM_ID, holdFormId } from "@/lib/holds";
-import { CLIENT_SEARCH_MAX, noClientMatchMessage } from "@/lib/clients";
+import { CLIENT_SEARCH_MAX, MORE_CLIENTS_MESSAGE, noClientMatchMessage } from "@/lib/clients";
 import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
 import { Avatar } from "@/components/ui/avatar";
@@ -200,7 +200,13 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
                     key={`${view.date}-${view.selected.map((t) => t.id).join()}-${view.q}`}
                     heading={heading}
                     search={search}
-                    emptyMessage={view.clients.length === 0 ? noClientMatchMessage(view.q) : null}
+                    notice={
+                      view.clients.length === 0
+                        ? noClientMatchMessage(view.q)
+                        : view.clientsTruncated
+                          ? MORE_CLIENTS_MESSAGE
+                          : null
+                    }
                     therapistIds={view.days.filter((day) => day.slots.length > 0).map((day) => day.therapist.id)}
                     clients={view.clients}
                   />

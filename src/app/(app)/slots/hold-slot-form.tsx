@@ -20,7 +20,7 @@ const initialState: HoldSlotState = { status: "idle" };
 export function HoldSlotForm(props: {
   heading: ReactNode;
   search: ReactNode;
-  emptyMessage: string | null;
+  notice: string | null; // пошук нічого не знайшов або знайшов більше, ніж показано
   therapistIds: string[];
   clients: ClientOption[];
 }) {
@@ -43,9 +43,9 @@ export function HoldSlotForm(props: {
           </Field>
         </div>
       </div>
-      {props.emptyMessage ? (
-        <p role="status" className="m-0 text-sm text-muted-foreground" data-testid="no-client-match">
-          {props.emptyMessage}
+      {props.notice ? (
+        <p role="status" className="m-0 text-sm text-muted-foreground" data-testid="client-search-notice">
+          {props.notice}
         </p>
       ) : null}
       {/* Без gap: порожні live-області форм не мають додавати відступів. */}

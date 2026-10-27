@@ -147,8 +147,12 @@ export function Select({
         className={`${controlClass} cursor-pointer py-0 pr-2 ${selected && avatars ? "pl-1.5" : "pl-4"} ${open ? "outline-2 outline-offset-2 outline-ring" : ""}`}
       >
         {selected && avatars ? <Avatar name={selected.label} className="size-[34px] text-xs" /> : null}
-        <span className={`flex-1 truncate ${selected ? "font-semibold" : "text-muted-foreground"}`}>
+        <span className={`min-w-0 flex-1 truncate ${selected ? "font-semibold" : "text-muted-foreground"}`}>
           {selected ? selected.label : (placeholder ?? "")}
+          {/* Підказка вибраного й у закритому полі: двоє дітей з однаковим ім'ям розрізняються опікуном. */}
+          {selected?.hint ? (
+            <span className="block truncate text-xs font-medium text-muted-foreground">{selected.hint}</span>
+          ) : null}
         </span>
         <span aria-hidden className="grid size-[34px] flex-none place-items-center rounded-full text-muted-foreground">
           <ChevronDownIcon className={`size-4 ${open ? "rotate-180" : ""}`} />

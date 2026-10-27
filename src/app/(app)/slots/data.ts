@@ -1,5 +1,5 @@
 import type { createClient } from "@/lib/supabase/server";
-import { clientSearchFilter } from "@/lib/clients";
+import { childGuardianLabel, CLIENT_OPTIONS_LIMIT, CLIENT_SEARCH_MAX, clientSearchFilter } from "@/lib/clients";
 import {
   addDays,
   buildDaySlots,
@@ -32,8 +32,13 @@ export function toClientOptions(
 }
 
 // Клієнти для утримання: усі або ті, чиє ім'я, email чи email опікуна містять q (RLS: admin і scheduler бачать усіх).
+// Не більше CLIENT_OPTIONS_LIMIT; на один рядок більше — щоб знати, що є ще.
 function clientsQuery(supabase: ServerClient, q: string) {
-  const query = supabase.from("clients").select("id, full_name, client_type, guardian_email").order("full_name");
+  const query = supabase
+    .from("clients")
+    .select("id, full_name, client_type, guardian_email")
+    .order("full_name")
+    .limit(CLIENT_OPTIONS_LIMIT + 1);
   const filter = clientSearchFilter(q);
   return filter ? query.or(filter) : query;
 }
@@ -43,7 +48,7 @@ export function toSelectOptions(clients: ClientOption[]): { value: string; label
   return clients.map((client) => ({
     value: client.id,
     label: client.name,
-    hint: client.guardianEmail ? `Child · guardian ${client.guardianEmail}` : undefined,
+    hint: client.guardianEmail ? childGuardianLabel(client.guardianEmail) : undefined,
   }));
 }
 
@@ -64,6 +69,7 @@ export type DayView = {
   expired: TherapistExpiredHold[];
   q: string; // пошук клієнта для утримання (AC-CARD-02)
   clients: ClientOption[];
+  clientsTruncated: boolean; // знайдено більше за CLIENT_OPTIONS_LIMIT — показано перших
   clientsError: boolean;
   error: boolean;
 };
@@ -89,7 +95,8 @@ export async function loadDayView(
   const now = new Date();
   const date = isPracticeDate(params.date) ? params.date : practiceDate(now);
   const today = practiceDate(now);
-  const q = params.q?.trim() ?? "";
+  // Один раз обрізаний q — і для запиту, і для поля, прихованих параметрів та повідомлень.
+  const q = (params.q ?? "").trim().slice(0, CLIENT_SEARCH_MAX).trim();
 
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
@@ -103,7 +110,7 @@ export async function loadDayView(
     email: p.email ?? "",
   }));
   const selected = selectTherapists(therapists, params.therapists);
-  const empty = { therapists, selected, date, today, days: [], expired: [], q, clients: [], clientsError: false };
+  const empty = { therapists, selected, date, today, days: [], expired: [], q, clients: [], clientsTruncated: false, clientsError: false };
 
   if (profilesError || selected.length === 0) {
     return { ...empty, error: Boolean(profilesError) };
@@ -177,7 +184,8 @@ export async function loadDayView(
     days,
     expired,
     q,
-    clients: clients.error ? [] : toClientOptions(clients.data),
+    clients: clients.error ? [] : toClientOptions(clients.data.slice(0, CLIENT_OPTIONS_LIMIT)),
+    clientsTruncated: !clients.error && clients.data.length > CLIENT_OPTIONS_LIMIT,
     clientsError: Boolean(clients.error),
     error: false,
   };

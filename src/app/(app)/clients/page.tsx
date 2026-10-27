@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getPageAccess } from "@/lib/request-user";
 import { APP_ROLES, isStaff } from "@/lib/roles";
-import { emptyClientsMessage } from "@/lib/clients";
+import { childGuardianLabel, emptyClientsMessage } from "@/lib/clients";
 import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
 import { Avatar } from "@/components/ui/avatar";
@@ -60,7 +60,7 @@ export default async function ClientsPage() {
                     {/* Дитина — без власного email: показуємо email опікуна (AC-CARD-02). */}
                     <span className="block text-[13px] break-all text-muted-foreground">
                       {client.client_type === "child"
-                        ? `Child · guardian ${client.guardian_email ?? ""}`
+                        ? childGuardianLabel(client.guardian_email ?? "")
                         : `Adult · ${client.email ?? ""}`}
                     </span>
                   </span>
