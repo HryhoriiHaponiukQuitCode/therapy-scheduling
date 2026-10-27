@@ -21,7 +21,7 @@ beforeAll(async () => {
   therapist2 = t.users["therapist2@example.test"];
   newuser1 = t.users["newuser1@example.test"];
   [{ id: clientId }] = await t.asService<{ id: string }>(
-    "insert into public.clients (full_name, email) values ('Client Six', 'client6@example.test') returning id",
+    "insert into public.clients (full_name, email, birth_date, session_language) values ('Client Six', 'client6@example.test', '1990-05-14', 'English') returning id",
   );
   // Утримання «Held» у therapist2 на завтра, створене годину тому.
   [{ id: holdOfTherapist2 }] = await t.asService<{ id: string }>(
@@ -36,7 +36,7 @@ describe("без входу", () => {
     await expect(t.asAnon("select id from public.clients")).rejects.toThrow(/permission denied/);
     await expect(t.asAnon("select id from public.holds")).rejects.toThrow(/permission denied/);
     await expect(
-      t.asAnon("insert into public.clients (full_name, email) values ('X', 'x@example.test')"),
+      t.asAnon("insert into public.clients (full_name, email, birth_date, session_language) values ('X', 'x@example.test', '1990-05-14', 'English')"),
     ).rejects.toThrow(/permission denied/);
     expect(await count("clients")).toBe(1);
     expect(await count("holds")).toBe(1);
@@ -69,7 +69,7 @@ describe("користувач без ролі", () => {
 
   it("AC-CARD-11: користувач без ролі не створює картку й не ставить собі роль", async () => {
     await expect(
-      t.asUser(newuser1, "insert into public.clients (full_name, email) values ('X', 'x@example.test')"),
+      t.asUser(newuser1, "insert into public.clients (full_name, email, birth_date, session_language) values ('X', 'x@example.test', '1990-05-14', 'English')"),
     ).rejects.toThrow(/row-level security/);
     await expect(
       t.asUser(newuser1, "update public.profiles set role = 'admin' where id = $1", [newuser1]),

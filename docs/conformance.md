@@ -33,10 +33,10 @@
 
 | AC | Що перевіряє | Код | Тест | Статус |
 |---|---|---|---|---|
-| AC-HOLD-10 | планувальник створює клієнта з іменем і новим email | `src/app/(app)/clients/actions.ts` (addClient), `supabase/migrations/20261019102511_roles_and_clients.sql`, `src/app/(app)/slots/data.ts` (toClientOptions) | `tests/clients.test.ts`, `tests/holds.test.ts` | реалізовано |
-| AC-HOLD-11 | порожнє ім'я — клієнта не створено, повідомлення | `src/lib/clients.ts` (validateClient) | `tests/clients.test.ts` | реалізовано |
-| AC-HOLD-15 | email без @ — клієнта не створено, повідомлення | `src/lib/clients.ts` (validateClient) | `tests/clients.test.ts` | реалізовано |
-| AC-HOLD-16 | дублікат email — клієнта не створено, повідомлення | `src/lib/clients.ts` (clientInsertErrorMessage), `supabase/migrations/20261019102511_roles_and_clients.sql` | `tests/clients.test.ts` | реалізовано |
+| AC-HOLD-10 | планувальник створює клієнта з іменем і новим email (повна форма) | `src/app/(app)/clients/actions.ts` (createClientCard), `src/app/(app)/clients/new/` (page, ClientCardForm) | `tests/clients.test.ts` | реалізовано |
+| AC-HOLD-11 | порожнє ім'я — картку не створено, повідомлення біля поля | `src/lib/clients.ts` (validateClientCard) | `tests/clients.test.ts` | реалізовано |
+| AC-HOLD-15 | email без @ — картку не створено, повідомлення біля поля | `src/lib/clients.ts` (validateClientCard); constraint `clients_email_format` | `tests/clients.test.ts` | реалізовано |
+| AC-HOLD-16 | дублікат email — картку не створено, повідомлення | `src/lib/clients.ts` (clientInsertErrorMessage); індекс `clients_email_lower_key` | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
 | AC-HOLD-01 | слоти дня зі статусами, утримати можна лише вільний | `src/lib/slots.ts` (buildDaySlots), `src/app/(app)/slots/page.tsx` | `tests/slots.test.ts` | реалізовано |
 | AC-HOLD-18 | день без вільних слотів — повідомлення | `src/lib/slots.ts` (hasFreeSlots), `src/app/(app)/slots/page.tsx` | `tests/slots.test.ts` | реалізовано |
 | AC-HOLD-02 | утримання вільного слоту на 24 години з «Held until» | `src/app/(app)/slots/actions.ts` (holdSlot), `supabase/migrations/20261019111956_hold_slot.sql` | `tests/holds.test.ts` | реалізовано |
@@ -66,28 +66,28 @@
 | AC-HOLD-31 | терапевт перемикається на наступний тиждень | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-32 | слоти, що почалися без активного утримання, — «Past», утримати не можна | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-33 | «No free slots on this day.» серед «Past», «Held» і «Confirmed» | — | — | відкладено (чекає реалізації) |
-| AC-HOLD-34 | дублікат email з великими літерами й пробілами — відмова | — | — | відкладено (чекає реалізації) |
-| AC-HOLD-35 | email зберігається й показується малими літерами без пробілів | — | — | відкладено (чекає реалізації) |
+| AC-HOLD-34 | дублікат email з великими літерами й пробілами — відмова | `src/lib/clients.ts` (validateClientCard) (нормалізація), індекс `clients_email_lower_key` | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
+| AC-HOLD-35 | email зберігається й показується малими літерами без пробілів | `src/lib/clients.ts` (validateClientCard); `supabase/migrations/20261027190554_client_cards.sql` (`clients_email_normalized`) | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
 | AC-HOLD-36 | повторне чи одночасне підтвердження — «This hold is already confirmed.» | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-37 | повторне утримання простроченого слоту за тим самим клієнтом | — | — | відкладено (чекає реалізації) |
 | AC-HOLD-38 | список утримань — лише «Held» і «Expired» за часом слоту | — | — | відкладено (чекає реалізації) |
-| AC-HOLD-39 | інші некоректні email — клієнта не створено | — | — | відкладено (чекає реалізації) |
+| AC-HOLD-39 | інші некоректні email — картку не створено | `src/lib/clients.ts` (validateClientCard) | `tests/clients.test.ts` | реалізовано |
 | AC-HOLD-40 | у розкладі терапевта — ім'я клієнта без email (без речення про список клієнтів) | — | — | відкладено (чекає реалізації) |
-| AC-HOLD-41 | ім'я лише з пробілів — порожнє; пробіли по краях прибираються | — | — | відкладено (чекає реалізації) |
+| AC-HOLD-41 | ім'я лише з пробілів — порожнє; пробіли по краях прибираються | `src/lib/clients.ts` (validateClientCard); `supabase/migrations/20261027190554_client_cards.sql` (`clients_full_name_trimmed`) | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
 | AC-HOLD-42 | утримання «Held», чий слот почався, не показується в списку | — | — | відкладено (чекає реалізації) |
-| AC-CARD-01 | картка дорослого з анкети, клієнта можна вибрати під час утримання | — | — | відкладено (чекає реалізації) |
+| AC-CARD-01 | картка дорослого з анкети з усіма даними; вибір під час утримання — наявний список клієнтів на /slots | `src/app/(app)/clients/actions.ts` (createClientCard), `src/app/(app)/clients/new/` (page, ClientCardForm), `supabase/migrations/20261027190554_client_cards.sql` | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
 | AC-CARD-02 | картка дитини з опікуном; під час утримання дитину знаходять за email опікуна, біля неї — email опікуна | — | — | відкладено (чекає реалізації) |
-| AC-CARD-03 | картка дитини без імені чи email опікуна — відмова, дані лишаються | — | — | відкладено (чекає реалізації) |
+| AC-CARD-03 | картка дитини без імені чи email опікуна — відмова, дані лишаються | `src/lib/clients.ts` (validateClientCard); `supabase/migrations/20261027190554_client_cards.sql` (`clients_contact_by_type`, `clients_guardian_email_format`) | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
 | AC-CARD-04 | терапевт бачить картки лише своїх клієнтів («Held» до початку слоту, «Confirmed» без обмеження) | — | — | відкладено (чекає реалізації) |
 | AC-CARD-05 | картка чужого клієнта — «You don't have access to this client.» | — | — | відкладено (чекає реалізації) |
-| AC-CARD-06 | терапевт не бачить форми нової картки — одразу відмова, картку не створено | — | — | відкладено (чекає реалізації) |
+| AC-CARD-06 | терапевт не бачить форми нової картки — одразу відмова, картку не створено | `src/app/(app)/clients/new/page.tsx` (getPageAccess), `src/app/(app)/clients/actions.ts` (createClientCard); RLS `clients_insert_staff` | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
 | AC-CARD-07 | без входу — лише сторінка входу за прямими посиланнями | `src/lib/supabase/proxy.ts`, `src/lib/request-user.ts` (getPageAccess), `src/lib/roles.ts` (pageAccess); GRANT `clients`, `holds` без anon | `tests/db/access.test.ts`, `tests/page-access.test.ts` | реалізовано |
 | AC-CARD-08 | після прострочення утримання клієнт зникає зі списку терапевта | — | — | відкладено (чекає реалізації) |
 | AC-CARD-09 | терапевт без клієнтів — порожній стан | — | — | відкладено (чекає реалізації) |
 | AC-CARD-10 | планувальник і адміністратор бачать усі картки | — | — | відкладено (чекає реалізації) |
 | AC-CARD-11 | користувач без ролі — лише повідомлення про відсутність доступу й «Sign out» | `supabase/migrations/20261027161014_roles_nullable.sql`, `src/components/no-access.tsx`, `src/app/(app)/layout.tsx`, `src/lib/roles.ts` (pageAccess) | `tests/db/access.test.ts`, `tests/page-access.test.ts` | реалізовано |
-| AC-CARD-12 | кілька помилок у картці дитини — усі повідомлення одразу біля полів, дані лишаються | — | — | відкладено (чекає реалізації) |
-| AC-CARD-13 | дублікат картки дитини (ім'я без регістру й пробілів, дата, email опікуна) — відмова | — | — | відкладено (чекає реалізації) |
+| AC-CARD-12 | кілька помилок у картці дитини — усі повідомлення одразу біля полів, дані лишаються | `src/lib/clients.ts` (validateClientCard), `ClientCardForm`; тригер `clients_before_insert` | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
+| AC-CARD-13 | дублікат картки дитини (ім'я без регістру й пробілів, дата, email опікуна) — відмова | `src/lib/clients.ts` (clientInsertErrorMessage); індекс `clients_child_identity_key` | `tests/clients.test.ts`, `tests/db/client-cards.test.ts` | реалізовано |
 | AC-CARD-14 | утримання «Held» робить клієнта своїм лише до початку слоту, «Confirmed» — без обмеження | — | — | відкладено (чекає реалізації) |
 | AC-CARD-15 | порожній список клієнтів для планувальника й адміністратора — повідомлення | — | — | відкладено (чекає реалізації) |
 | AC-CARD-16 | картка, якої не існує: планувальнику — «doesn't exist», терапевту — «no access» | — | — | відкладено (чекає реалізації) |
