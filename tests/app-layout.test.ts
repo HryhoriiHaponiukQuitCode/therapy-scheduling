@@ -43,7 +43,7 @@ describe("getRequestUser", () => {
     });
   });
 
-  it("throws instead of treating a failed profile query as «no role»", async () => {
+  it("AC-CARD-11: збій запиту профілю — помилка, а не стан «без ролі»", async () => {
     supabaseMock.getClaims.mockResolvedValue({ data: { claims: { sub: "user-1", email: "scheduler1@example.test" } } });
     supabaseMock.profile.mockResolvedValue({ data: null, error: { message: "network" } });
     await expect(getRequestUser()).rejects.toThrow("Could not load your profile");

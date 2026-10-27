@@ -6,15 +6,17 @@
 alter table public.profiles drop constraint profiles_role_check;               -- 1) зняти старе правило
 alter table public.profiles alter column role drop not null;                   --    роль може бути відсутня…
 -- 2) наявні дані: до цієї міграції тригер давав кожному новому користувачу Auth default 'therapist'. Справжній
--- терапевт практики має доступність (therapist_availability — сид за email); профіль 'therapist' без неї отримав
--- роль лише за замовчуванням — тепер у нього ролі немає (AC-CARD-11). Ризик: якщо такому акаунту роль давали
--- свідомо, її повертає service_role (npm run users:demo або Dashboard).
+-- терапевт практики має доступність (therapist_availability — сид за email, у застосунку її не редагують) або
+-- утримання й сеанси; профіль 'therapist' без жодного з них отримав роль лише за замовчуванням — тепер у нього
+-- ролі немає (AC-CARD-11). Ризик (зміна даних): якщо такому акаунту роль давали свідомо, її повертає service_role —
+-- npm run users:demo (усі свідомі акаунти — у supabase/demo-users.json) або Dashboard.
 update public.profiles as p
 set role = null
 where p.role = 'therapist'
   and not exists (
     select 1 from public.therapist_availability as a where lower(a.therapist_email) = lower(p.email)
-  );
+  )
+  and not exists (select 1 from public.holds as h where h.therapist_id = p.id);
 alter table public.profiles alter column role drop default;                    -- 3) тригер on_auth_user_created її не ставить
 alter table public.profiles
   add constraint profiles_role_check
