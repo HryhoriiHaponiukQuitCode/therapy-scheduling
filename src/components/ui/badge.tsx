@@ -7,8 +7,9 @@ const STYLE: Record<BadgeStatus, string> = {
   Held: "bg-status-held text-status-held-foreground",
   Confirmed: "bg-status-confirmed text-status-confirmed-foreground",
   Expired: "bg-status-expired text-status-expired-foreground",
-  // «Past» (impl-client-cards, design.md): наявні токени, без нового кольору; відрізняє текст і іконка.
-  Past: "bg-muted text-muted-foreground",
+  // «Past»: токени «Expired» (DESIGN.md, розділ 2: напівпрозоре muted у темній темі не дає 4.5:1); від «Expired»
+  // відрізняють текст і іконка.
+  Past: "bg-status-expired text-status-expired-foreground",
 };
 
 const ICON = { Free: FreeIcon, Held: HeldIcon, Confirmed: CheckIcon, Expired: ExpiredIcon, Past: PastIcon };

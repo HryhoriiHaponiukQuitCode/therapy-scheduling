@@ -8,6 +8,7 @@ import {
   practiceTimeToUtc,
   type HoldListRecord,
 } from "@/lib/slots";
+import { loadHolds } from "@/app/(app)/holds/data";
 
 // Список утримань /holds (holdsList) і статус «Past» (buildDaySlots) з фіксованим now — дані з «Дано» AC PM.
 
@@ -129,5 +130,61 @@ describe("статус «Past»", () => {
     expect(AVAILABILITY_HORIZON_DAYS).toBe(56);
     expect(last).toHaveLength(5);
     expect(beyond).toEqual([]);
+  });
+
+  it("за 8 тижнями лишаються години активних утримань і сеансів — без вільних", () => {
+    const now = at("2026-11-03", 12);
+    const session = hold("s1", "client1", "therapist1", at("2026-12-30", 11), at("2026-10-20", 9), at("2026-10-20", 10));
+    const slots = buildDaySlots({ date: "2026-12-30", availability: window, holds: [session], now });
+    const schedule = buildDaySlots({
+      date: "2026-12-30",
+      availability: [],
+      holds: [session],
+      now,
+      includeHoldHours: true,
+    });
+    expect(slots.map((s) => [s.time, s.status, s.clientName])).toEqual([["11:00", "Confirmed", "client1"]]);
+    expect(schedule.map((s) => [s.time, s.status])).toEqual([["11:00", "Confirmed"]]);
+  });
+});
+
+describe("loadHolds", () => {
+  // Підмінений клієнт: is(колонка, значення) фільтрує рядки, як база; решта фільтрів — без змін.
+  function fakeSupabase(rows: Record<string, unknown>[]) {
+    const filters: [string, unknown][] = [];
+    const query = {
+      select: () => query,
+      is: (column: string, value: unknown) => (filters.push([column, value]), query),
+      gt: () => query,
+      order: () => query,
+      limit: async () => ({ data: rows.filter((row) => filters.every(([c, v]) => row[c] === v)), error: null }),
+    };
+    return { from: () => query } as never;
+  }
+
+  const row = (id: string, created: Date, confirmed: Date | null) => ({
+    id,
+    therapist_id: "t1",
+    client_id: "c1",
+    slot_start: at("2026-11-05", 10).toISOString(),
+    created_at: created.toISOString(),
+    confirmed_at: confirmed?.toISOString() ?? null,
+    clients: { full_name: "client1" },
+    therapist: { full_name: "therapist1", email: "therapist1@example.test" },
+  });
+
+  it("AC-HOLD-37: прострочене утримання client1 сховано, коли його повторне утримання вже підтверджено", async () => {
+    const supabase = fakeSupabase([
+      row("h1", at("2026-11-02", 14, 30), null),
+      row("h3", at("2026-11-03", 15), at("2026-11-03", 15, 10)),
+    ]);
+    const { holds, error } = await loadHolds(supabase, at("2026-11-03", 16));
+    expect(error).toBe(false);
+    expect(holds).toEqual([]);
+  });
+
+  it("ім'я терапевта — з профілю, вкладеного в утримання", async () => {
+    const { holds } = await loadHolds(fakeSupabase([row("h1", at("2026-11-03", 15), null)]), at("2026-11-03", 16));
+    expect(holds.map((h) => [h.clientName, h.therapistName, h.status])).toEqual([["client1", "therapist1", "Held"]]);
   });
 });

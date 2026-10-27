@@ -2,11 +2,11 @@ import type { createClient } from "@/lib/supabase/server";
 import {
   addDays,
   buildDaySlots,
+  holdRecord,
   isoWeekday,
   isPracticeDate,
   practiceDate,
   type DaySlot,
-  type HoldRecord,
 } from "@/lib/slots";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -43,13 +43,7 @@ export async function loadMySchedule(
     return { weekStart, days: [], error: true };
   }
 
-  const records: HoldRecord[] = holds.data.map((row) => ({
-    id: row.id,
-    slotStart: new Date(row.slot_start),
-    createdAt: new Date(row.created_at),
-    confirmedAt: row.confirmed_at ? new Date(row.confirmed_at) : null,
-    clientName: row.client_name,
-  }));
+  const records = holds.data.map((row) => holdRecord(row, row.client_name));
 
   const days = Array.from({ length: 7 }, (_, i) => {
     const date = addDays(weekStart, i);

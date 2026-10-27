@@ -53,7 +53,7 @@
 | `status-free` / `-foreground` | бейдж «Free» | `#e0f4e7` / `#1d6942` | `#14301f` / `#a3e3bd` | `bg-status-free`, `text-status-free-foreground` |
 | `status-held` / `-foreground` | бейдж «Held» | `#fbf0cf` / `#76520a` | `#2e260d` / `#f0d488` | `bg-status-held`, `text-status-held-foreground` |
 | `status-confirmed` / `-foreground` | бейдж «Confirmed» | `#e4e9ff` / `#2a3c9a` | `#1e2650` / `#bcc8ff` | `bg-status-confirmed`, `text-status-confirmed-foreground` |
-| `status-expired` / `-foreground` | бейдж «Expired» | `#eaedf3` / `#4f566b` | `#262b3d` / `#c3c7d4` | `bg-status-expired`, `text-status-expired-foreground` |
+| `status-expired` / `-foreground` | бейдж «Expired» і «Past» | `#eaedf3` / `#4f566b` | `#262b3d` / `#c3c7d4` | `bg-status-expired`, `text-status-expired-foreground` |
 
 Лише в `globals.css` (без класів Tailwind, у компонентних класах `.glass`, `.slot-*`, `.avatar`):
 
@@ -70,11 +70,13 @@
 | Held | текст «Held» + годинник | `accent` + діагональна штриховка 135° (`hatch`, смуга 2px кожні 12px) |
 | Confirmed | текст «Confirmed» + галочка | суцільне `accent` з тінню |
 | Expired | текст «Expired» + перекреслене коло | приглушене `card` |
+| Past | текст «Past» + коло зі стрілкою назад, кольори `status-expired` | приглушене `card`, як «Expired» |
 
 ### Контраст
 
 WCAG 2.1, найгірший випадок: напівпрозорі поверхні (`card`, `accent`, `secondary`) пораховано поверх кожного з
-кольорів фону (`bg-1`, `bg-2` і трьох плям) і взято найменше значення.
+кольорів фону (`bg-1`, `bg-2` і трьох плям) і взято найменше значення. Бейдж «Past» не бере `muted`: у темній темі
+`muted-foreground` на `muted` дає лише 4.37 (поверх `card` — 3.68), тому він на непрозорих токенах `status-expired`.
 
 | Пара | Світла | Темна | Норма |
 |---|---|---|---|
@@ -90,7 +92,7 @@ WCAG 2.1, найгірший випадок: напівпрозорі повер
 | `status-free-foreground` на `status-free` | 5.80 | 9.70 | ≥ 4.5 |
 | `status-held-foreground` на `status-held` | 6.19 | 10.35 | ≥ 4.5 |
 | `status-confirmed-foreground` на `status-confirmed` | 7.87 | 8.87 | ≥ 4.5 |
-| `status-expired-foreground` на `status-expired` | 6.23 | 8.32 | ≥ 4.5 |
+| `status-expired-foreground` на `status-expired` (і бейдж «Past») | 6.23 | 8.32 | ≥ 4.5 |
 | `now-foreground` на `now` | 5.87 | 8.52 | ≥ 4.5 |
 | `input` на `card` | 3.25 | 3.67 | ≥ 3 |
 | `input` на `accent` (межа поля на його тлі) | 3.45 | 3.24 | ≥ 3 |
@@ -137,7 +139,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 | `Field` (`ui/field`) | `error?` | `Label` + контрол + помилка поля `text-destructive` під ним |
 | `Select` (`ui/select`) | — | власний select-only combobox (WAI-ARIA): Enter / Space / ↓ відкривають, ↑ ↓ Home End, Enter вибирає, Esc закриває й повертає фокус; значення — прихований `<input>` |
 | `Panel` (`ui/panel`) | `title?`, `description?`, `actions?` | скляна картка `<section aria-labelledby>`; аналог `Card` |
-| `StatusBadge` (`ui/badge`) | `Free`, `Held`, `Confirmed`, `Expired` | статус — завжди текст PM + іконка, не лише колір |
+| `StatusBadge` (`ui/badge`) | `Free`, `Held`, `Confirmed`, `Expired`, `Past` | статус — завжди текст PM + іконка, не лише колір |
 | `Avatar` (`ui/avatar`) | розмір через `className` | коло з ініціалами, `aria-hidden` (імʼя завжди поруч текстом) |
 | `Skeleton` (`ui/skeleton`) | `SkeletonField`, `SkeletonRows` | стан завантаження в `loading.tsx`: ті самі панелі, пульсуючі блоки `accent` |
 

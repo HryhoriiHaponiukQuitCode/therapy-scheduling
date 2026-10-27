@@ -112,12 +112,17 @@ export type HoldRow = {
 };
 
 export function toHoldRecord(h: HoldRow): HoldRecord {
+  return holdRecord(h, h.clients?.full_name ?? "—");
+}
+
+// Рядок утримання з уже відомим іменем клієнта → HoldRecord (toHoldRecord і функція my_schedule).
+export function holdRecord(h: Omit<HoldRow, "clients">, clientName: string): HoldRecord {
   return {
     id: h.id,
     slotStart: new Date(h.slot_start),
     createdAt: new Date(h.created_at),
     confirmedAt: h.confirmed_at ? new Date(h.confirmed_at) : null,
-    clientName: h.clients?.full_name ?? "—",
+    clientName,
   };
 }
 
@@ -149,7 +154,8 @@ export type AvailabilityWindow = { start_hour: number; end_hour: number };
 
 // Слоти вибраного дня: години доступності терапевта, кожна — вільна, утримана, підтверджена або минула.
 // Прострочене утримання слот не займає (AC-HOLD-06). Утримати можна лише вільний слот, що ще не почався (AC-HOLD-01);
-// слот, що почався без активного утримання, — «Past» (AC-HOLD-32). Далі за 8 тижнів від сьогодні слотів немає.
+// слот, що почався без активного утримання, — «Past» (AC-HOLD-32). Далі за 8 тижнів від сьогодні вільних слотів
+// немає: лишаються лише години активних утримань і сеансів.
 export function buildDaySlots(input: {
   date: string;
   availability: AvailabilityWindow[];
@@ -158,17 +164,20 @@ export function buildDaySlots(input: {
   // Розклад терапевта: показати й години активних утримань чи сеансів поза поточною доступністю.
   includeHoldHours?: boolean;
 }): DaySlot[] {
-  if (input.date > addDays(practiceDate(input.now), AVAILABILITY_HORIZON_DAYS)) return [];
+  const beyondHorizon = input.date > addDays(practiceDate(input.now), AVAILABILITY_HORIZON_DAYS);
+  const active = new Set(
+    input.holds.filter((hold) => holdStatus(hold, input.now) !== "Expired").map((h) => h.slotStart.getTime()),
+  );
+  const isActive = (hour: number) => active.has(practiceTimeToUtc(input.date, hour).getTime());
   const hours = new Set<number>();
   for (const window of input.availability) {
-    for (let hour = window.start_hour; hour < window.end_hour; hour++) hours.add(hour);
+    for (let hour = window.start_hour; hour < window.end_hour; hour++) {
+      if (!beyondHorizon || isActive(hour)) hours.add(hour);
+    }
   }
   if (input.includeHoldHours) {
-    const active = new Set(
-      input.holds.filter((hold) => holdStatus(hold, input.now) !== "Expired").map((h) => h.slotStart.getTime()),
-    );
     for (let hour = 0; hour < 24; hour++) {
-      if (active.has(practiceTimeToUtc(input.date, hour).getTime())) hours.add(hour);
+      if (isActive(hour)) hours.add(hour);
     }
   }
 
