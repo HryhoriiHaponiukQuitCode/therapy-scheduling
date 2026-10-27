@@ -6,6 +6,7 @@ const TEXTURE: Record<BadgeStatus, string> = {
   Held: "slot-held",
   Confirmed: "slot-confirmed",
   Expired: "slot-expired",
+  Past: "slot-expired", // приглушена картка, як у «Expired»: слот уже не доступний
 };
 
 // Картка слота (розділ 2.3): фактура за статусом (пунктир / штриховка / суцільне / приглушене скло), імʼя клієнта

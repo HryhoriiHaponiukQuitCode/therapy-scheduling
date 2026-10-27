@@ -52,6 +52,7 @@ export async function holdSlot(_prevState: HoldSlotState, formData: FormData): P
   }
 
   revalidatePath("/slots");
+  revalidatePath("/holds");
   return { status: "success", message: "Slot held for 24 hours." };
 }
 
@@ -86,5 +87,6 @@ export async function confirmHold(
   }
 
   revalidatePath("/slots");
+  revalidatePath("/holds");
   return { status: "success", message: "Hold confirmed. The slot is now a session." };
 }

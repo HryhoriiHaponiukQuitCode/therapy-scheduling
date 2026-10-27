@@ -18,14 +18,13 @@ import { NoAccess } from "@/components/no-access";
 import { PageHeader } from "@/components/page-header";
 import { Panel } from "@/components/ui/panel";
 import { SlotsNavigation } from "@/components/slots-navigation";
-import { StatusBadge } from "@/components/ui/badge";
 import { loadDayView, type TherapistDay } from "./data";
 import { ConfirmHoldForm } from "./confirm-hold-form";
 import { HoldSlotForm } from "./hold-slot-form";
 
-// Слоти вибраних терапевтів на вибраний день зі статусами (AC-HOLD-01, 05, 06, 18, 24) і прострочені утримання
-// (AC-HOLD-20). Вигляд — DESIGN.md, розділи 4.2 і 5: ліворуч GET-форми «Therapists» (кілька) і «Day»,
-// праворуч спільна погодинна сітка з колонкою на кожного терапевта і «Expired holds».
+// Слоти вибраних терапевтів на вибраний день зі статусами (AC-HOLD-01, 05, 06, 18, 24, 32, 33). Прострочені й
+// чинні утримання — окрема сторінка /holds. Вигляд — DESIGN.md, розділи 4.2 і 5: ліворуч GET-форми «Therapists»
+// (кілька) і «Day», праворуч спільна погодинна сітка з колонкою на кожного терапевта.
 export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
   // Перевірка доступу — до будь-якого запиту даних: терапевт за прямим посиланням бачить лише відмову (AC-HOLD-44).
   const access = await getPageAccess(STAFF_ROLES, STAFF_ONLY_PAGE_MESSAGE);
@@ -46,10 +45,6 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
   // Форма утримання з пошуком — і коли пошук нічого не знайшов: інакше не було б де змінити запит.
   const showHoldForm = !view.clientsError && (view.clients.length > 0 || view.q !== "");
   const withSlots = view.days.some((day) => day.slots.length > 0);
-  // AC-HOLD-24: терапевт без жодного слоту цього дня — лише повідомлення в його колонці, його прострочених
-  // утримань у панелі «Expired holds» не показуємо.
-  const withSlotIds = new Set(view.days.filter((day) => day.slots.length > 0).map((day) => day.therapist.id));
-  const expired = view.expired.filter((hold) => withSlotIds.has(hold.therapistId));
 
   const column = ({ therapist, slots }: TherapistDay): DayGridColumn => {
     const free = slots.filter((slot) => slot.status === "Free").length;
@@ -238,25 +233,6 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
             )}
           </Panel>
 
-          {/* AC-HOLD-24: у дні без жодного слоту — лише повідомлення, без інших розділів. */}
-          {expired.length > 0 ? (
-            <Panel
-              id="expired-holds-title"
-              title="Expired holds"
-              description="Upcoming slots of these therapists not confirmed within 24 hours — they are free again."
-            >
-              <ul role="list" className="m-0 flex list-none flex-col gap-2 p-0" data-testid="expired-holds" aria-label="Expired holds">
-                {expired.map((hold) => (
-                  <li key={hold.id} className="slot-expired flex flex-wrap items-center gap-x-3.5 gap-y-1.5 rounded-lg px-3.5 py-3">
-                    <b className="font-semibold">{formatPracticeTime(hold.slotStart)}</b>
-                    <span>{hold.clientName}</span>
-                    <span className="text-muted-foreground">{hold.therapistName}</span>
-                    <StatusBadge status="Expired" />
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-          ) : null}
         </div>
       </SlotsNavigation>
     </>

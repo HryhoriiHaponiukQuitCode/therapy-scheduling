@@ -51,6 +51,15 @@ export function ScheduleIcon(props: IconProps) {
   );
 }
 
+// Пункт смуги «Holds»: пісочний годинник — утримання на 24 години.
+export function HoldsIcon(props: IconProps) {
+  return (
+    <svg {...base("0 0 18 18", props)} strokeWidth={1.4}>
+      <path d="M5 2.5h8M5 15.5h8M6 2.5c0 3.5 6 3.5 6 6.5s-6 3-6 6.5M12 2.5c0 3.5-6 3.5-6 6.5s6 3 6 6.5" />
+    </svg>
+  );
+}
+
 export function CalendarIcon(props: IconProps) {
   return (
     <svg {...base("0 0 18 18", props)} strokeWidth={1.4}>
@@ -133,6 +142,16 @@ export function ExpiredIcon(props: IconProps) {
     <svg {...base("0 0 12 12", props)} strokeWidth={1.4}>
       <circle cx="6" cy="6" r="4.2" />
       <path d="M3.2 8.8l5.6-5.6" />
+    </svg>
+  );
+}
+
+// «Past»: коло зі стрілкою годинника назад (до 9-ї) — відрізняється від «Held» без кольору.
+export function PastIcon(props: IconProps) {
+  return (
+    <svg {...base("0 0 12 12", props)} strokeWidth={1.4}>
+      <circle cx="6" cy="6" r="4.2" />
+      <path d="M6 3.6V6H3.8" />
     </svg>
   );
 }

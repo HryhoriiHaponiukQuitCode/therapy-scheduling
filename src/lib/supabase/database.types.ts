@@ -175,6 +175,19 @@ export type Database = {
         };
         Returns: Database["public"]["Tables"]["holds"]["Row"];
       };
+      my_schedule: {
+        Args: {
+          p_from: string;
+          p_to: string;
+        };
+        Returns: {
+          id: string;
+          slot_start: string;
+          created_at: string;
+          confirmed_at: string | null;
+          client_name: string;
+        }[];
+      };
     };
     Enums: {
       [_ in never]: never;

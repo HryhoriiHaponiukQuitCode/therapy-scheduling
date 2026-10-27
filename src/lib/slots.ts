@@ -5,6 +5,8 @@
 export const PRACTICE_TIME_ZONE = "America/Los_Angeles";
 export const HOLD_MINUTES = 1440;
 export const NO_FREE_SLOTS_MESSAGE = "No free slots on this day.";
+// Доступність — на 8 тижнів уперед від сьогодні (сид PM); те саме обмеження — у private.hold_slot (SLOT_UNKNOWN).
+export const AVAILABILITY_HORIZON_DAYS = 56;
 
 const wallClock = new Intl.DateTimeFormat("en-US", {
   timeZone: PRACTICE_TIME_ZONE,
@@ -110,12 +112,17 @@ export type HoldRow = {
 };
 
 export function toHoldRecord(h: HoldRow): HoldRecord {
+  return holdRecord(h, h.clients?.full_name ?? "—");
+}
+
+// Рядок утримання з уже відомим іменем клієнта → HoldRecord (toHoldRecord і функція my_schedule).
+export function holdRecord(h: Omit<HoldRow, "clients">, clientName: string): HoldRecord {
   return {
     id: h.id,
     slotStart: new Date(h.slot_start),
     createdAt: new Date(h.created_at),
     confirmedAt: h.confirmed_at ? new Date(h.confirmed_at) : null,
-    clientName: h.clients?.full_name ?? "—",
+    clientName,
   };
 }
 
@@ -129,7 +136,8 @@ export function holdStatus(hold: Pick<HoldRecord, "createdAt" | "confirmedAt">, 
   return now.getTime() < heldUntil(hold).getTime() ? "Held" : "Expired";
 }
 
-export type SlotStatus = "Free" | "Held" | "Confirmed";
+// «Past» — слот почався (з моменту початку включно) без активного утримання чи сеансу (AC-HOLD-32).
+export type SlotStatus = "Free" | "Held" | "Confirmed" | "Past";
 
 export type DaySlot = {
   start: Date;
@@ -144,8 +152,10 @@ export type DaySlot = {
 
 export type AvailabilityWindow = { start_hour: number; end_hour: number };
 
-// Слоти вибраного дня: години доступності терапевта, кожна — вільна, утримана або підтверджена.
-// Прострочене утримання слот не займає (AC-HOLD-06). Утримати можна лише вільний слот, що ще не почався (AC-HOLD-01).
+// Слоти вибраного дня: години доступності терапевта, кожна — вільна, утримана, підтверджена або минула.
+// Прострочене утримання слот не займає (AC-HOLD-06). Утримати можна лише вільний слот, що ще не почався (AC-HOLD-01);
+// слот, що почався без активного утримання, — «Past» (AC-HOLD-32). Далі за 8 тижнів від сьогодні вільних слотів
+// немає: лишаються лише години активних утримань і сеансів.
 export function buildDaySlots(input: {
   date: string;
   availability: AvailabilityWindow[];
@@ -154,16 +164,20 @@ export function buildDaySlots(input: {
   // Розклад терапевта: показати й години активних утримань чи сеансів поза поточною доступністю.
   includeHoldHours?: boolean;
 }): DaySlot[] {
+  const beyondHorizon = input.date > addDays(practiceDate(input.now), AVAILABILITY_HORIZON_DAYS);
+  const active = new Set(
+    input.holds.filter((hold) => holdStatus(hold, input.now) !== "Expired").map((h) => h.slotStart.getTime()),
+  );
+  const isActive = (hour: number) => active.has(practiceTimeToUtc(input.date, hour).getTime());
   const hours = new Set<number>();
   for (const window of input.availability) {
-    for (let hour = window.start_hour; hour < window.end_hour; hour++) hours.add(hour);
+    for (let hour = window.start_hour; hour < window.end_hour; hour++) {
+      if (!beyondHorizon || isActive(hour)) hours.add(hour);
+    }
   }
   if (input.includeHoldHours) {
-    const active = new Set(
-      input.holds.filter((hold) => holdStatus(hold, input.now) !== "Expired").map((h) => h.slotStart.getTime()),
-    );
     for (let hour = 0; hour < 24; hour++) {
-      if (active.has(practiceTimeToUtc(input.date, hour).getTime())) hours.add(hour);
+      if (isActive(hour)) hours.add(hour);
     }
   }
 
@@ -176,37 +190,47 @@ export function buildDaySlots(input: {
         .map((hold) => ({ hold, status: holdStatus(hold, input.now) }))
         .find((entry): entry is { hold: HoldRecord; status: "Held" | "Confirmed" } => entry.status !== "Expired");
 
-      const status: SlotStatus = active ? active.status : "Free";
+      const status: SlotStatus = active ? active.status : start.getTime() <= input.now.getTime() ? "Past" : "Free";
       return {
         start,
         time: `${String(hour).padStart(2, "0")}:00`,
         status,
         clientName: active ? active.hold.clientName : null,
         heldUntil: active && active.status === "Held" ? heldUntil(active.hold) : null,
-        canHold: status === "Free" && start.getTime() > input.now.getTime(),
+        canHold: status === "Free",
         holdId: active && active.status === "Held" ? active.hold.id : null,
         canConfirm: active?.status === "Held" && start.getTime() > input.now.getTime(),
       };
     });
 }
 
-export type ExpiredHold = { id: string; clientName: string; slotStart: Date };
+// Утримання для списку /holds: з клієнтом і терапевтом.
+export type HoldListRecord = HoldRecord & { clientId: string; therapistId: string; therapistName: string };
+export type HoldListItem = HoldListRecord & { status: "Held" | "Expired"; heldUntil: Date };
 
-// AC-HOLD-20: прострочені утримання (статус «Expired») для планувальника й адміністратора; їхні слоти вільні.
-// Лише слоти, що ще не почалися й не зайняті іншим активним утриманням чи сеансом: їх можна утримати знову.
-export function expiredHolds(holds: HoldRecord[], now: Date): ExpiredHold[] {
-  const occupied = new Set(
-    holds.filter((hold) => holdStatus(hold, now) !== "Expired").map((hold) => hold.slotStart.getTime()),
-  );
+// Список утримань планувальника (AC-HOLD-28, 29, 38, 42): лише «Held» і «Expired», чиї слоти ще не почалися, за часом
+// слоту. Прострочене приховуємо, лише коли пізніше той самий клієнт утримав той самий слот (AC-HOLD-37); за іншим
+// клієнтом обидва записи лишаються до початку слоту (AC-HOLD-43). На тому самому слоті новіше — вище.
+export function holdsList(holds: HoldListRecord[], now: Date): HoldListItem[] {
+  const sameSlot = (a: HoldListRecord, b: HoldListRecord) =>
+    a.therapistId === b.therapistId && a.slotStart.getTime() === b.slotStart.getTime();
   return holds
+    .map((hold) => ({ ...hold, status: holdStatus(hold, now), heldUntil: heldUntil(hold) }))
+    .filter((hold): hold is HoldListItem => hold.status !== "Confirmed" && hold.slotStart.getTime() > now.getTime())
     .filter(
       (hold) =>
-        holdStatus(hold, now) === "Expired" &&
-        hold.slotStart.getTime() > now.getTime() &&
-        !occupied.has(hold.slotStart.getTime()),
+        hold.status === "Held" ||
+        !holds.some(
+          (other) =>
+            other.id !== hold.id &&
+            other.clientId === hold.clientId &&
+            sameSlot(other, hold) &&
+            other.createdAt.getTime() > hold.createdAt.getTime(),
+        ),
     )
-    .sort((a, b) => a.slotStart.getTime() - b.slotStart.getTime())
-    .map((hold) => ({ id: hold.id, clientName: hold.clientName, slotStart: hold.slotStart }));
+    .sort(
+      (a, b) => a.slotStart.getTime() - b.slotStart.getTime() || b.createdAt.getTime() - a.createdAt.getTime(),
+    );
 }
 
 // AC-HOLD-18: повідомлення, коли в дні немає жодного вільного слоту.

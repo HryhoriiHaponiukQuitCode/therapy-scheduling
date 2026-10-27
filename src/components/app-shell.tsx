@@ -4,7 +4,7 @@ import { getRequestTheme } from "@/lib/request-theme";
 import { isStaff, type AppRole } from "@/lib/roles";
 import type { Theme } from "@/lib/theme";
 import { Avatar } from "./ui/avatar";
-import { BrandMark, HomeIcon, ScheduleIcon, SignOutIcon, SlotsIcon, UsersIcon } from "./icons";
+import { BrandMark, HoldsIcon, HomeIcon, ScheduleIcon, SignOutIcon, SlotsIcon, UsersIcon } from "./icons";
 import { RailLink, RailSignOut, RailThemeToggle } from "./rail-link";
 import { ROUTE_STATUS_ID } from "./route-status-id";
 
@@ -25,6 +25,7 @@ export function Rail({ user, theme }: { user: ShellUser; theme: Theme }) {
         {/* Клієнти — усім ролям: терапевт бачить лише своїх (AC-CARD-04); слоти — лише admin і scheduler (AC-HOLD-44). */}
         {user.role ? <RailLink href="/clients" label="Clients" icon={<UsersIcon />} /> : null}
         {isStaff(user.role) ? <RailLink href="/slots" label="Slots" icon={<SlotsIcon />} /> : null}
+        {isStaff(user.role) ? <RailLink href="/holds" label="Holds" icon={<HoldsIcon />} /> : null}
         {user.role === "therapist" ? <RailLink href="/my-schedule" label="My schedule" icon={<ScheduleIcon />} /> : null}
       </nav>
       <div className="mt-auto flex flex-col items-center gap-3.5 max-[760px]:mt-0 max-[760px]:flex-row max-[760px]:gap-1">
