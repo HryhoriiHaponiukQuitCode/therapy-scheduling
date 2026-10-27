@@ -5,7 +5,8 @@ import { Avatar } from "./avatar";
 import { controlClass } from "./input";
 import { ChevronDownIcon } from "../icons";
 
-export type SelectOption = { value: string; label: string };
+// hint — другий рядок варіанта приглушеним текстом (наприклад, email опікуна біля дитини).
+export type SelectOption = { value: string; label: string; hint?: string };
 
 // Власний Select (розділ 4.1): патерн WAI-ARIA «select-only combobox», без нативного <select>.
 // Тригер — пігулка 48px з колом ініціалів вибраного; спливаюча панель accent, варіанти 48px з ініціалами.
@@ -177,7 +178,12 @@ export function Select({
                 } ${isSelected ? "font-bold" : ""}`}
               >
                 {avatars ? <Avatar name={option.label} className="size-8 text-[11px]" /> : null}
-                <span className="flex-1">{option.label}</span>
+                <span className="min-w-0 flex-1">
+                  {option.label}
+                  {option.hint ? (
+                    <span className="block text-xs font-medium break-all text-muted-foreground">{option.hint}</span>
+                  ) : null}
+                </span>
                 {isSelected ? (
                   <svg aria-hidden viewBox="0 0 12 12" className="size-3.5 flex-none text-primary" fill="none" stroke="currentColor" strokeWidth={2}>
                     <path d="M2 6.5l2.5 2.5L10 3.5" />

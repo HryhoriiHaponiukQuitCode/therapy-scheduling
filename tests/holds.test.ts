@@ -119,6 +119,15 @@ describe("slot-holds: утримання слоту", () => {
     ]);
   });
 
+  it("AC-HOLD-25: client1 уже має утримання на цей час в іншого терапевта — повідомлення PM", async () => {
+    supabaseMock.rpc.mockResolvedValue({ data: null, error: { message: "CLIENT_BUSY" } });
+
+    const state = await holdSlot({ status: "idle" }, form("c1111111-1111-4111-8111-111111111111"));
+
+    expect(state).toEqual({ status: "error", message: "This client already has a hold or session at this time." });
+    expect(HOLD_MESSAGES.CLIENT_BUSY).toBe("This client already has a hold or session at this time.");
+  });
+
   it("AC-HOLD-07: слот 2026-11-03 10:00 о 10:05 — утримання не створюється, повідомлення PM", async () => {
     vi.setSystemTime(at("2026-11-03", 10, 5));
 
@@ -157,10 +166,10 @@ describe("slot-holds: утримання слоту", () => {
 
   it("AC-HOLD-10: створеного клієнта «Client Three» можна вибрати під час утримання слоту", async () => {
     const options = toClientOptions([
-      { id: "c1111111-1111-4111-8111-111111111111", full_name: "client1" },
-      { id: "c3333333-3333-4333-8333-333333333333", full_name: "Client Three" },
+      { id: "c1111111-1111-4111-8111-111111111111", full_name: "client1", client_type: "adult", guardian_email: null },
+      { id: "c3333333-3333-4333-8333-333333333333", full_name: "Client Three", client_type: "adult", guardian_email: null },
     ]);
-    expect(options).toContainEqual({ id: "c3333333-3333-4333-8333-333333333333", name: "Client Three" });
+    expect(options).toContainEqual({ id: "c3333333-3333-4333-8333-333333333333", name: "Client Three", guardianEmail: null });
 
     supabaseMock.rpc.mockResolvedValue({ data: { id: "h3" }, error: null });
     const state = await holdSlot({ status: "idle" }, form("c3333333-3333-4333-8333-333333333333"));

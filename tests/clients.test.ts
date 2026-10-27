@@ -167,7 +167,7 @@ describe("картка дорослого", () => {
 });
 
 describe("картка дитини", () => {
-  it("картка дитини з опікуном: без власного email, email опікуна малими літерами", async () => {
+  it("AC-CARD-02: scheduler1 створює картку дитини Client Seven з опікуном: без власного email, email опікуна малими літерами", async () => {
     await run(child({ guardian_email: " Guardian7@Example.TEST " }));
     expect(supabaseMock.insert).toHaveBeenCalledWith("clients", {
       client_type: "child",

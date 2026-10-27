@@ -39,7 +39,7 @@
   - AC-CARD-06 — PGlite, кількість карток незмінна;
   - AC-CARD-13, AC-HOLD-16, AC-HOLD-34 — PGlite, 23505;
   - AC-CARD-03, AC-CARD-12, AC-HOLD-11, AC-HOLD-15, AC-HOLD-39, AC-HOLD-41 — `validateClientCard` і constraint.
-- [ ] 2.6 Мутаційна перевірка: локальна таблиця. У CI — червоний прогін AC-CARD-06:
+- [x] 2.6 Мутаційна перевірка: локальна таблиця. У CI — червоний прогін AC-CARD-06:
   - `mutation:` — `with check (true)` у `clients_insert_staff` нової міграції;
   - потім revert.
   Done when: AC-CARD-01, AC-CARD-03, AC-CARD-06, AC-CARD-12, AC-CARD-13, AC-HOLD-10, AC-HOLD-11, AC-HOLD-15,
@@ -54,21 +54,21 @@
 - [x] 3.4 Тести відмов з AC ID: AC-CARD-05, AC-CARD-08, AC-CARD-14 (PGlite, 0 рядків, дані незмінні), AC-CARD-16
   (`missingCardMessage`, `isClientId`).
 - [x] 3.5 Тести дозволених дій: AC-CARD-04, AC-CARD-09, AC-CARD-10, AC-CARD-15.
-- [ ] 3.6 Мутаційна перевірка: локальна таблиця. У CI — червоний прогін AC-CARD-05:
+- [x] 3.6 Мутаційна перевірка: локальна таблиця. У CI — червоний прогін AC-CARD-05:
   - `mutation:` — `using (true)` у `clients_select_own_therapist`;
   - потім revert.
   Done when: AC-CARD-04, AC-CARD-05, AC-CARD-08, AC-CARD-09, AC-CARD-10, AC-CARD-14, AC-CARD-15, AC-CARD-16.
 
 ## 4. Пошук клієнта й правила утримання
 
-- [ ] 4.1 Міграція `hold_slot_client_busy`: `create or replace private.hold_slot` — блокування за клієнтом і часом,
+- [x] 4.1 Міграція `hold_slot_client_busy`: `create or replace private.hold_slot` — блокування за клієнтом і часом,
   `CLIENT_BUSY`.
-- [ ] 4.2 Мапінг тексту «This client already has a hold or session at this time.».
-- [ ] 4.3 Пошук клієнта на `/slots` (`q`: ім'я, email, email опікуна; біля дитини — email опікуна).
-- [ ] 4.4 Тести відмов з AC ID: AC-HOLD-25 (PGlite: `CLIENT_BUSY`, утримань не додалось), AC-HOLD-36 (PGlite:
+- [x] 4.2 Мапінг тексту «This client already has a hold or session at this time.».
+- [x] 4.3 Пошук клієнта на `/slots` (`q`: ім'я, email, email опікуна; біля дитини — email опікуна).
+- [x] 4.4 Тести відмов з AC ID: AC-HOLD-25 (PGlite: `CLIENT_BUSY`, утримань не додалось), AC-HOLD-36 (PGlite:
   `HOLD_CONFIRMED`, `confirmed_at` незмінний).
-- [ ] 4.5 Тести дозволених дій: AC-HOLD-26, AC-HOLD-27, AC-HOLD-37, AC-CARD-02.
-- [ ] 4.6 Мутаційна перевірка: локальна таблиця (прибрати перевірку `CLIENT_BUSY` у новій міграції → AC-HOLD-25
+- [x] 4.5 Тести дозволених дій: AC-HOLD-26, AC-HOLD-27, AC-HOLD-37, AC-CARD-02.
+- [x] 4.6 Мутаційна перевірка: локальна таблиця (прибрати перевірку `CLIENT_BUSY` у новій міграції → AC-HOLD-25
   червоний).
   Done when: AC-CARD-02, AC-HOLD-25, AC-HOLD-26, AC-HOLD-27, AC-HOLD-36, AC-HOLD-37.
 

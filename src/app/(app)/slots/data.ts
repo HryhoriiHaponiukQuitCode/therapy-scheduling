@@ -1,4 +1,5 @@
 import type { createClient } from "@/lib/supabase/server";
+import { clientSearchFilter } from "@/lib/clients";
 import {
   addDays,
   buildDaySlots,
@@ -16,11 +17,34 @@ import {
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export type Therapist = { id: string; name: string; email: string };
-export type ClientOption = { id: string; name: string };
+export type ClientOption = { id: string; name: string; guardianEmail: string | null };
 
 // Клієнти для вибору під час утримання (AC-HOLD-10); порядок задає запит (.order("full_name")).
-export function toClientOptions(rows: { id: string; full_name: string }[]): ClientOption[] {
-  return rows.map((row) => ({ id: row.id, name: row.full_name }));
+// Біля дитини показуємо email опікуна (AC-CARD-02), тож він їде в опцію.
+export function toClientOptions(
+  rows: { id: string; full_name: string; client_type: string; guardian_email: string | null }[],
+): ClientOption[] {
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.full_name,
+    guardianEmail: row.client_type === "child" ? row.guardian_email : null,
+  }));
+}
+
+// Клієнти для утримання: усі або ті, чиє ім'я, email чи email опікуна містять q (RLS: admin і scheduler бачать усіх).
+function clientsQuery(supabase: ServerClient, q: string) {
+  const query = supabase.from("clients").select("id, full_name, client_type, guardian_email").order("full_name");
+  const filter = clientSearchFilter(q);
+  return filter ? query.or(filter) : query;
+}
+
+// Варіанти Select «Client to hold a slot for»: біля дитини — email опікуна (AC-CARD-02).
+export function toSelectOptions(clients: ClientOption[]): { value: string; label: string; hint?: string }[] {
+  return clients.map((client) => ({
+    value: client.id,
+    label: client.name,
+    hint: client.guardianEmail ? `Child · guardian ${client.guardianEmail}` : undefined,
+  }));
 }
 
 export type TherapistDay = { therapist: Therapist; slots: DaySlot[] };
@@ -38,6 +62,7 @@ export type DayView = {
   today: string; // «сьогодні» в America/Los_Angeles — для Calendar
   days: TherapistDay[]; // колонка на кожного вибраного терапевта, у порядку списку
   expired: TherapistExpiredHold[];
+  q: string; // пошук клієнта для утримання (AC-CARD-02)
   clients: ClientOption[];
   clientsError: boolean;
   error: boolean;
@@ -59,11 +84,12 @@ export function selectTherapists(therapists: Therapist[], ids: string[]): Therap
 // RLS: admin і scheduler бачать профілі терапевтів і всі утримання.
 export async function loadDayView(
   supabase: ServerClient,
-  params: { therapists: string[]; date?: string },
+  params: { therapists: string[]; date?: string; q?: string },
 ): Promise<DayView> {
   const now = new Date();
   const date = isPracticeDate(params.date) ? params.date : practiceDate(now);
   const today = practiceDate(now);
+  const q = params.q?.trim() ?? "";
 
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
@@ -77,7 +103,7 @@ export async function loadDayView(
     email: p.email ?? "",
   }));
   const selected = selectTherapists(therapists, params.therapists);
-  const empty = { therapists, selected, date, today, days: [], expired: [], clients: [], clientsError: false };
+  const empty = { therapists, selected, date, today, days: [], expired: [], q, clients: [], clientsError: false };
 
   if (profilesError || selected.length === 0) {
     return { ...empty, error: Boolean(profilesError) };
@@ -99,7 +125,7 @@ export async function loadDayView(
       .in("therapist_id", ids)
       .gte("slot_start", dayStart)
       .lt("slot_start", dayEnd),
-    supabase.from("clients").select("id, full_name").order("full_name"),
+    clientsQuery(supabase, q),
     // AC-HOLD-20: огляд прострочених утримань терапевтів на майбутні слоти, незалежно від вибраного дня;
     // запит і ліміт 200 — на кожного терапевта, як і для одного.
     Promise.all(
@@ -150,6 +176,7 @@ export async function loadDayView(
     today,
     days,
     expired,
+    q,
     clients: clients.error ? [] : toClientOptions(clients.data),
     clientsError: Boolean(clients.error),
     error: false,

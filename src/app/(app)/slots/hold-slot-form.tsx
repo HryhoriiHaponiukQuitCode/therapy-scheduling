@@ -6,7 +6,7 @@ import { Field } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
 import { holdFormId } from "@/lib/holds";
 import { holdSlot, type HoldSlotState } from "./actions";
-import type { ClientOption } from "./data";
+import { toSelectOptions, type ClientOption } from "./data";
 
 const initialState: HoldSlotState = { status: "idle" };
 
@@ -16,7 +16,14 @@ const initialState: HoldSlotState = { status: "idle" };
 // Форми лишаються змонтованими після утримання, тож повідомлення про успіх видно; показуємо результат лише
 // останньої відправленої форми, інші — порожні live-області (ActionMessage не демонтуємо).
 // Вигляд (DESIGN.md, розділ 5): заголовок панелі зліва, Select справа, під ними ActionMessage.
-export function HoldSlotForm(props: { heading: ReactNode; therapistIds: string[]; clients: ClientOption[] }) {
+// Пошук клієнта (search) — GET-форма сторінки поруч із Select; біля дитини — email опікуна (AC-CARD-02).
+export function HoldSlotForm(props: {
+  heading: ReactNode;
+  search: ReactNode;
+  emptyMessage: string | null;
+  therapistIds: string[];
+  clients: ClientOption[];
+}) {
   const [clientId, setClientId] = useState("");
   const [lastTherapist, setLastTherapist] = useState<string | null>(null);
 
@@ -24,15 +31,23 @@ export function HoldSlotForm(props: { heading: ReactNode; therapistIds: string[]
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end justify-between gap-4">
         {props.heading}
-        <Field label="Client to hold a slot for" htmlFor="hold-client" className="min-w-0 flex-[0_1_320px] max-[760px]:flex-auto">
-          <Select
-            id="hold-client"
-            placeholder="Choose a client"
-            options={props.clients.map((client) => ({ value: client.id, label: client.name }))}
-            onChange={setClientId}
-          />
-        </Field>
+        <div className="flex min-w-0 flex-[0_1_660px] flex-wrap items-end gap-4 max-[760px]:flex-auto">
+          {props.search}
+          <Field label="Client to hold a slot for" htmlFor="hold-client" className="min-w-0 flex-[1_1_280px]">
+            <Select
+              id="hold-client"
+              placeholder={props.clients.length > 0 ? "Choose a client" : "No clients found"}
+              options={toSelectOptions(props.clients)}
+              onChange={setClientId}
+            />
+          </Field>
+        </div>
       </div>
+      {props.emptyMessage ? (
+        <p role="status" className="m-0 text-sm text-muted-foreground" data-testid="no-client-match">
+          {props.emptyMessage}
+        </p>
+      ) : null}
       {/* Без gap: порожні live-області форм не мають додавати відступів. */}
       <div className="flex flex-col">
         {props.therapistIds.map((therapistId) => (

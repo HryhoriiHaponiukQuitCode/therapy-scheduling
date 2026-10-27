@@ -165,3 +165,21 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 export function isClientId(value: string): boolean {
   return UUID_PATTERN.test(value);
 }
+
+// ── Пошук клієнта під час утримання на /slots (design.md → Auth, AC-CARD-02) ──
+export const CLIENT_SEARCH_MAX = 100;
+
+// Умова для PostgREST .or(): ім'я, email або email опікуна містять q без урахування регістру. Значення в лапках, бо
+// кома, дужки й двокрапка — службові символи or(); лапки й зворотний слеш екрануємо. Порожній q — без фільтра.
+// shortcut: % і _ у q лишаються шаблонами ilike (знайде трохи більше), екранувати — якщо пошук почне плутати.
+export function clientSearchFilter(q: string): string | null {
+  const term = q.trim().slice(0, CLIENT_SEARCH_MAX);
+  if (!term) return null;
+  const value = `"*${term.replace(/[\\"]/g, (char) => `\\${char}`)}*"`;
+  return ["full_name", "email", "guardian_email"].map((column) => `${column}.ilike.${value}`).join(",");
+}
+
+// Пошук нічого не знайшов. Власне формулювання: PM тексту не задав.
+export function noClientMatchMessage(q: string): string {
+  return `No clients match "${q.trim()}".`;
+}
