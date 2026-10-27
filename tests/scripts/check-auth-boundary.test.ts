@@ -1,11 +1,13 @@
+import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { repoRoot, runScript } from "./run-script";
 
-// Самоперевірка scripts/check-auth-boundary.mjs: мінімальний проєкт без порушень і по одному зламаному випадку на
-// кожне правило — кожен має впасти саме зі своїм правилом. Плюс сам репозиторій — без порушень.
+// Самоперевірка scripts/check-auth-boundary.mjs: мінімальний проєкт без порушень і зламані випадки — щонайменше один на
+// кожне правило; кожен падає саме зі своїм правилом (захист лише в коментарі SQL — з обома правилами таблиці).
+// Плюс сам репозиторій — без порушень.
 
 const OK: Record<string, string> = {
   "supabase/migrations/20260101000000_base.sql": `
@@ -58,7 +60,7 @@ export async function noDatabase() {
   "src/proxy.ts": `export async function proxy() { /* getClaims() */ }\n`,
 };
 
-const CASES: { rule: string; change: Record<string, string | null> }[] = [
+const CASES: { rule: string; rules?: string[]; change: Record<string, string | null> }[] = [
   {
     rule: "definer-in-private",
     change: {
@@ -84,6 +86,22 @@ const CASES: { rule: string; change: Record<string, string | null> }[] = [
     },
   },
   {
+    // Захист лише в блочному коментарі — база його не виконує.
+    rule: "table-rls",
+    rules: ["table-rls", "table-revoke"],
+    change: {
+      "supabase/migrations/20260102000000_bad.sql": `create table public.open (id int);
+/* alter table public.open enable row level security;
+   revoke all on table public.open from anon, authenticated; */`,
+    },
+  },
+  {
+    rule: "table-rls",
+    change: {
+      "supabase/migrations/20260102000000_bad.sql": `alter table public.items disable row level security;`,
+    },
+  },
+  {
     rule: "no-get-session",
     change: { "src/lib/session.ts": `export const s = (c: any) => c.auth.getSession();\n` },
   },
@@ -101,6 +119,42 @@ const CASES: { rule: string; change: Record<string, string | null> }[] = [
   const supabase = await createClient();
   const access = await getPageAccess(["admin"]);
   return [supabase, access];
+}
+`,
+    },
+  },
+  {
+    // Результат перевірки ігнорується — сторінка однаково читає дані.
+    rule: "page-access",
+    change: {
+      "src/app/(app)/ignored/page.tsx": `export default async function Ignored() {
+  await getPageAccess(["admin"]);
+  const supabase = await createClient();
+  return supabase;
+}
+`,
+    },
+  },
+  {
+    rule: "action-auth",
+    change: {
+      "src/app/(app)/items/actions.ts": `"use server";
+export const doIt = async () => {
+  const supabase = await createClient();
+  await supabase.from("items").insert({});
+};
+`,
+    },
+  },
+  {
+    // Результат getCurrentUser() ігнорується — дія однаково пише в базу.
+    rule: "action-auth",
+    change: {
+      "src/app/(app)/items/actions.ts": `"use server";
+export async function doIt() {
+  const supabase = await createClient();
+  await getCurrentUser(supabase);
+  await supabase.from("items").insert({});
 }
 `,
     },
@@ -151,11 +205,19 @@ describe("check-auth-boundary", () => {
     expect(code).toBe(0);
   });
 
-  it.each(CASES.map((c, i) => [`${i + 1}. ${c.rule}`, c] as const))("%s — FAIL лише з цим правилом", (_, c) => {
+  it.each(CASES.map((c, i) => [`${i + 1}. ${(c.rules ?? [c.rule]).join(" + ")}`, c] as const))("%s — FAIL лише з цим правилом", (_, c) => {
     const { code, out } = runScript("check-auth-boundary.mjs", project(c.change));
     expect(code).toBe(1);
-    expect(rulesOf(out)).toEqual([c.rule]);
+    expect(rulesOf(out)).toEqual(c.rules ?? [c.rule]);
     expect(out).toMatch(/^[^\s:]+[^:]*:\d+: \[/m);
+  });
+
+  it("--root без значення — повідомлення українською, код 2", () => {
+    const result = spawnSync(process.execPath, [path.join(repoRoot, "scripts", "check-auth-boundary.mjs"), "--root"], {
+      encoding: "utf8",
+    });
+    expect(result.stderr).toContain("після --root вкажіть теку проєкту");
+    expect(result.status).toBe(2);
   });
 
   it("немає ні src/, ні supabase/migrations/ — код 2", () => {

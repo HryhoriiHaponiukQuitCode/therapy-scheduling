@@ -4,16 +4,19 @@
 // База (supabase/migrations/*.sql):
 //   1) definer-in-private — функція `security definer` лише в схемі private (у public — обгортка security invoker);
 //   2) definer-search-path — у такої функції `set search_path = ''`;
-//   3) table-rls — кожна `create table public.<t>` має `alter table public.<t> enable row level security`;
+//   3) table-rls — кожна `create table public.<t>` має `alter table public.<t> enable row level security`, і
+//      остання команда enable / disable для неї в порядку міграцій — enable;
 //   4) table-revoke — і `revoke all on [table] public.<t> from anon, authenticated` (далі — лише явні grant).
 // Застосунок (src/):
 //   5) no-get-session — жодного виклику getSession(): авторизація лише через getClaims();
 //   6) no-middleware — немає src/middleware.ts (сесію оновлює src/proxy.ts);
 //   7) page-access — кожна сторінка src/app/(app)/**/page.tsx викликає getPageAccess( до першого createClient( чи
-//      load…( — відмова без жодного запиту даних;
-//   8) action-auth — у файлі "use server" кожна експортована функція, що звертається до бази (.from( чи .rpc( ),
-//      спершу викликає getCurrentUser( або getClaims(.
-// Коментарі (-- у SQL, // і /* */ у TS) не перевіряються.
+//      load…(, і між ними є гілка відмови (return / redirect( / notFound( / throw) — відмова без жодного запиту даних;
+//   8) action-auth — у файлі "use server" кожна експортована дія (export async function або export const … = async),
+//      що звертається до бази (.from( чи .rpc( ), спершу викликає getCurrentUser( або getClaims( і має між ними гілку
+//      відмови (як у 7).
+// Гілку відмови правила 7 і 8 шукають за текстом (є вихід між перевіркою і запитом), а не за потоком виконання.
+// Коментарі (-- і /* */ у SQL, // і /* */ у TS) не перевіряються.
 // Використання: node scripts/check-auth-boundary.mjs [--root <dir>] [--json]
 // Код виходу: 0 — порушень немає, 1 — є порушення, 2 — немає чого перевіряти (ні src/, ні supabase/migrations/).
 
@@ -22,7 +25,11 @@ import { join, relative, sep } from "node:path";
 
 const args = process.argv.slice(2);
 const rootIdx = args.indexOf("--root");
-const root = rootIdx >= 0 ? args[rootIdx + 1] : process.cwd();
+if (rootIdx >= 0 && (!args[rootIdx + 1] || args[rootIdx + 1].startsWith("--"))) {
+  console.error("check-auth-boundary: після --root вкажіть теку проєкту.");
+  process.exit(2);
+}
+const root =rootIdx >= 0 ? args[rootIdx + 1] : process.cwd();
 const asJson = args.includes("--json");
 
 const isDir = (p) => {
@@ -51,7 +58,9 @@ function walk(dir, ext) {
 
 // Коментарі замінюємо пробілами, зберігаючи переноси рядків: номери рядків лишаються правильними.
 const blank = (text) => text.replace(/[^\n]/g, " ");
-const stripSql = (sql) => sql.replace(/--[^\n]*/g, blank);
+const stripSql = (sql) => sql.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/--[^\n]*/g, blank);
+// Вихід із функції до запиту даних: гілка відмови повертає, перенаправляє або кидає помилку.
+const EXIT = /\breturn\b|\bredirect\s*\(|\bnotFound\s*\(|\bthrow\b/;
 const stripTs = (code) => code.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/(^|[^:"'`])\/\/[^\n]*/g, (m, p) => p + blank(m.slice(p.length)));
 const lineOf = (text, index) => text.slice(0, index).split("\n").length;
 const rel = (file) => relative(root, file).split(sep).join("/");
@@ -84,8 +93,10 @@ for (const { file, sql } of allSql) {
   for (const match of sql.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.|"public"\.)"?(\w+)"?/gi)) {
     const table = match[1];
     const t = `(?:public\\.|"public"\\.)"?${table}"?`;
-    if (!new RegExp(`alter\\s+table\\s+(?:only\\s+)?${t}\\s+enable\\s+row\\s+level\\s+security`, "i").test(joined)) {
-      report(file, sql, match.index, "table-rls", `public.${table}: немає enable row level security`);
+    // Стан RLS — за останньою командою enable / disable у порядку міграцій.
+    const toggles = [...joined.matchAll(new RegExp(`alter\\s+table\\s+(?:only\\s+)?${t}\\s+(enable|disable)\\s+row\\s+level\\s+security`, "gi"))];
+    if (toggles.at(-1)?.[1].toLowerCase() !== "enable") {
+      report(file, sql, match.index, "table-rls", `public.${table}: RLS не ввімкнено (немає enable row level security або останнє — disable)`);
     }
     if (!new RegExp(`revoke\\s+all\\s+on\\s+(?:table\\s+)?${t}\\s+from\\s+anon\\s*,\\s*authenticated`, "i").test(joined)) {
       report(file, sql, match.index, "table-revoke", `public.${table}: немає revoke all … from anon, authenticated`);
@@ -117,19 +128,24 @@ for (const file of srcFiles) {
       report(file, code, 0, "page-access", "сторінка (app) не викликає getPageAccess()");
     } else if (data >= 0 && data < access) {
       report(file, code, data, "page-access", "запит даних до getPageAccess() — спершу перевірка доступу");
+    } else if (data >= 0 && !EXIT.test(code.slice(access, data))) {
+      report(file, code, data, "page-access", "між getPageAccess() і запитом даних немає гілки відмови (return / redirect)");
     }
   }
 
   if (/^\s*["']use server["']/.test(code)) {
-    const exports = [...code.matchAll(/export\s+async\s+function\s+(\w+)/g)];
+    const exports = [...code.matchAll(/export\s+(?:async\s+function\s+(\w+)|const\s+(\w+)\s*=\s*async\b)/g)];
     exports.forEach((match, i) => {
+      const name = match[1] ?? match[2];
       const end = i + 1 < exports.length ? exports[i + 1].index : code.length;
       const body = code.slice(match.index, end);
       const db = body.search(/\.(?:from|rpc)\s*\(/);
       if (db < 0) return;
       const auth = body.search(/\bgetCurrentUser\s*\(|\bgetClaims\s*\(/);
       if (auth < 0 || auth > db) {
-        report(file, code, match.index + db, "action-auth", `${match[1]}: звернення до бази до getCurrentUser()/getClaims()`);
+        report(file, code, match.index + db, "action-auth", `${name}: звернення до бази до getCurrentUser()/getClaims()`);
+      } else if (!EXIT.test(body.slice(auth, db))) {
+        report(file, code, match.index + db, "action-auth", `${name}: результат getCurrentUser()/getClaims() не перевірено — немає гілки відмови до бази`);
       }
     });
   }

@@ -76,9 +76,14 @@
 
 - **`npm run check:auth`** (`scripts/check-auth-boundary.mjs`; у CI — job «Межа доступу: RLS, private і getClaims» у
   `.github/workflows/architecture.yml`). Вісім правил, вивід `файл:рядок: [правило]`, код виходу 1 на порушенні:
-  - база: `definer-in-private`, `definer-search-path`, `table-rls`, `table-revoke`;
-  - застосунок: `no-get-session`, `no-middleware`, `page-access` (getPageAccess до createClient / load…),
-    `action-auth` (getCurrentUser / getClaims до `.from(` / `.rpc(`).
+  - база: `definer-in-private`, `definer-search-path`, `table-rls` (остання команда enable / disable — enable),
+    `table-revoke`; коментарі `--` і `/* */` не рахуються;
+  - застосунок: `no-get-session`, `no-middleware`, `page-access` (getPageAccess до createClient / load… і гілка
+    відмови між ними), `action-auth` (getCurrentUser / getClaims до `.from(` / `.rpc(` і гілка відмови між ними; дії
+    `export async function` і `export const … = async`).
+  - Обмеження: гілку відмови правило шукає за текстом (`return`, `redirect(`, `notFound(`, `throw` між перевіркою і
+    запитом), а не за потоком виконання. Умову, що ніколи не спрацьовує, воно не помітить — це лишається рев'ю й
+    тестам сторінок.
 - **Самоперевірка правила** — `tests/scripts/check-auth-boundary.test.ts`. Чистий мінімальний проєкт проходить, а кожне з
   восьми правил має зламаний випадок, де падає саме воно. Сам репозиторій — без порушень.
 - **Межа бази** — тести на PGlite від імені кожної ролі (`asUser`, `asAnon`) у `tests/db/`: `access.test.ts`,
