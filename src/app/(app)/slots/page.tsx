@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getRequestUser } from "@/lib/request-user";
-import { isStaff } from "@/lib/roles";
+import { getPageAccess } from "@/lib/request-user";
+import { STAFF_ONLY_PAGE_MESSAGE, STAFF_ROLES } from "@/lib/roles";
 import { formatPracticeTime, hasFreeSlots, NO_FREE_SLOTS_MESSAGE, practiceClock, weekdayName } from "@/lib/slots";
 import { CONFIRM_FORM_ID, holdFormId } from "@/lib/holds";
+import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Calendar } from "@/components/calendar";
 import { ChoiceList } from "@/components/choice-list";
 import { DayGrid, type DayGridColumn } from "@/components/day-grid";
 import { EmptyState } from "@/components/empty-state";
+import { NoAccess } from "@/components/no-access";
 import { PageHeader } from "@/components/page-header";
 import { Panel } from "@/components/ui/panel";
 import { SlotsNavigation } from "@/components/slots-navigation";
@@ -24,20 +25,12 @@ import { HoldSlotForm } from "./hold-slot-form";
 // (AC-HOLD-20). Вигляд — DESIGN.md, розділи 4.2 і 5: ліворуч GET-форми «Therapists» (кілька) і «Day»,
 // праворуч спільна погодинна сітка з колонкою на кожного терапевта і «Expired holds».
 export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
-  const supabase = await createClient();
-  const user = await getRequestUser();
-  if (!user) {
-    redirect("/login");
-  }
+  // Перевірка доступу — до будь-якого запиту даних: терапевт за прямим посиланням бачить лише відмову (AC-HOLD-44).
+  const access = await getPageAccess(STAFF_ROLES, STAFF_ONLY_PAGE_MESSAGE);
+  if (access.kind === "no-role") return <NoAccess />;
+  if (access.kind === "forbidden") return <AccessDenied title="Slots" message={access.message} />;
 
-  if (!isStaff(user.role)) {
-    return (
-      <>
-        <PageHeader title="Slots" />
-        <p className="m-0">Only schedulers and admins can view therapists&apos; slots.</p>
-      </>
-    );
-  }
+  const supabase = await createClient();
 
   const params = await searchParams;
   const therapistParam = params.therapist;

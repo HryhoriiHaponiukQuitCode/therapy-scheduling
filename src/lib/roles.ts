@@ -15,6 +15,35 @@ export function isStaff(role: string | null | undefined): role is "admin" | "sch
   return role === "admin" || role === "scheduler";
 }
 
+// Тексти PM (openspec/specs/client-access/spec.md, slot-holds/spec.md).
+export const NO_ROLE_MESSAGE = "Your account has no access yet. Contact an administrator."; // AC-CARD-11
+export const STAFF_ONLY_PAGE_MESSAGE = "Only schedulers and admins can view this page."; // AC-HOLD-44
+
+export const STAFF_ROLES = ["admin", "scheduler"] as const satisfies readonly AppRole[];
+
+type PageUser = { role: AppRole | null } | null;
+
+// Хто що бачить на сторінці (перевірка до будь-якого запиту даних):
+// без входу — на /login (AC-CARD-07); без ролі — лише NO_ROLE_MESSAGE і «Sign out» (AC-CARD-11);
+// роль не з allowed — відмова з текстом AC (AC-HOLD-44). Дані охороняє ще й RLS.
+export type PageAccess<U> =
+  | { kind: "anon" }
+  | { kind: "no-role" }
+  | { kind: "forbidden"; message: string }
+  | { kind: "ok"; user: U & { role: AppRole } };
+
+export function pageAccess<U extends PageUser>(
+  user: U,
+  allowed: readonly AppRole[],
+  forbiddenMessage: string,
+): PageAccess<NonNullable<U>> {
+  if (!user) return { kind: "anon" };
+  const role = user.role;
+  if (role === null) return { kind: "no-role" };
+  if (!allowed.includes(role)) return { kind: "forbidden", message: forbiddenMessage };
+  return { kind: "ok", user: user as NonNullable<U> & { role: AppRole } };
+}
+
 // Поточний користувач і його роль; null — немає сесії.
 export async function getCurrentUser(supabase: ServerClient) {
   const { data } = await supabase.auth.getClaims();

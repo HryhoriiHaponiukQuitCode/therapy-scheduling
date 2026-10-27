@@ -1,10 +1,11 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getRequestUser } from "@/lib/request-user";
+import { getPageAccess } from "@/lib/request-user";
 import { formatPracticeTime, practiceClock, practiceDate } from "@/lib/slots";
+import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
 import { DayGrid } from "@/components/day-grid";
 import { EmptyState } from "@/components/empty-state";
+import { NoAccess } from "@/components/no-access";
 import { CalendarIcon } from "@/components/icons";
 import { PageHeader } from "@/components/page-header";
 import { Panel } from "@/components/ui/panel";
@@ -13,20 +14,15 @@ import { loadMySchedule } from "./data";
 // Розклад терапевта: власні слоти, утримання й сеанси на 7 днів (AC-HOLD-09, AC-HOLD-21).
 // Вигляд — панель на кожен день із погодинною сіткою DayGrid (одна колонка без шапки) без дій (DESIGN.md, розділ 5).
 export default async function MySchedulePage() {
-  const supabase = await createClient();
-  const user = await getRequestUser();
-  if (!user) {
-    redirect("/login");
+  const access = await getPageAccess(["therapist"], "Only therapists have a personal schedule.");
+  if (access.kind === "no-role") return <NoAccess />;
+  if (access.kind === "forbidden") return <AccessDenied title="My schedule" message={access.message} />;
+  const user = access.user;
+  if (!user.email) {
+    return <AccessDenied title="My schedule" message="Only therapists have a personal schedule." />;
   }
 
-  if (user.role !== "therapist" || !user.email) {
-    return (
-      <>
-        <PageHeader title="My schedule" />
-        <p className="m-0">Only therapists have a personal schedule.</p>
-      </>
-    );
-  }
+  const supabase = await createClient();
 
   const now = new Date();
   const { days, error } = await loadMySchedule(supabase, { id: user.id, email: user.email }, now);
