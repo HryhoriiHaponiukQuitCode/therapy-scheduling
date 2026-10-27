@@ -27,15 +27,15 @@
 
 ## 2. Повна картка клієнта
 
-- [ ] 2.1 Міграція `client_cards`:
+- [x] 2.1 Міграція `client_cards`:
   - колонки й нормалізація наявних рядків;
   - `clients_contact_by_type`, `clients_email_normalized`, `clients_full_name_trimmed`;
   - тригер нової картки, `clients_child_identity_key`;
   - колонковий `grant insert`; перестворена `clients_insert_staff`.
-- [ ] 2.2 `validateClientCard` (усі помилки полів одразу, тексти PM), мапінг 23505 за назвою індексу.
-- [ ] 2.3 Дія `createClientCard`: `getClaims` → роль → дані → insert.
-- [ ] 2.4 Сторінка `/clients/new`: відмова терапевту без форми. Швидку форму `/clients` прибрати.
-- [ ] 2.5 Тести відмов з AC ID:
+- [x] 2.2 `validateClientCard` (усі помилки полів одразу, тексти PM), мапінг 23505 за назвою індексу.
+- [x] 2.3 Дія `createClientCard`: `getClaims` → роль → дані → insert.
+- [x] 2.4 Сторінка `/clients/new`: відмова терапевту без форми. Швидку форму `/clients` прибрати.
+- [x] 2.5 Тести відмов з AC ID:
   - AC-CARD-06 — PGlite, кількість карток незмінна;
   - AC-CARD-13, AC-HOLD-16, AC-HOLD-34 — PGlite, 23505;
   - AC-CARD-03, AC-CARD-12, AC-HOLD-11, AC-HOLD-15, AC-HOLD-39, AC-HOLD-41 — `validateClientCard` і constraint.

@@ -1,46 +1,139 @@
-// Картка клієнта зрізу 1: ім'я та email (openspec/specs/clients/spec.md).
-// Тексти повідомлень — дослівно з вимог PM; та сама перевірка формату email є в constraint
-// clients_email_format (міграція 20261019102511_roles_and_clients.sql).
+// Картка клієнта з анкети (openspec/specs/clients/spec.md, client-access/spec.md).
+// Тексти повідомлень — дослівно з вимог PM. Ті самі правила повторює база (міграції 20261019102511_roles_and_clients.sql
+// і 20261027190554_client_cards.sql): constraint, тригер нової картки, унікальні індекси — вони остаточні.
+import { isPracticeDate } from "@/lib/slots";
 
-export const CLIENT_INVALID_MESSAGE = "Enter the client's name and a valid email.";
-export const CLIENT_DUPLICATE_MESSAGE = "A client with this email already exists.";
-export const CLIENT_FORBIDDEN_MESSAGE = "Only schedulers and admins can create clients.";
+export const CLIENT_INVALID_MESSAGE = "Enter the client's name and a valid email."; // AC-HOLD-11, 15, 39, 41
+export const CLIENT_DUPLICATE_MESSAGE = "A client with this email already exists."; // AC-HOLD-16, 34
+export const CHILD_DUPLICATE_MESSAGE = "A client with these details already exists."; // AC-CARD-13
+export const CLIENT_FORBIDDEN_MESSAGE = "Only schedulers and admins can create client cards."; // AC-CARD-06
+export const CLIENT_TYPE_MESSAGE = "Select a client type.";
+export const CHILD_NAME_MESSAGE = "Enter the client's name."; // AC-CARD-12
+export const BIRTH_DATE_MESSAGE = "Enter a date of birth that is not in the future."; // AC-CARD-12
+export const LANGUAGE_MESSAGE = "Select a session language."; // AC-CARD-12
+export const GUARDIAN_MESSAGE = "Enter the guardian's name and a valid email."; // AC-CARD-03
 
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-// Ті самі межі, що clients_full_name_length і clients_email_length у міграції.
+// Ті самі межі, що clients_*_length у міграціях.
 export const CLIENT_NAME_MAX = 200;
 export const CLIENT_EMAIL_MAX = 254;
 
-export type ClientInput = { fullName: string; email: string };
+export const CLIENT_TYPES = ["adult", "child"] as const;
+export const SESSION_LANGUAGES = ["English", "Spanish"] as const;
+export type ClientType = (typeof CLIENT_TYPES)[number];
+export type SessionLanguage = (typeof SESSION_LANGUAGES)[number];
 
-export type ClientValidation =
-  | { ok: true; value: ClientInput }
-  | { ok: false; message: string };
+// Поля форми — імена полів <form> і ключі помилок біля полів.
+export type ClientCardField =
+  | "client_type"
+  | "full_name"
+  | "birth_date"
+  | "session_language"
+  | "email"
+  | "guardian_name"
+  | "guardian_email";
 
-// AC-HOLD-11 (порожнє ім'я) і AC-HOLD-15 (email без @) — до запиту в базу.
-export function validateClient(fullName: unknown, email: unknown): ClientValidation {
-  const name = typeof fullName === "string" ? fullName.trim() : "";
-  const address = typeof email === "string" ? email.trim() : "";
+export type ClientCardValues = Record<ClientCardField, string>;
+export type ClientCardErrors = Partial<Record<ClientCardField, string>>;
 
-  if (
-    !name ||
-    name.length > CLIENT_NAME_MAX ||
-    address.length > CLIENT_EMAIL_MAX ||
-    !EMAIL_PATTERN.test(address)
-  ) {
-    return { ok: false, message: CLIENT_INVALID_MESSAGE };
-  }
-  return { ok: true, value: { fullName: name, email: address } };
+export type ClientCardInsert = {
+  client_type: ClientType;
+  full_name: string;
+  birth_date: string;
+  session_language: SessionLanguage;
+  email: string | null;
+  guardian_name: string | null;
+  guardian_email: string | null;
+};
+
+export type ClientCardValidation =
+  | { ok: true; value: ClientCardInsert }
+  | { ok: false; errors: ClientCardErrors };
+
+export const EMPTY_CLIENT_CARD: ClientCardValues = {
+  client_type: "",
+  full_name: "",
+  birth_date: "",
+  session_language: "",
+  email: "",
+  guardian_name: "",
+  guardian_email: "",
+};
+
+// AC-HOLD-35: email малими літерами без пробілів по краях; null — некоректний.
+function normalizeEmail(value: string): string | null {
+  const email = value.trim().toLowerCase();
+  return email.length <= CLIENT_EMAIL_MAX && EMAIL_PATTERN.test(email) ? email : null;
 }
 
-// Коди Postgres, які повертає insert у clients.
-const UNIQUE_VIOLATION = "23505"; // clients_email_lower_key — AC-HOLD-16
-const CHECK_VIOLATION = "23514"; // clients_full_name_* / clients_email_*
+// AC-HOLD-41: ім'я без пробілів по краях; лише з пробілів — порожнє (null).
+function normalizeName(value: string): string | null {
+  const name = value.trim();
+  return name && name.length <= CLIENT_NAME_MAX ? name : null;
+}
+
+// Усі помилки полів одразу, кожна біля свого поля (AC-CARD-12); today — календарний день практики (РРРР-ММ-ДД),
+// дата народження, що дорівнює йому, коректна.
+export function validateClientCard(values: ClientCardValues, today: string): ClientCardValidation {
+  const errors: ClientCardErrors = {};
+  const type = (CLIENT_TYPES as readonly string[]).includes(values.client_type)
+    ? (values.client_type as ClientType)
+    : null;
+  if (!type) errors.client_type = CLIENT_TYPE_MESSAGE;
+
+  const fullName = normalizeName(values.full_name);
+  const birthDate = values.birth_date.trim();
+  if (!isPracticeDate(birthDate) || birthDate > today) errors.birth_date = BIRTH_DATE_MESSAGE;
+  const language = (SESSION_LANGUAGES as readonly string[]).includes(values.session_language)
+    ? (values.session_language as SessionLanguage)
+    : null;
+  if (!language) errors.session_language = LANGUAGE_MESSAGE;
+
+  let email: string | null = null;
+  let guardianName: string | null = null;
+  let guardianEmail: string | null = null;
+  if (type === "adult") {
+    // AC-HOLD-11, 15, 39, 41: ім'я або email дорослого — одне повідомлення PM біля поля, якого воно стосується.
+    email = normalizeEmail(values.email);
+    if (!fullName) errors.full_name = CLIENT_INVALID_MESSAGE;
+    if (!email) errors.email = CLIENT_INVALID_MESSAGE;
+  } else {
+    if (!fullName) errors.full_name = CHILD_NAME_MESSAGE;
+    if (type === "child") {
+      // AC-CARD-03: ім'я та email опікуна; для email опікуна — лише правило коректного email (#22).
+      guardianName = normalizeName(values.guardian_name);
+      guardianEmail = normalizeEmail(values.guardian_email);
+      if (!guardianName) errors.guardian_name = GUARDIAN_MESSAGE;
+      if (!guardianEmail) errors.guardian_email = GUARDIAN_MESSAGE;
+    }
+  }
+
+  if (Object.keys(errors).length > 0 || !type || !fullName || !language) {
+    return { ok: false, errors };
+  }
+  return {
+    ok: true,
+    value: {
+      client_type: type,
+      full_name: fullName,
+      birth_date: birthDate,
+      session_language: language,
+      email,
+      guardian_name: guardianName,
+      guardian_email: guardianEmail,
+    },
+  };
+}
+
+// Помилка insert у clients → текст PM. 23505 розрізняємо за назвою унікального індексу; 23514 (constraint чи тригер
+// clients_before_insert) після validateClientCard не очікуємо — загальний текст.
+const UNIQUE_VIOLATION = "23505";
 const INSUFFICIENT_PRIVILEGE = "42501"; // RLS clients_insert_staff
 
-export function clientInsertErrorMessage(code: string | undefined): string {
-  if (code === UNIQUE_VIOLATION) return CLIENT_DUPLICATE_MESSAGE;
-  if (code === CHECK_VIOLATION) return CLIENT_INVALID_MESSAGE;
-  if (code === INSUFFICIENT_PRIVILEGE) return CLIENT_FORBIDDEN_MESSAGE;
+export function clientInsertErrorMessage(error: { code?: string; message?: string }): string {
+  if (error.code === UNIQUE_VIOLATION) {
+    return error.message?.includes("clients_child_identity_key") ? CHILD_DUPLICATE_MESSAGE : CLIENT_DUPLICATE_MESSAGE;
+  }
+  if (error.code === INSUFFICIENT_PRIVILEGE) return CLIENT_FORBIDDEN_MESSAGE;
   return "Could not create the client. Try again.";
 }

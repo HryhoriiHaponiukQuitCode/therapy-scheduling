@@ -18,6 +18,8 @@ export function Select({
   defaultValue = "",
   placeholder,
   onChange,
+  avatars = true,
+  invalid,
 }: {
   id: string;
   name?: string; // без name — значення лише через onChange (одне поле для кількох форм)
@@ -25,6 +27,8 @@ export function Select({
   defaultValue?: string;
   placeholder?: string;
   onChange?: (value: string) => void;
+  avatars?: boolean; // коло з ініціалами — для людей (терапевт, клієнт), не для значень на кшталт мови
+  invalid?: boolean; // aria-invalid на тригері — межа destructive, як у Input
 }) {
   const listId = useId();
   const [value, setValue] = useState(defaultValue);
@@ -136,11 +140,12 @@ export function Select({
         aria-expanded={open}
         aria-controls={listId}
         aria-activedescendant={open ? `${listId}-${active}` : undefined}
+        aria-invalid={invalid || undefined}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={onKeyDown}
-        className={`${controlClass} cursor-pointer py-0 pr-2 ${selected ? "pl-1.5" : "pl-4"} ${open ? "outline-2 outline-offset-2 outline-ring" : ""}`}
+        className={`${controlClass} cursor-pointer py-0 pr-2 ${selected && avatars ? "pl-1.5" : "pl-4"} ${open ? "outline-2 outline-offset-2 outline-ring" : ""}`}
       >
-        {selected ? <Avatar name={selected.label} className="size-[34px] text-xs" /> : null}
+        {selected && avatars ? <Avatar name={selected.label} className="size-[34px] text-xs" /> : null}
         <span className={`flex-1 truncate ${selected ? "font-semibold" : "text-muted-foreground"}`}>
           {selected ? selected.label : (placeholder ?? "")}
         </span>
@@ -171,7 +176,7 @@ export function Select({
                   index === active ? "bg-card ring-1 ring-input ring-inset" : ""
                 } ${isSelected ? "font-bold" : ""}`}
               >
-                <Avatar name={option.label} className="size-8 text-[11px]" />
+                {avatars ? <Avatar name={option.label} className="size-8 text-[11px]" /> : null}
                 <span className="flex-1">{option.label}</span>
                 {isSelected ? (
                   <svg aria-hidden viewBox="0 0 12 12" className="size-3.5 flex-none text-primary" fill="none" stroke="currentColor" strokeWidth={2}>

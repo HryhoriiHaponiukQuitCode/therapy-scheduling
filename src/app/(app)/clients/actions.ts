@@ -7,22 +7,23 @@ import { getCurrentUser, isStaff } from "@/lib/roles";
 import {
   CLIENT_FORBIDDEN_MESSAGE,
   clientInsertErrorMessage,
-  validateClient,
+  EMPTY_CLIENT_CARD,
+  validateClientCard,
+  type ClientCardErrors,
+  type ClientCardField,
+  type ClientCardValues,
 } from "@/lib/clients";
+import { practiceDate } from "@/lib/slots";
 
-export type ClientFormValues = { fullName: string; email: string };
-
-export type AddClientState =
+export type ClientCardState =
   | { status: "idle" }
-  | { status: "error"; message: string; values: ClientFormValues }
-  | { status: "success"; message: string };
+  | { status: "error"; message: string | null; errors: ClientCardErrors; values: ClientCardValues }
+  | { status: "success"; message: string; at: number };
 
-// Створення картки клієнта (AC-HOLD-10, AC-HOLD-11, AC-HOLD-15, AC-HOLD-16).
-// Порядок: сесія → роль → дані. RLS (clients_insert_staff) — остання лінія захисту.
-export async function addClient(
-  _prevState: AddClientState,
-  formData: FormData,
-): Promise<AddClientState> {
+// Створення картки клієнта з анкети (AC-CARD-01, 02, 03, 06, 12, 13; AC-HOLD-10, 11, 15, 16, 34, 35, 39, 41).
+// Порядок: сесія (getClaims) → роль з profiles → дані → insert клієнтом користувача. RLS clients_insert_staff,
+// constraint, тригер і унікальні індекси бази — остання лінія захисту.
+export async function createClientCard(_prevState: ClientCardState, formData: FormData): Promise<ClientCardState> {
   const supabase = await createClient();
   const user = await getCurrentUser(supabase);
   if (!user) {
@@ -30,26 +31,24 @@ export async function addClient(
   }
 
   // Введене повертаємо в стані помилки: React 19 скидає форму після кожної дії.
-  const values: ClientFormValues = {
-    fullName: String(formData.get("full_name") ?? ""),
-    email: String(formData.get("email") ?? ""),
-  };
+  const values = Object.fromEntries(
+    (Object.keys(EMPTY_CLIENT_CARD) as ClientCardField[]).map((field) => [field, String(formData.get(field) ?? "")]),
+  ) as ClientCardValues;
 
   if (!isStaff(user.role)) {
-    return { status: "error", message: CLIENT_FORBIDDEN_MESSAGE, values };
+    return { status: "error", message: CLIENT_FORBIDDEN_MESSAGE, errors: {}, values };
   }
 
-  const result = validateClient(values.fullName, values.email);
+  const result = validateClientCard(values, practiceDate(new Date()));
   if (!result.ok) {
-    return { status: "error", message: result.message, values };
+    return { status: "error", message: null, errors: result.errors, values };
   }
 
-  const { fullName, email } = result.value;
-  const { error } = await supabase.from("clients").insert({ full_name: fullName, email });
+  const { error } = await supabase.from("clients").insert(result.value);
   if (error) {
-    return { status: "error", message: clientInsertErrorMessage(error.code), values };
+    return { status: "error", message: clientInsertErrorMessage(error), errors: {}, values };
   }
 
   revalidatePath("/clients");
-  return { status: "success", message: `Client "${fullName}" created.` };
+  return { status: "success", message: `Client "${result.value.full_name}" created.`, at: Date.now() };
 }
