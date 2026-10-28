@@ -1,20 +1,20 @@
-import { PageHeader } from "@/components/page-header";
-import { Panel } from "@/components/ui/panel";
 import { LoadingStatus } from "@/components/route-status";
-import { Skeleton, SkeletonRows } from "@/components/ui/skeleton";
+import { SkeletonRows } from "@/components/ui/skeleton";
+import { DayPanel, MyScheduleShell } from "./shell";
 
-// Миттєвий стан переходу на /my-schedule: панелі днів зі скелетонами погодинної сітки.
+// Миттєвий стан переходу на /my-schedule: той самий каркас (MyScheduleShell, DayPanel), тиждень, заголовки днів
+// і погодинна сітка — скелетонами.
 export default function MyScheduleLoading() {
   return (
     <>
       <LoadingStatus />
-      <PageHeader title="My schedule" description="Times in America/Los_Angeles." />
-      {Array.from({ length: 3 }, (_, day) => (
-        <Panel key={day}>
-          <Skeleton className="mb-5 h-7 w-36" />
-          <SkeletonRows rows={3} rowClassName="min-h-[104px]" columns={["h-4 w-12", "h-[72px] flex-1 rounded-lg"]} />
-        </Panel>
-      ))}
+      <MyScheduleShell>
+        {Array.from({ length: 3 }, (_, day) => (
+          <DayPanel key={day}>
+            <SkeletonRows rows={3} rowClassName="min-h-[104px]" columns={["h-4 w-12", "h-[72px] flex-1 rounded-lg"]} />
+          </DayPanel>
+        ))}
+      </MyScheduleShell>
     </>
   );
 }

@@ -15,12 +15,10 @@ import { ChoiceList } from "@/components/choice-list";
 import { DayGrid, type DayGridColumn } from "@/components/day-grid";
 import { EmptyState } from "@/components/empty-state";
 import { NoAccess } from "@/components/no-access";
-import { PageHeader } from "@/components/page-header";
-import { Panel } from "@/components/ui/panel";
-import { SlotsNavigation } from "@/components/slots-navigation";
 import { loadDayView, type TherapistDay } from "./data";
 import { ConfirmHoldForm } from "./confirm-hold-form";
 import { HoldSlotForm } from "./hold-slot-form";
+import { SlotsShell } from "./shell";
 
 // Слоти вибраних терапевтів на вибраний день зі статусами (AC-HOLD-01, 05, 06, 18, 24, 32, 33). Прострочені й
 // чинні утримання — окрема сторінка /holds. Вигляд — DESIGN.md, розділи 4.2 і 5: ліворуч GET-форми «Therapists»
@@ -144,97 +142,90 @@ export default async function SlotsPage({ searchParams }: PageProps<"/slots">) {
   );
 
   return (
-    <>
-      <PageHeader title="Slots" description="Times in America/Los_Angeles." />
-
-      <SlotsNavigation className="grid grid-cols-[360px_minmax(0,1fr)] items-start gap-6 max-[1100px]:grid-cols-1">
-        <div className="flex min-w-0 flex-col gap-6">
-          <Panel id="slots-therapists" title="Therapists" description="Choose whose slots to show side by side.">
-            {/* Зміна вибору одразу відправляє форму; поточний день — прихованим полем. */}
-            <form method="get" action="/slots" data-navigate="">
-              <input type="hidden" name="date" value={view.date} />
-              {view.q ? <input type="hidden" name="q" value={view.q} /> : null}
-              {view.therapists.length > 0 ? (
-                <ChoiceList
-                  name="therapist"
-                  values={view.selected.map((t) => t.id)}
-                  choices={view.therapists.map((t) => ({ value: t.id, label: t.name }))}
-                />
-              ) : (
-                <p className="m-0 text-muted-foreground">No therapists yet.</p>
-              )}
-            </form>
-          </Panel>
-          <Panel id="slots-day" title="Day">
-            {/* Вибір дня одразу відправляє форму; вибрані терапевти — прихованими полями. */}
-            <form method="get" action="/slots" data-navigate="">
-              {view.selected.map((t) => (
-                <input key={t.id} type="hidden" name="therapist" value={t.id} />
-              ))}
-              {view.q ? <input type="hidden" name="q" value={view.q} /> : null}
-              <Calendar name="date" value={view.date} today={view.today} />
-            </form>
-          </Panel>
-        </div>
-
-        <div className="flex min-w-0 flex-col gap-6 transition-opacity duration-200 group-data-[pending]/nav:opacity-60">
-          <Panel labelledBy="day-slots">
-            {view.error ? (
-              <div className="flex flex-col gap-4">
-                {heading}
-                <ActionMessage state={{ status: "error", message: "Could not load slots. Try again later." }} />
-              </div>
+    <SlotsShell
+      therapists={
+        <>
+          {/* Зміна вибору одразу відправляє форму; поточний день — прихованим полем. */}
+          <form method="get" action="/slots" data-navigate="">
+            <input type="hidden" name="date" value={view.date} />
+            {view.q ? <input type="hidden" name="q" value={view.q} /> : null}
+            {view.therapists.length > 0 ? (
+              <ChoiceList
+                name="therapist"
+                values={view.selected.map((t) => t.id)}
+                choices={view.therapists.map((t) => ({ value: t.id, label: t.name }))}
+              />
             ) : (
-              <div className="flex flex-col gap-4">
-                {/* Форми монтуємо для вибраного дня зі слотами завжди, а не лише коли є що утримати чи
-                    підтвердити: після останньої дії revalidatePath прибрав би форму разом із повідомленням про результат. */}
-                {withSlots && showHoldForm ? (
-                  // key: новий день, набір терапевтів чи пошук — новий стан форми (без чужого повідомлення й без
-                  // вибраного клієнта, якого вже немає серед знайдених).
-                  <HoldSlotForm
-                    key={`${view.date}-${view.selected.map((t) => t.id).join()}-${view.q}`}
-                    heading={heading}
-                    search={search}
-                    notice={
-                      view.clients.length === 0
-                        ? noClientMatchMessage(view.q)
-                        : view.clientsTruncated
-                          ? MORE_CLIENTS_MESSAGE
-                          : null
-                    }
-                    therapistIds={view.days.filter((day) => day.slots.length > 0).map((day) => day.therapist.id)}
-                    clients={view.clients}
-                  />
-                ) : (
-                  <div className="flex flex-wrap items-end justify-between gap-4">
-                    {heading}
-                    {withSlots && !view.clientsError ? (
-                      <Link href="/clients" className="text-sm font-semibold text-primary underline underline-offset-[3px]">
-                        Create a client to hold a slot
-                      </Link>
-                    ) : null}
-                  </div>
-                )}
-                {withSlots && view.clientsError ? (
-                  <ActionMessage
-                    state={{ status: "error", message: "Could not load clients, so slots cannot be held right now." }}
-                  />
-                ) : null}
-                {withSlots ? <ConfirmHoldForm key={`confirm-${view.date}-${view.selected.map((t) => t.id).join()}`} /> : null}
-                {view.days.length > 0 ? (
-                  <DayGrid
-                    columns={view.days.map(column)}
-                    now={now}
-                    label={`Slots on ${view.date}`}
-                    data-testid="slot-list"
-                  />
-                ) : null}
-              </div>
+              <p className="m-0 text-muted-foreground">No therapists yet.</p>
             )}
-          </Panel>
-
+          </form>
+        </>
+      }
+      day={
+        <>
+          {/* Вибір дня одразу відправляє форму; вибрані терапевти — прихованими полями. */}
+          <form method="get" action="/slots" data-navigate="">
+            {view.selected.map((t) => (
+              <input key={t.id} type="hidden" name="therapist" value={t.id} />
+            ))}
+            {view.q ? <input type="hidden" name="q" value={view.q} /> : null}
+            <Calendar name="date" value={view.date} today={view.today} />
+          </form>
+        </>
+      }
+    >
+      {view.error ? (
+        <div className="flex flex-col gap-4">
+          {heading}
+          <ActionMessage state={{ status: "error", message: "Could not load slots. Try again later." }} />
         </div>
-      </SlotsNavigation>
-    </>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {/* Форми монтуємо для вибраного дня зі слотами завжди, а не лише коли є що утримати чи
+              підтвердити: після останньої дії revalidatePath прибрав би форму разом із повідомленням про результат. */}
+          {withSlots && showHoldForm ? (
+            // key: новий день, набір терапевтів чи пошук — новий стан форми (без чужого повідомлення й без
+            // вибраного клієнта, якого вже немає серед знайдених).
+            <HoldSlotForm
+              key={`${view.date}-${view.selected.map((t) => t.id).join()}-${view.q}`}
+              heading={heading}
+              search={search}
+              notice={
+                view.clients.length === 0
+                  ? noClientMatchMessage(view.q)
+                  : view.clientsTruncated
+                    ? MORE_CLIENTS_MESSAGE
+                    : null
+              }
+              therapistIds={view.days.filter((day) => day.slots.length > 0).map((day) => day.therapist.id)}
+              clients={view.clients}
+            />
+          ) : (
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              {heading}
+              {withSlots && !view.clientsError ? (
+                <Link href="/clients" className="text-sm font-semibold text-primary underline underline-offset-[3px]">
+                  Create a client to hold a slot
+                </Link>
+              ) : null}
+            </div>
+          )}
+          {withSlots && view.clientsError ? (
+            <ActionMessage
+              state={{ status: "error", message: "Could not load clients, so slots cannot be held right now." }}
+            />
+          ) : null}
+          {withSlots ? <ConfirmHoldForm key={`confirm-${view.date}-${view.selected.map((t) => t.id).join()}`} /> : null}
+          {view.days.length > 0 ? (
+            <DayGrid
+              columns={view.days.map(column)}
+              now={now}
+              label={`Slots on ${view.date}`}
+              data-testid="slot-list"
+            />
+          ) : null}
+        </div>
+      )}
+    </SlotsShell>
   );
 }

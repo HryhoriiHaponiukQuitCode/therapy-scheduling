@@ -153,7 +153,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 | `Panel` (`ui/panel`) | `title?`, `description?`, `actions?` | скляна картка `<section aria-labelledby>`; аналог `Card` |
 | `StatusBadge` (`ui/badge`) | `Free`, `Held`, `Confirmed`, `Expired`, `Past` | статус — завжди текст PM + іконка, не лише колір |
 | `Avatar` (`ui/avatar`) | розмір через `className` | коло з ініціалами, `aria-hidden` (імʼя завжди поруч текстом) |
-| `Skeleton` (`ui/skeleton`) | `SkeletonField`, `SkeletonRows` | стан завантаження в `loading.tsx`: ті самі панелі, пульсуючі блоки `accent` |
+| `Skeleton` (`ui/skeleton`) | `SkeletonField`, `SkeletonRows` | стан завантаження в `loading.tsx`: пульсуючі блоки `accent` замість даних у тому самому каркасі `shell.tsx`, що й сторінка (розділ 6) |
 
 Новий примітив — у `src/components/ui/` на токенах з розділу 2; сторінка не має власних `<button>` чи `<input>` зі
 стилями (приховані `<input type="hidden">` форм — можна).
@@ -167,7 +167,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 | Успіх дії | `ActionMessage` (`role="status"`): пігулка `bg-success-surface text-success` | «Slot held for 24 hours.» |
 | Лендінг (гість на `/`, сторінка `/welcome`) | одна суцільна сторінка без карток: hero на один екран (`LandingHero`: плями, текст угорі ліворуч, праворуч велика 3D-капсула `LandingPill` (three.js, від 1100px; полотно на всю праву частину hero від шапки до низу, не заходить на текст і «Sign in»; промпт — `docs/design/landing-pill-prompt.md`), унизу велика назва, яку видно повністю), плями якого тануть донизу (`.hero-blobs`), тож межі з рештою сторінки не видно; далі «How it works» і ролі — кроки й ролі скляними блоками (`glass rounded-xl`, як `Panel`); «Sign in» (у шапці hero) веде на `/login` (форма — як була, `StandalonePanel`) | «Calm scheduling for a busy practice.» |
 | Відмова в доступі | панель з поясненням, без даних (`StandalonePanel`, як і вхід) | текст — дослівно з AC відмови |
-| Завантаження розділу | `loading.tsx` зі `Skeleton` і «Loading…» у постійній `role="status"`-області AppShell; іконка пункту смуги — спінер, поки перехід чекає сервера | «Loading…» |
+| Завантаження розділу | `loading.tsx` зі `Skeleton` і «Loading…» у постійній `role="status"`-області AppShell; іконка пункту смуги — спінер, поки перехід чекає сервера. Кожна сторінка `src/app/(app)/**/page.tsx` має поруч власний `loading.tsx` і `shell.tsx`: у `shell.tsx` — каркас (`PageHeader`, панелі з назвами й діями, класи сіток і рядків), його рендерять і сторінка, і скелетон; невідоме до завантаження (роль, імʼя, тиждень) каркас показує `Skeleton`. Скелетон не повторює розмітку вручну; перевіряє `tests/route-skeletons.test.ts` | «Loading…» |
 | Дія виконується | `Button` `pending`: спінер, `aria-busy`, `disabled` | «Holding…» |
 | Вимкнена дія | `disabled` + курсор `not-allowed`; причина — текстом поруч | — |
 
