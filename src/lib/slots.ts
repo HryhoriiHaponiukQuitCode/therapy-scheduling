@@ -112,7 +112,7 @@ export type HoldRow = {
 };
 
 export function toHoldRecord(h: HoldRow): HoldRecord {
-  return holdRecord(h, h.clients?.full_name ?? "—");
+  return holdRecord(h, h.clients?.full_name ?? "Unknown client");
 }
 
 // Рядок утримання з уже відомим іменем клієнта → HoldRecord (toHoldRecord і функція my_schedule).

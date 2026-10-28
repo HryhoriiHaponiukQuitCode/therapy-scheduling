@@ -45,8 +45,8 @@ function AccountPill({ user }: { user: ShellUser }) {
   return (
     <div className="glass col-start-2 row-start-1 col-span-1! flex items-center gap-3 self-start rounded-full py-2 pr-2 pl-[18px] max-[760px]:p-1">
       <span className="min-w-0 max-[760px]:sr-only">
-        <span className="block truncate text-[13px] leading-4 font-semibold">{user.email ?? "—"}</span>
-        <span className="text-xs text-muted-foreground">{user.role ?? "—"}</span>
+        <span className="block truncate text-[13px] leading-4 font-semibold">{user.email ?? "No email"}</span>
+        <span className="text-xs text-muted-foreground">{user.role ?? "No role"}</span>
       </span>
       <Avatar name={user.email ?? ""} className="size-11 text-sm" />
     </div>

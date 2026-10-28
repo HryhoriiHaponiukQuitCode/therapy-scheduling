@@ -23,7 +23,7 @@ export default async function Home() {
           <div className="flex flex-col gap-1">
             <dt className="text-[13px] font-semibold text-muted-foreground">Email</dt>
             <dd className="m-0 font-semibold break-all" data-testid="user-email">
-              {user.email ?? "—"}
+              {user.email ?? "Not set"}
             </dd>
           </div>
           <div className="flex flex-col gap-1">

@@ -109,7 +109,7 @@ export default function WelcomePage() {
       </main>
 
       <footer className="px-16 pb-10 text-xs text-muted-foreground max-[760px]:px-6">
-        Practice scheduling — an internal tool for one therapy practice.
+        Practice scheduling, an internal tool for one therapy practice.
       </footer>
     </div>
   );
