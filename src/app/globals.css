@@ -222,7 +222,7 @@ body {
     line-height: 1;
   }
 
-  /* Hero лендінгу (LandingHero, DESIGN.md, розділ 6): плями фону, лінія пульсу, назва, що тане донизу. Декор. */
+  /* Hero лендінгу (LandingHero, DESIGN.md, розділ 6): плями фону, назва, що тане донизу. Декор. */
   /* Плями тануть донизу hero: межа з наступною секцією не видна. */
   .hero-blobs {
     -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
@@ -242,10 +242,6 @@ body {
   .hero-blob-c {
     background: var(--blob-c);
   }
-  .hero-pulse {
-    stroke: var(--ring);
-    opacity: 0.55;
-  }
   .hero-wordmark {
     -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
@@ -261,7 +257,7 @@ body {
   }
 }
 
-/* Рух лише за згоди ОС (розділ 7): без неї елементи одразу на місці, плями стоять, лінія пульсу намальована.
+/* Рух лише за згоди ОС (розділ 7): без неї елементи одразу на місці, плями стоять.
    --d — затримка появи елемента (по черзі, 80–120 мс крок). */
 @media (prefers-reduced-motion: no-preference) {
   .rise {
@@ -279,12 +275,6 @@ body {
   }
   .hero-blob-c {
     animation-duration: 36s;
-  }
-  .hero-pulse {
-    animation: draw 2.4s ease-out 0.7s both;
-  }
-  .float {
-    animation: float 7s ease-in-out infinite alternate;
   }
 }
 
@@ -355,16 +345,6 @@ body {
 @keyframes drift {
   to {
     transform: translate3d(10%, -8%, 0) scale(1.15);
-  }
-}
-@keyframes draw {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-}
-@keyframes float {
-  to {
-    transform: translateY(-10px);
   }
 }
 @keyframes word-in {

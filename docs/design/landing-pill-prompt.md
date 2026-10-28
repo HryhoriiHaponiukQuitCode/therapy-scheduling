@@ -18,11 +18,13 @@ drei, no images or models): one React client component in a Next.js 16 App Route
 
 ## Scene and scale
 
-- **Container:** the hero's right column, `clamp(360px, 30vw, 560px)` wide, square. Shown from 1100 px; below that the
-  hero text stands alone and the three.js chunk is never downloaded.
+- **Container:** the hero's right column, `clamp(360px, 30vw, 560px)` wide and as tall as the free space of the
+  one-screen hero (at least 320 px). Shown from 1100 px; below that the hero text stands alone and the three.js chunk
+  is never downloaded.
 - **Background:** none. The canvas is transparent and sits on the "Airy glass" page (blue-lavender gradient with soft
   blobs), so the capsule reads as part of the page, not a box.
-- **Camera:** perspective, fov 30°, the capsule fills about 80 % of the width.
+- **Camera:** perspective, fov 30°, moved back just enough that the capsule (4 × 4.2 units with hover and shadow) fits
+  both the width and the height of the canvas, whatever its proportions.
 - **Renderer:** alpha, antialias, Neutral tone mapping (brand colours stay true), DPR capped at 2.
 - **Environment:** PMREM `RoomEnvironment` for soft studio reflections, `environmentIntensity` 1 in light theme, .7 in
   dark; plus one soft key light from the top-left.
@@ -82,7 +84,7 @@ intensity update in place.
   seen through it; a soft shadow below.
 - Moving the mouse tilts it; hovering grows it a little with a stronger sheen; dragging spins it with inertia and it
   settles back; a click opens and closes it.
-- The square space is reserved before the canvas loads: no layout shift.
+- The column's space is reserved before the canvas loads: no layout shift.
 - Below 1100 px nothing is rendered and three.js is not downloaded.
 - Dark theme: the same capsule, softer environment and shadow.
 - **Content:** no real brands or logos.

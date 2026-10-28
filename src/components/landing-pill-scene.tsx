@@ -39,6 +39,9 @@ const REST_TILT = -0.995; // ≈ 33° до горизонталі, корпус 
 const BEADS = 55;
 const DRAG_RAD_PER_PX = 0.01;
 const OPEN_DISTANCE = 0.35;
+// Що має вміститися в кадр за будь-яких пропорцій полотна: капсула по діагоналі з наведенням і тінню.
+const FIT_WIDTH = 4;
+const FIT_HEIGHT = 4.2;
 
 /** Профіль половини капсули для LatheGeometry: від шва (y = from) уздовж циліндра й далі півкулею до осі. */
 function halfProfile(radius: number, from: number): Vector2[] {
@@ -89,7 +92,6 @@ export function LandingPillScene() {
 
     const scene = new Scene();
     const camera = new PerspectiveCamera(30, 1, 0.1, 50);
-    camera.position.set(0, 0, 7.4);
 
     const pmrem = new PMREMGenerator(renderer);
     const room = new RoomEnvironment();
@@ -208,6 +210,9 @@ export function LandingPillScene() {
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
+      // Висота колонки залежить від екрана: відстань камери — така, щоб вмістилось і за шириною, і за висотою.
+      const halfTan = Math.tan((camera.fov * Math.PI) / 360);
+      camera.position.set(0, 0, Math.max(FIT_HEIGHT, FIT_WIDTH / camera.aspect) / (2 * halfTan));
     };
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(wrap);

@@ -13,14 +13,15 @@ const POINTS = [
 
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
-// Hero лендінгу на весь екран, без рамки картки (DESIGN.md, розділ 6, «Лендінг»): плями, що повільно дрейфують,
-// 3D-капсула праворуч (LandingPill, від 1100px), лінія пульсу зі знака і велика назва, що тане донизу. Поява — по черзі (.rise, .reveal-line, затримка --d); при prefers-reduced-motion
-// усе статичне.
+// Hero лендінгу на один екран, без рамки картки (DESIGN.md, розділ 6, «Лендінг»): плями, що повільно дрейфують,
+// текст угорі ліворуч, 3D-капсула праворуч (LandingPill, від 1100px, висотою з вільне місце) і велика назва, що тане
+// донизу й зменшується на низьких екранах (22dvh), щоб її було видно повністю. Поява — по черзі (.rise, .reveal-line,
+// затримка --d); при prefers-reduced-motion усе статичне.
 export function LandingHero() {
   return (
     <section
       aria-labelledby="landing-title"
-      className="relative isolate flex min-h-dvh flex-col justify-between gap-12 overflow-hidden px-16 pt-10 max-[760px]:min-h-0 max-[760px]:gap-10 max-[760px]:px-6 max-[760px]:pt-6"
+      className="relative isolate flex min-h-dvh flex-col justify-between gap-12 overflow-hidden px-16 pt-10 pb-8 max-[760px]:min-h-0 max-[760px]:gap-10 max-[760px]:px-6 max-[760px]:pt-6"
     >
       <div aria-hidden className="hero-blobs absolute inset-0 -z-10">
         <span className="hero-blob hero-blob-a top-[-15%] left-[-10%] size-[55%]" />
@@ -38,8 +39,8 @@ export function LandingHero() {
         </Link>
       </header>
 
-      <div className="flex items-center justify-between gap-10">
-        <div className="flex max-w-[600px] flex-col gap-6 min-[1600px]:max-w-[720px]">
+      <div className="flex flex-1 items-start justify-between gap-10">
+        <div className="flex max-w-[600px] flex-col gap-6 min-[1100px]:pt-[4dvh] min-[1600px]:max-w-[720px]">
           <h1
             id="landing-title"
             className="rise m-0 text-[52px] leading-[58px] font-normal tracking-[-0.03em] max-[760px]:text-[34px] max-[760px]:leading-10 min-[1600px]:text-[64px] min-[1600px]:leading-[70px]"
@@ -64,39 +65,29 @@ export function LandingHero() {
           </ul>
         </div>
 
-        <div aria-hidden className="hidden aspect-square w-[clamp(360px,30vw,560px)] shrink-0 min-[1100px]:block">
+        <div
+          aria-hidden
+          className="hidden min-h-[320px] w-[clamp(360px,30vw,560px)] shrink-0 self-stretch min-[1100px]:block"
+        >
           <LandingPill />
         </div>
       </div>
 
-      <div aria-hidden className="-mb-[0.2em] flex flex-col gap-3">
-        <svg
-          viewBox="0 0 600 80"
-          preserveAspectRatio="none"
-          fill="none"
-          className="hero-pulse h-14 w-full max-[760px]:h-10"
-        >
-          <path
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-            d="M0 40H400L414 40L426 8L442 72L456 24L466 40H600"
-          />
-        </svg>
-        <p className="hero-wordmark m-0 text-[clamp(44px,11vw,260px)] leading-[0.9] tracking-[-0.05em]">
-          <span className="block overflow-hidden">
-            <span className="reveal-line block" style={delay(200)}>
-              Practice
-            </span>
+      <p
+        aria-hidden
+        className="hero-wordmark text-[clamp(44px,min(11vw,22dvh),260px)] leading-[0.9] tracking-[-0.05em]"
+      >
+        <span className="block overflow-hidden">
+          <span className="reveal-line block" style={delay(200)}>
+            Practice
           </span>
-          <span className="block overflow-hidden">
-            <span className="reveal-line block" style={delay(320)}>
-              scheduling
-            </span>
+        </span>
+        <span className="block overflow-hidden pb-[0.15em]">
+          <span className="reveal-line block" style={delay(320)}>
+            scheduling
           </span>
-        </p>
-      </div>
+        </span>
+      </p>
     </section>
   );
 }

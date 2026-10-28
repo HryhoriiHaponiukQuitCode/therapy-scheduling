@@ -124,7 +124,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 | Підпис поля | `text-[13px] leading-[18px] font-semibold` | `Label` |
 | Підпис, допоміжний текст | `text-xs text-muted-foreground` або `text-muted-foreground` | описи панелей, години |
 | Бейдж | `text-xs font-bold` | `StatusBadge` |
-| Назва в hero лендінгу | `text-[clamp(44px,11vw,260px)] leading-[0.9] font-normal tracking-[-0.05em]`, тане донизу (`.hero-wordmark`) | `LandingHero`, декор (`aria-hidden`) |
+| Назва в hero лендінгу | `text-[clamp(44px,min(11vw,22dvh),260px)] leading-[0.9] font-normal tracking-[-0.05em]` (на низьких екранах менша, щоб уміститися), тане донизу (`.hero-wordmark`) | `LandingHero`, декор (`aria-hidden`) |
 
 ## 4. Відступи й радіуси
 
@@ -165,7 +165,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 | Порожній список чи день | `EmptyState`: пунктирна рамка `rounded-lg`, іконка в скляному колі, текст 600, `role="status"` | «No free slots on this day.» (AC-HOLD-18, AC-HOLD-24) |
 | Помилка дії | `ActionMessage` (`role="alert"`): пігулка `bg-destructive-surface text-destructive` з іконкою над чи під формою; введене лишається у формі | «This slot is no longer available.» (AC-HOLD-03) |
 | Успіх дії | `ActionMessage` (`role="status"`): пігулка `bg-success-surface text-success` | «Slot held for 24 hours.» |
-| Лендінг (гість на `/`, сторінка `/welcome`) | одна суцільна сторінка без карток: hero на весь екран (`LandingHero`: плями, праворуч 3D-капсула `LandingPill` (three.js, від 1100px; промпт — `docs/design/landing-pill-prompt.md`), лінія пульсу, велика назва), плями якого тануть донизу (`.hero-blobs`), тож межі з рештою сторінки не видно; далі «How it works» і ролі — кроки й ролі скляними блоками (`glass rounded-xl`, як `Panel`); «Sign in» (у шапці hero) веде на `/login` (форма — як була, `StandalonePanel`) | «Calm scheduling for a busy practice.» |
+| Лендінг (гість на `/`, сторінка `/welcome`) | одна суцільна сторінка без карток: hero на один екран (`LandingHero`: плями, текст угорі ліворуч, праворуч 3D-капсула `LandingPill` (three.js, від 1100px, висотою з вільне місце; промпт — `docs/design/landing-pill-prompt.md`), унизу велика назва, яку видно повністю), плями якого тануть донизу (`.hero-blobs`), тож межі з рештою сторінки не видно; далі «How it works» і ролі — кроки й ролі скляними блоками (`glass rounded-xl`, як `Panel`); «Sign in» (у шапці hero) веде на `/login` (форма — як була, `StandalonePanel`) | «Calm scheduling for a busy practice.» |
 | Відмова в доступі | панель з поясненням, без даних (`StandalonePanel`, як і вхід) | текст — дослівно з AC відмови |
 | Завантаження розділу | `loading.tsx` зі `Skeleton` і «Loading…» у постійній `role="status"`-області AppShell; іконка пункту смуги — спінер, поки перехід чекає сервера | «Loading…» |
 | Дія виконується | `Button` `pending`: спінер, `aria-busy`, `disabled` | «Holding…» |
@@ -182,7 +182,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 - Спершу семантичний HTML (`<button>`, `<table>` / `role="table"`, `<label>`); `aria-*` — там, де HTML бракує.
 - Спінер і пульс скелетона вимикаються при `prefers-reduced-motion: reduce`.
 - Рух на лендінгу — лише в `@media (prefers-reduced-motion: no-preference)`; без нього все одразу на місці й нерухоме:
-  - hero: поява по черзі `.rise` / `.reveal-line`, дрейф плям, малювання лінії пульсу, `.float`;
+  - hero: поява по черзі `.rise` / `.reveal-line`, дрейф плям;
   - блоки й заголовки нижче (`data-reveal`, `RevealOnScroll`): з'являються за часом (≈ 1 с, по черзі в ряду), коли до
     них доходить прокрутка; що видно одразу, не ховається; без JS — на місці;
   - 3D-капсула (`LandingPill`): нахиляється до курсора, на наведенні трохи росте, перетягуванням крутиться з інерцією
