@@ -147,13 +147,14 @@ export function Combobox({
             setOpen(true);
           }
         }}
-        className={`${controlClass} cursor-pointer py-0 pr-2 ${selected && avatars ? "pl-1.5" : "pl-4"} ${open ? "outline-2 outline-offset-2 outline-ring" : ""}`}
+        // Поки список відкритий, фокус — у полі пошуку: власного кільця тригер не малює (одне виділення на екрані).
+        className={`${controlClass} cursor-pointer py-0 pr-2 ${selected && avatars ? "pl-1.5" : "pl-4"}`}
       >
         <TriggerValue selected={selected} placeholder={placeholder} avatars={avatars} open={open} />
       </button>
       {open ? (
         <div className={`${popupClass} flex w-full min-w-[280px] flex-col gap-1.5 p-1.5`}>
-          <label className={`${controlClass} min-h-11 px-3.5 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring`}>
+          <label className={`${controlClass} min-h-11 px-3.5 focus-within:border-ring`}>
             <SearchIcon className="size-4 flex-none text-muted-foreground" />
             <input
               ref={inputRef}
@@ -171,8 +172,8 @@ export function Combobox({
               autoComplete="off"
               onChange={(event) => onQuery(event.target.value)}
               onKeyDown={onKeyDown}
-              // Фокус-кільце — на всій пігулці (focus-within), а не на голому полі всередині неї: глобальний
-              // :focus-visible (globals.css, поза шарами) перебиває утиліту, тому outline-none! з important.
+              // Фокус показує межа всієї пігулки (border-ring, focus-within) — одна лінія, без прямокутника на
+              // самому полі: глобальний :focus-visible (globals.css, поза шарами) перебиває утиліту, тому outline-none!.
               className="min-w-0 flex-1 bg-transparent outline-none! placeholder:text-muted-foreground"
             />
           </label>
