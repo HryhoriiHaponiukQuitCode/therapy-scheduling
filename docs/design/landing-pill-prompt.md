@@ -18,9 +18,10 @@ drei, no images or models): one React client component in a Next.js 16 App Route
 
 ## Scene and scale
 
-- **Container:** the hero's right column, `clamp(360px, 30vw, 560px)` wide and as tall as the free space of the
-  one-screen hero (at least 320 px). Shown from 1100 px; below that the hero text stands alone and the three.js chunk
-  is never downloaded.
+- **Container:** the whole right part of the one-screen hero, from under the header to the bottom: half the width,
+  but never over the hero text (the left 800 px) or the "Sign in" button, so the capsule is a big hero object, not a
+  card-sized one. Shown from 1100 px; below that the hero text stands alone and the three.js chunk is never
+  downloaded.
 - **Background:** none. The canvas is transparent and sits on the "Airy glass" page (blue-lavender gradient with soft
   blobs), so the capsule reads as part of the page, not a box.
 - **Camera:** perspective, fov 30°, moved back just enough that the capsule (4 × 4.2 units with hover and shadow) fits

@@ -14,7 +14,7 @@ const POINTS = [
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
 // Hero лендінгу на один екран, без рамки картки (DESIGN.md, розділ 6, «Лендінг»): плями, що повільно дрейфують,
-// текст угорі ліворуч, 3D-капсула праворуч (LandingPill, від 1100px, висотою з вільне місце) і велика назва, що тане
+// текст угорі ліворуч, 3D-капсула на всю праву частину (LandingPill, від 1100px) і велика назва, що тане
 // донизу й зменшується на низьких екранах (22dvh), щоб її було видно повністю. Поява — по черзі (.rise, .reveal-line,
 // затримка --d); при prefers-reduced-motion усе статичне.
 export function LandingHero() {
@@ -29,6 +29,14 @@ export function LandingHero() {
         <span className="hero-blob hero-blob-c bottom-[-25%] left-[25%] size-[60%]" />
       </div>
 
+      {/* Капсула — на всю праву частину hero, від шапки до низу: не перекриває текст ліворуч (до 800px) і «Sign in». */}
+      <div
+        aria-hidden
+        className="absolute top-28 right-0 bottom-0 hidden w-[min(50%,calc(100%-800px))] min-[1100px]:block"
+      >
+        <LandingPill />
+      </div>
+
       <header className="rise flex items-center justify-between gap-4">
         <div className="flex items-center gap-2.5 rounded-full border border-card-border bg-accent py-1.5 pr-4 pl-1.5 text-[13px] font-semibold">
           <BrandMark size={28} />
@@ -39,7 +47,7 @@ export function LandingHero() {
         </Link>
       </header>
 
-      <div className="flex flex-1 items-start justify-between gap-10">
+      <div className="flex flex-1 items-start">
         <div className="flex max-w-[600px] flex-col gap-6 min-[1100px]:pt-[4dvh] min-[1600px]:max-w-[720px]">
           <h1
             id="landing-title"
@@ -65,12 +73,6 @@ export function LandingHero() {
           </ul>
         </div>
 
-        <div
-          aria-hidden
-          className="hidden min-h-[320px] w-[clamp(360px,30vw,560px)] shrink-0 self-stretch min-[1100px]:block"
-        >
-          <LandingPill />
-        </div>
       </div>
 
       <p
