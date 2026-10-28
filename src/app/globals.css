@@ -210,4 +210,76 @@ body {
     font-weight: 700;
     line-height: 1;
   }
+
+  /* Hero входу (LoginHero, DESIGN.md, розділ 6): плями фону, лінія пульсу, назва, що тане донизу. Декор. */
+  .hero-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(48px);
+  }
+  .hero-blob-a {
+    background: var(--blob-a);
+  }
+  .hero-blob-b {
+    background: var(--blob-b);
+  }
+  .hero-blob-c {
+    background: var(--blob-c);
+  }
+  .hero-pulse {
+    stroke: var(--ring);
+    opacity: 0.55;
+  }
+  .hero-wordmark {
+    -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+  }
+}
+
+/* Рух лише за згоди ОС (розділ 7): без неї елементи одразу на місці, плями стоять, лінія пульсу намальована.
+   --d — затримка появи елемента (по черзі, 80–120 мс крок). */
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0ms) both;
+  }
+  .reveal-line {
+    animation: reveal-line 1s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0ms) both;
+  }
+  .hero-blob {
+    animation: drift 24s ease-in-out infinite alternate;
+  }
+  .hero-blob-b {
+    animation-duration: 30s;
+    animation-direction: alternate-reverse;
+  }
+  .hero-blob-c {
+    animation-duration: 36s;
+  }
+  .hero-pulse {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw 2.4s ease-out 0.7s forwards;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+@keyframes reveal-line {
+  from {
+    transform: translateY(105%);
+  }
+}
+@keyframes drift {
+  to {
+    transform: translate3d(10%, -8%, 0) scale(1.15);
+  }
+}
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
