@@ -212,6 +212,11 @@ body {
   }
 
   /* Hero лендінгу (LandingHero, DESIGN.md, розділ 6): плями фону, лінія пульсу, назва, що тане донизу. Декор. */
+  /* Плями тануть донизу hero: межа з наступною секцією не видна. */
+  .hero-blobs {
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+  }
   .hero-blob {
     position: absolute;
     border-radius: 9999px;

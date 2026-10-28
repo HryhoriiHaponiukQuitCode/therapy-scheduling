@@ -25,7 +25,8 @@ const ROLES = [
   { title: "Admin", text: "Runs the practice and can do everything a scheduler can." },
 ];
 
-// Лендінг для гостя — одна суцільна сторінка, секції без карток, поділені лінією (DESIGN.md, розділ 6, «Лендінг»): гість на «/» бачить цю сторінку за тією самою адресою
+// Лендінг для гостя — одна суцільна сторінка: hero без рамки, нижче кроки, ролі й заклик — скляними блоками
+// (DESIGN.md, розділ 6, «Лендінг»): гість на «/» бачить цю сторінку за тією самою адресою
 // (src/lib/guest-route.ts), вхід — кнопкою «Sign in». Даних застосунку немає: сторінка статична.
 // Секції нижче з'являються під час прокрутки (.scroll-rise), слова тези темнішають по одному (.scroll-word).
 export default function WelcomePage() {
@@ -38,7 +39,7 @@ export default function WelcomePage() {
         <section
           id="how"
           aria-labelledby="how-title"
-          className="flex flex-col gap-14 border-t border-border px-10 py-24 max-[760px]:px-5 max-[760px]:py-14"
+          className="flex flex-col gap-12 px-10 pt-16 pb-20 max-[760px]:gap-8 max-[760px]:px-5 max-[760px]:pt-10 max-[760px]:pb-14"
         >
           <div className="grid gap-8 min-[1024px]:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)]">
             <h2 id="how-title" className="scroll-rise m-0 text-[13px] leading-[18px] font-semibold text-muted-foreground">
@@ -56,11 +57,11 @@ export default function WelcomePage() {
               ))}
             </p>
           </div>
-          <ol className="m-0 grid list-none gap-8 p-0 min-[900px]:grid-cols-3">
+          <ol className="m-0 grid list-none gap-6 p-0 max-[760px]:gap-4 min-[900px]:grid-cols-3">
             {STEPS.map(({ icon: Icon, title, text }, i) => (
-              <li key={title} className="scroll-rise flex flex-col gap-3 border-t border-border pt-6">
+              <li key={title} className="scroll-rise glass rounded-xl p-[26px] max-[760px]:rounded-lg max-[760px]:p-5 flex flex-col gap-3">
                 <span className="flex items-center gap-3">
-                  <span className="grid size-10 place-items-center rounded-full border border-card-border bg-card">
+                  <span className="grid size-10 place-items-center rounded-full border border-card-border bg-accent">
                     <Icon className="size-[18px]" />
                   </span>
                   <span className="text-[13px] font-semibold text-muted-foreground">0{i + 1}</span>
@@ -74,7 +75,7 @@ export default function WelcomePage() {
 
         <section
           aria-labelledby="roles-title"
-          className="flex flex-col gap-10 border-t border-border px-10 py-24 max-[760px]:px-5 max-[760px]:py-14"
+          className="flex flex-col gap-10 px-10 pb-20 max-[760px]:gap-8 max-[760px]:px-5 max-[760px]:pb-14"
         >
           <h2
             id="roles-title"
@@ -82,9 +83,9 @@ export default function WelcomePage() {
           >
             One place, three roles.
           </h2>
-          <ul className="m-0 grid list-none gap-8 p-0 min-[900px]:grid-cols-3">
+          <ul className="m-0 grid list-none gap-6 p-0 max-[760px]:gap-4 min-[900px]:grid-cols-3">
             {ROLES.map(({ title, text }) => (
-              <li key={title} className="scroll-rise flex flex-col gap-2 border-t border-border pt-5">
+              <li key={title} className="scroll-rise glass rounded-xl p-[26px] max-[760px]:rounded-lg max-[760px]:p-5 flex flex-col gap-2">
                 <h3 className="m-0 text-lg leading-6 font-semibold">{title}</h3>
                 <p className="m-0 text-muted-foreground">{text}</p>
               </li>
@@ -92,23 +93,22 @@ export default function WelcomePage() {
           </ul>
         </section>
 
-        <section
-          aria-labelledby="cta-title"
-          className="scroll-rise flex flex-col items-center gap-6 text-center border-t border-border px-10 py-24 max-[760px]:px-5 max-[760px]:py-14"
-        >
-          <h2
-            id="cta-title"
-            className="m-0 text-[34px] leading-10 font-normal tracking-[-0.02em] max-[760px]:text-[24px] max-[760px]:leading-8"
-          >
-            Ready for today&apos;s schedule?
-          </h2>
-          <Link href="/login" className={buttonClass("primary")}>
-            Sign in
-          </Link>
+        <section aria-labelledby="cta-title" className="px-10 pb-20 max-[760px]:px-5 max-[760px]:pb-14">
+          <div className="scroll-rise glass flex flex-col items-center gap-6 rounded-xl px-8 py-16 text-center max-[760px]:rounded-lg max-[760px]:px-5 max-[760px]:py-12">
+            <h2
+              id="cta-title"
+              className="m-0 text-[34px] leading-10 font-normal tracking-[-0.02em] max-[760px]:text-[24px] max-[760px]:leading-8"
+            >
+              Ready for today&apos;s schedule?
+            </h2>
+            <Link href="/login" className={buttonClass("primary")}>
+              Sign in
+            </Link>
+          </div>
         </section>
       </main>
 
-      <footer className="border-t border-border px-10 py-6 text-xs text-muted-foreground max-[760px]:px-5">
+      <footer className="px-10 pb-8 text-xs text-muted-foreground max-[760px]:px-5">
         Practice scheduling — an internal tool for one therapy practice.
       </footer>
     </div>
