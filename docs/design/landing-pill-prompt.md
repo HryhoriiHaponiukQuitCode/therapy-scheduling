@@ -33,15 +33,18 @@ drei, no images or models): one React client component in a Next.js 16 App Route
 ## The capsule
 
 - **Shape:** a 2:1 stadium capsule (radius .8, total length ≈ 3.4), lying diagonally at about 33° from horizontal, top
-  end to the left. Built from two `LatheGeometry` halves:
-  - **Cap (lower-right half):** a touch wider (radius × 1.035) and it overlaps the body by .12, like a real capsule cap.
-    Matte-satin plastic: `MeshPhysicalMaterial`, roughness .32, clearcoat 1, clearcoat roughness .18, sheen .4. A
-    vertex-colour gradient along its length in the **logo gradient** (cyan → blue → violet).
-  - **Body (upper-left half):** clear glass. `MeshPhysicalMaterial` with transmission 1, thickness .7, IOR 1.45,
-    roughness .05, clearcoat 1, a faint lavender-white tint and a light iridescence (.25) for a thin sheen at grazing
-    angles.
-- **Beads:** about 55 small spheres (radius .06 to .11, one `InstancedMesh`) inside the glass half, in the logo colours
-  plus white, packed at random (seeded, so every visit looks the same). They are seen through the glass, refracted.
+  end to the left. Built from two `LatheGeometry` halves, each a **closed hollow shell** (outer wall, inner wall and a
+  rim at the seam), so when the capsule opens you see a real 3D cut with wall thickness, not a paper-thin edge:
+  - **Cap (lower-right half):** a touch wider (radius × 1.06, wall .04) and it overlaps the body by .12, like a real
+    capsule cap; its inner wall is wider than the body, so the body slides in without intersecting it. Matte-satin
+    plastic: `MeshPhysicalMaterial`, roughness .32, clearcoat 1, clearcoat roughness .18, sheen .4. A vertex-colour
+    gradient along its length in the **logo gradient** (cyan → blue → violet).
+  - **Body (upper-left half):** clear glass, wall .06. A see-through `MeshPhysicalMaterial` (transparent, opacity .3,
+    no depth write), roughness .04, clearcoat 1, full specular, a faint lavender-white tint and a light iridescence
+    (.3) for a thin sheen at grazing angles. Not `transmission`: on a transparent canvas it cannot see the page
+    behind and renders the glass milky white.
+- **Beads:** about 45 small spheres (radius .08 to .14, one `InstancedMesh`) inside the glass half, in the logo colours
+  plus white, packed at random (seeded, so every visit looks the same), seen through the glass.
 - **Contact shadow:** a soft radial blur plane under the capsule in the foreground colour, about 18 % opacity
   (10 % in dark theme). It tightens and fades as the capsule lifts.
 
@@ -65,7 +68,7 @@ intensity update in place.
   rotateX = −y · .25 rad (x, y normalised to −1…1 around the canvas centre and clamped). Smoothed with a 0.3 s
   exponential; eases back when the pointer leaves the window.
 - **Hover (raycast on the capsule):** springs up to scale 1.06 (k 170, c 19); the glass gains sheen (iridescence
-  .25 → .6, env intensity × 1.5). Cursor `grab`.
+  .3 → .65, env intensity 1.4 → 2, opacity .3 → .38). Cursor `grab`.
 - **Drag:** press on the capsule and drag to spin it freely (.01 rad per px, about the screen axes). On release it keeps
   spinning with inertia (velocity decays about 3× per second), then eases back to its resting pose. Cursor `grabbing`.
 - **Click (press and release without dragging):** the capsule opens: the cap and body spring apart by .35 along the

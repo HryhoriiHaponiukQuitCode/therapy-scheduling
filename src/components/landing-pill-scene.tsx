@@ -5,7 +5,6 @@ import {
   CanvasTexture,
   Color,
   DirectionalLight,
-  DoubleSide,
   Float32BufferAttribute,
   Group,
   InstancedMesh,
@@ -30,28 +29,41 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { beadLayout, damp, pointerOffset, springStep } from "@/lib/pill-motion";
 
 // Капсула: радіус, пряма частина кожної половини (разом 2·(LENGTH + RADIUS) ≈ 3.4, стадіон 2:1), ковпачок ширший
-// і заходить на корпус, як у справжньої капсули.
+// і заходить на корпус, як у справжньої капсули. Обидві половини — порожнисті оболонки зі стінкою й торцем: коли
+// капсула відкривається, видно справжній зріз. Внутрішня стінка ковпачка (RADIUS·CAP_SCALE − CAP_WALL) ширша за
+// корпус, тож корпус входить у ковпачок, не перетинаючи його.
 const RADIUS = 0.8;
 const LENGTH = 0.9;
-const CAP_SCALE = 1.035;
+const CAP_SCALE = 1.06;
+const CAP_WALL = 0.04;
+const BODY_WALL = 0.06;
 const CAP_OVERLAP = 0.12;
 const REST_TILT = 0.995; // ≈ 33° до горизонталі, корпус (скло) — вгорі ліворуч
-const BEADS = 55;
+const BEADS = 45;
 const DRAG_RAD_PER_PX = 0.01;
 const OPEN_DISTANCE = 0.35;
-// Що має вміститися в кадр за будь-яких пропорцій полотна: капсула по діагоналі з наведенням і тінню.
 // Капсула трохи вище центру полотна (тінь — разом із нею).
 const RAISE = 0.35;
+// Що має вміститися в кадр за будь-яких пропорцій полотна: капсула по діагоналі з наведенням і тінню.
 const FIT_WIDTH = 4.6;
 const FIT_HEIGHT = 4.8;
 
-/** Профіль половини капсули для LatheGeometry: від шва (y = from) уздовж циліндра й далі півкулею до осі. */
-function halfProfile(radius: number, from: number): Vector2[] {
-  const points = [new Vector2(radius, from), new Vector2(radius, LENGTH)];
-  for (let i = 1; i <= 20; i++) {
+/**
+ * Замкнений профіль половини капсули для LatheGeometry: внутрішня стінка від вершини вниз до шва (y = from), торець
+ * (кільце товщиною wall), зовнішня стінка вгору до вершини. Напрям обходу задає, куди дивляться грані: внутрішні —
+ * усередину, торець — до шва, зовнішні — назовні. Короткі відрізки біля кутів торця тримають його ребра чіткими.
+ */
+function shellProfile(radius: number, wall: number, from: number): Vector2[] {
+  const inner = radius - wall;
+  const arc = (r: number, i: number) => {
     const t = (i / 20) * (Math.PI / 2);
-    points.push(new Vector2(radius * Math.cos(t), LENGTH + radius * Math.sin(t)));
-  }
+    return new Vector2(r * Math.cos(t), LENGTH + r * Math.sin(t));
+  };
+  const points: Vector2[] = [];
+  for (let i = 20; i >= 0; i--) points.push(arc(inner, i));
+  points.push(new Vector2(inner, from + 0.01), new Vector2(inner, from));
+  points.push(new Vector2(radius, from), new Vector2(radius, from + 0.01));
+  for (let i = 0; i <= 20; i++) points.push(arc(radius, i));
   return points;
 }
 
@@ -104,29 +116,30 @@ export function LandingPillScene() {
     scene.add(key);
 
     // Ковпачок: градієнт лого вершинними кольорами від шва (c → b) до дальнього кінця (a).
-    const capGeometry = new LatheGeometry(halfProfile(RADIUS * CAP_SCALE, -CAP_OVERLAP), 72);
+    const capGeometry = new LatheGeometry(shellProfile(RADIUS * CAP_SCALE, CAP_WALL, -CAP_OVERLAP), 72);
     const capMaterial = new MeshPhysicalMaterial({
       vertexColors: true,
       roughness: 0.32,
       clearcoat: 1,
       clearcoatRoughness: 0.18,
       sheen: 0.4,
-      side: DoubleSide,
     });
     const cap = new Mesh(capGeometry, capMaterial);
     cap.rotation.x = Math.PI;
 
-    const bodyGeometry = new LatheGeometry(halfProfile(RADIUS, 0), 72);
+    // Скло — напівпрозоре, а не transmission: на прозорому полотні transmission не бачить сторінки й робить корпус
+    // матово-білим. Зовнішня й внутрішня стінки разом дають товщину скла, торець видно на зрізі.
+    const bodyGeometry = new LatheGeometry(shellProfile(RADIUS, BODY_WALL, 0), 72);
     const bodyMaterial = new MeshPhysicalMaterial({
-      transmission: 1,
-      thickness: 0.7,
-      ior: 1.45,
-      roughness: 0.05,
+      transparent: true,
+      opacity: 0.3,
+      depthWrite: false,
+      roughness: 0.04,
       clearcoat: 1,
-      clearcoatRoughness: 0.05,
-      iridescence: 0.25,
+      clearcoatRoughness: 0.04,
+      specularIntensity: 1,
+      iridescence: 0.3,
       iridescenceIOR: 1.3,
-      attenuationDistance: 2.5,
     });
     const body = new Mesh(bodyGeometry, bodyMaterial);
 
@@ -187,7 +200,6 @@ export function LandingPillScene() {
       }
       capGeometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
       bodyMaterial.color.copy(palette.glass);
-      bodyMaterial.attenuationColor.copy(palette.glass);
       const tones = [palette.a, palette.b, palette.c, palette.glass];
       beads.forEach(({ tone }, i) => beadMesh.setColorAt(i, tones[tone]));
       if (beadMesh.instanceColor) beadMesh.instanceColor.needsUpdate = true;
@@ -354,8 +366,9 @@ export function LandingPillScene() {
       [scale, scaleVelocity] = springStep(scale, scaleVelocity, hovered || dragging ? 1.06 : 1, 170, 19, dt);
       pill.scale.setScalar(scale * (0.85 + 0.15 * appear));
       const shine = (scale - 1) / 0.06;
-      bodyMaterial.iridescence = 0.25 + 0.35 * shine;
-      bodyMaterial.envMapIntensity = 1 + 0.5 * shine;
+      bodyMaterial.iridescence = 0.3 + 0.35 * shine;
+      bodyMaterial.envMapIntensity = 1.4 + 0.6 * shine;
+      bodyMaterial.opacity = 0.3 + 0.08 * shine;
 
       if (openTarget === 1 && elapsed >= closeAt) openTarget = 0;
       [open, openVelocity] = springStep(open, openVelocity, openTarget, 120, 14, dt);

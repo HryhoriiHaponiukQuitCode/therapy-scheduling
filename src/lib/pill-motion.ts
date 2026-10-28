@@ -57,7 +57,7 @@ export function beadLayout(
   const inner = radius - wall;
   const beads: Bead[] = [];
   while (beads.length < count) {
-    const r = 0.06 + random() * 0.05;
+    const r = 0.08 + random() * 0.06;
     const y = r + random() * (length + inner - 2 * r);
     // Центр гранули — у «меншій» капсулі радіуса inner − r: циліндр до length, далі півкуля.
     const dy = Math.max(0, y - length);
