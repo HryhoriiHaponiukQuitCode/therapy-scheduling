@@ -88,7 +88,7 @@ export function LandingPillScene() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // three.js потребує WebGL2; компонент рендериться лише в браузері (ssr: false), тож перевірка — одразу.
-  const [webgl] = useState(() => Boolean(document.createElement("canvas").getContext("webgl2")));
+  const [webgl, setWebgl] = useState(() => Boolean(document.createElement("canvas").getContext("webgl2")));
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -99,7 +99,10 @@ export function LandingPillScene() {
     try {
       renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "low-power" });
     } catch {
-      return;
+      // Контекст є, але рендерер не створився (ліміт контекстів, драйвер): показати .pill-fallback. Стан — у
+      // наступному кадрі, не синхронно в ефекті (react-hooks/set-state-in-effect).
+      const frame = requestAnimationFrame(() => setWebgl(false));
+      return () => cancelAnimationFrame(frame);
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = NeutralToneMapping;
@@ -223,10 +226,13 @@ export function LandingPillScene() {
       if (!width || !height) return;
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
-      camera.updateProjectionMatrix();
       // Висота колонки залежить від екрана: відстань камери — така, щоб вмістилось і за шириною, і за висотою.
       const halfTan = Math.tan((camera.fov * Math.PI) / 360);
-      camera.position.set(0, 0, Math.max(FIT_HEIGHT, FIT_WIDTH / camera.aspect) / (2 * halfTan));
+      const distance = Math.max(FIT_HEIGHT, FIT_WIDTH / camera.aspect) / (2 * halfTan);
+      camera.position.set(0, 0, distance);
+      // Дальня межа — за капсулою й тінню на будь-якій відстані (у високому вузькому полотні камера відходить далеко).
+      camera.far = distance + 10;
+      camera.updateProjectionMatrix();
     };
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(wrap);

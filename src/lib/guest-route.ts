@@ -9,6 +9,7 @@ export type GuestRoute =
 
 export function guestRoute(pathname: string): GuestRoute {
   if (pathname === "/") return { kind: "rewrite", pathname: "/welcome" };
-  if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) return { kind: "next" };
+  // Сама адреса або вкладена в неї (/auth/callback), але не «схожа» (/welcome-private, /login-x).
+  if (PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))) return { kind: "next" };
   return { kind: "redirect", pathname: "/login" };
 }

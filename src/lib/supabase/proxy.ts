@@ -47,11 +47,16 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
     if (route.kind === "rewrite") {
-      // Лендінг за адресою «/»: rewrite, а не redirect. Cookie сесії (зокрема очищені) — як у supabaseResponse.
+      // Лендінг за адресою «/»: rewrite, а не redirect. Cookie сесії (зокрема очищені) і заголовки проти кешування
+      // з setAll — як у supabaseResponse, щоб CDN не закешував відповідь із Set-Cookie.
       const url = request.nextUrl.clone();
       url.pathname = route.pathname;
       const response = NextResponse.rewrite(url, { request });
       supabaseResponse.cookies.getAll().forEach((cookie) => response.cookies.set(cookie));
+      for (const header of ["cache-control", "expires", "pragma"]) {
+        const value = supabaseResponse.headers.get(header);
+        if (value) response.headers.set(header, value);
+      }
       return response;
     }
   }

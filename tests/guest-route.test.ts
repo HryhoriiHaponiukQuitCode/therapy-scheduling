@@ -12,8 +12,14 @@ describe("guestRoute: куди веде запит без входу", () => {
     }
   });
 
-  it("сторінки застосунку ведуть на /login, а не на лендінг", () => {
-    for (const path of ["/slots", "/holds", "/clients/new", "/my-schedule"]) {
+  it("AC-CARD-07: сторінки застосунку за прямим посиланням ведуть на /login, а не на лендінг", () => {
+    for (const path of ["/clients", "/clients/new", "/holds", "/slots", "/my-schedule"]) {
+      expect(guestRoute(path)).toEqual({ kind: "redirect", pathname: "/login" });
+    }
+  });
+
+  it("адреси, лише схожі на публічні, теж ведуть на /login", () => {
+    for (const path of ["/welcome-private", "/login-x", "/authx"]) {
       expect(guestRoute(path)).toEqual({ kind: "redirect", pathname: "/login" });
     }
   });
