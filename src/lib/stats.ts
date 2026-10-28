@@ -10,8 +10,9 @@ import {
 
 // Статистика головної: слоти найближчих STATS_DAYS днів (від сьогодні за часом практики) за статусами.
 // Рахуємо лише слоти, що ще не почалися: минулі («Past») і вже початі сеанси чи утримання — не запас і не
-// навантаження наперед. Ті самі правила статусів, що на /slots і /my-schedule (buildDaySlots): прострочене утримання
-// слот не займає, години утримань і сеансів поза поточною доступністю теж рахуються.
+// навантаження наперед. Ті самі правила статусів, що на сторінці ролі (buildDaySlots): прострочене утримання слот не
+// займає; години утримань і сеансів поза поточною доступністю рахуються лише з includeHoldHours — як на /my-schedule
+// (терапевт), а не на /slots (адміністратор і планувальник).
 export const STATS_DAYS = 7;
 
 export type StatusCounts = { confirmed: number; held: number; free: number };
@@ -45,13 +46,21 @@ export function totalSlots(counts: StatusCounts): number {
   return counts.confirmed + counts.held + counts.free;
 }
 
-// Частка зайнятих (утриманих і підтверджених) слотів, %; null — слотів немає.
+// Частка зайнятих (утриманих і підтверджених) слотів, %; null — слотів немає. 100% — лише коли вільних немає, 0% — лише
+// коли не зайнято жодного: округлення не ховає останній вільний чи єдиний зайнятий слот.
 export function bookedPercent(counts: StatusCounts): number | null {
   const total = totalSlots(counts);
-  return total === 0 ? null : Math.round(((counts.held + counts.confirmed) / total) * 100);
+  if (total === 0) return null;
+  const booked = counts.held + counts.confirmed;
+  const percent = Math.round((booked / total) * 100);
+  return Math.min(Math.max(percent, booked > 0 ? 1 : 0), booked < total ? 99 : 100);
 }
 
-export function scheduleStats(therapists: TherapistSchedule[], now: Date): ScheduleStats {
+export function scheduleStats(
+  therapists: TherapistSchedule[],
+  now: Date,
+  options: { includeHoldHours: boolean },
+): ScheduleStats {
   const from = practiceDate(now);
   const dates = Array.from({ length: STATS_DAYS }, (_, i) => addDays(from, i));
   const perTherapist = therapists.map((therapist) => ({
@@ -63,7 +72,7 @@ export function scheduleStats(therapists: TherapistSchedule[], now: Date): Sched
           availability: therapist.availability.filter((window) => window.weekday === isoWeekday(date)),
           holds: therapist.holds,
           now,
-          includeHoldHours: true,
+          includeHoldHours: options.includeHoldHours,
         }),
         now,
       ),

@@ -1,12 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { getPageAccess } from "@/lib/request-user";
 import { APP_ROLES, isStaff, NO_ROLE_MESSAGE } from "@/lib/roles";
-import { bookedPercent, totalSlots } from "@/lib/stats";
+import { totalSlots } from "@/lib/stats";
 import { ActionMessage } from "@/components/action-message";
 import { EmptyState } from "@/components/empty-state";
 import { CalendarIcon, CheckIcon, FreeIcon, HeldIcon } from "@/components/icons";
 import { NoAccess } from "@/components/no-access";
-import { CountsTable, DayChart, StatTile, TableView } from "@/components/schedule-stats";
+import { CountsTable, DayChart, percentText, StatTile, TableView } from "@/components/schedule-stats";
 import { loadHomeStats } from "./data";
 import { DaysPanel, HomeShell, StatTiles, TherapistsPanel } from "./shell";
 
@@ -21,7 +21,7 @@ export default async function Home() {
   if (access.kind !== "ok") return <NoAccess />;
   const user = access.user;
   const staff = isStaff(user.role);
-  const stats = await loadHomeStats(await createClient(), user, new Date());
+  const { stats, error } = await loadHomeStats(await createClient(), user, new Date());
   const description = staff
     ? "Whole practice, next 7 days. Times in America/Los_Angeles."
     : "Your schedule, next 7 days. Times in America/Los_Angeles.";
@@ -29,7 +29,7 @@ export default async function Home() {
   if (!stats) {
     return (
       <HomeShell description={description}>
-        <ActionMessage state={{ status: "error", message: "Could not load statistics. Try again later." }} />
+        <ActionMessage state={{ status: "error", message: error }} />
       </HomeShell>
     );
   }
@@ -47,7 +47,7 @@ export default async function Home() {
         <StatTile
           icon={<CalendarIcon />}
           label="Booked"
-          value={`${bookedPercent(totals) ?? 0}%`}
+          value={percentText(totals)}
           caption={`${booked} of ${total} upcoming slots`}
         />
       </StatTiles>

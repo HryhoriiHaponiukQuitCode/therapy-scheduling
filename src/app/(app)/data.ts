@@ -3,61 +3,93 @@ import { isStaff, type AppRole } from "@/lib/roles";
 import { addDays, holdRecord, practiceDate, practiceTimeToUtc, toHoldRecord } from "@/lib/slots";
 import { scheduleStats, STATS_DAYS, type ScheduleStats } from "@/lib/stats";
 import { ownAvailability } from "./my-schedule/data";
+import { loadTherapists } from "./slots/data";
 
 type ServerClient = Awaited<ReturnType<typeof createClient>>;
 
+export const HOME_STATS_MESSAGES = {
+  ERROR: "Could not load statistics. Try again later.",
+  NO_EMAIL: "Your account has no email, so your schedule cannot be shown. Contact an administrator.",
+} as const;
+
+export type HomeStats = { stats: ScheduleStats; error: null } | { stats: null; error: string };
+
+// PostgREST віддає не більше max-rows рядків (1000 у Supabase) і решту відкидає без помилки, тож читаємо сторінками
+// за стабільним порядком, доки сторінка не неповна. null — запит не вдався.
+const PAGE_SIZE = 1000;
+
+async function allRows<T>(
+  page: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>,
+): Promise<T[] | null> {
+  const rows: T[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await page(from, from + PAGE_SIZE - 1);
+    if (error || !data) return null;
+    rows.push(...data);
+    if (data.length < PAGE_SIZE) return rows;
+  }
+}
+
 // Статистика головної на STATS_DAYS днів (scheduleStats). Адміністратор і планувальник бачать усю практику з розбивкою
-// за терапевтами (RLS: їм видно профілі терапевтів, доступність і всі утримання); терапевт — лише власний розклад, як
-// на /my-schedule (функція my_schedule). null — запит не вдався.
+// за терапевтами, як на /slots (RLS: їм видно профілі терапевтів, доступність і всі утримання); терапевт — лише власний
+// розклад, як на /my-schedule (функція my_schedule).
 export async function loadHomeStats(
   supabase: ServerClient,
   user: { id: string; email: string | null; role: AppRole },
   now: Date,
-): Promise<ScheduleStats | null> {
+): Promise<HomeStats> {
   const from = practiceDate(now);
   const to = addDays(from, STATS_DAYS);
+  const failed = { stats: null, error: HOME_STATS_MESSAGES.ERROR };
 
   if (!isStaff(user.role)) {
-    if (!user.email) return null;
+    // Без email доступність терапевта не знайти, і повтор не допоможе: окреме повідомлення, а не «Try again».
+    if (!user.email) return { stats: null, error: HOME_STATS_MESSAGES.NO_EMAIL };
     const [availability, holds] = await Promise.all([
       ownAvailability(supabase, user.email),
       supabase.rpc("my_schedule", { p_from: from, p_to: to }),
     ]);
-    if (availability.error || holds.error) return null;
-    return scheduleStats(
-      [
-        {
-          id: user.id,
-          name: user.email,
-          availability: availability.data,
-          holds: holds.data.map((row) => holdRecord(row, row.client_name)),
-        },
-      ],
-      now,
-    );
+    if (availability.error || holds.error) return failed;
+    const own = {
+      id: user.id,
+      name: user.email,
+      availability: availability.data,
+      holds: holds.data.map((row) => holdRecord(row, row.client_name)),
+    };
+    return { stats: scheduleStats([own], now, { includeHoldHours: true }), error: null };
   }
 
-  const [profiles, availability, holds] = await Promise.all([
-    supabase.from("profiles").select("id, full_name, email").eq("role", "therapist").order("full_name"),
-    supabase.from("therapist_availability").select("therapist_email, weekday, start_hour, end_hour"),
-    supabase
-      .from("holds")
-      .select("id, therapist_id, slot_start, created_at, confirmed_at, clients(full_name)")
-      .gte("slot_start", practiceTimeToUtc(from, 0).toISOString())
-      .lt("slot_start", practiceTimeToUtc(to, 0).toISOString()),
+  const [therapists, availability, holds] = await Promise.all([
+    loadTherapists(supabase),
+    allRows((a, b) =>
+      supabase
+        .from("therapist_availability")
+        .select("id, therapist_email, weekday, start_hour, end_hour")
+        .order("id")
+        .range(a, b),
+    ),
+    allRows((a, b) =>
+      supabase
+        .from("holds")
+        .select("id, therapist_id, slot_start, created_at, confirmed_at, clients(full_name)")
+        .gte("slot_start", practiceTimeToUtc(from, 0).toISOString())
+        .lt("slot_start", practiceTimeToUtc(to, 0).toISOString())
+        .order("id")
+        .range(a, b),
+    ),
   ]);
-  if (profiles.error || availability.error || holds.error) return null;
+  if (therapists.error || !availability || !holds) return failed;
 
-  return scheduleStats(
-    profiles.data.map((profile) => ({
-      id: profile.id,
-      name: profile.full_name ?? profile.email ?? profile.id,
+  const stats = scheduleStats(
+    therapists.therapists.map((therapist) => ({
+      id: therapist.id,
+      name: therapist.name,
       // Email доступності — без урахування регістру, як у RLS і hold_slot.
-      availability: availability.data.filter(
-        (row) => row.therapist_email.toLowerCase() === profile.email?.toLowerCase(),
-      ),
-      holds: holds.data.filter((row) => row.therapist_id === profile.id).map(toHoldRecord),
+      availability: availability.filter((row) => row.therapist_email.toLowerCase() === therapist.email.toLowerCase()),
+      holds: holds.filter((row) => row.therapist_id === therapist.id).map(toHoldRecord),
     })),
     now,
+    { includeHoldHours: false },
   );
+  return { stats, error: null };
 }

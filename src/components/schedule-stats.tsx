@@ -43,20 +43,36 @@ function Segments({ counts, vertical }: { counts: StatusCounts; vertical: boolea
   ));
 }
 
-function percentText(counts: StatusCounts): string {
+// Найменша висота стовпця, у яку вміщаються його сегменти (по 3px) і зазори між ними (по 2px): інакше малий день
+// вилазить за свою висоту й налазить на підсумок над стовпцем.
+function minBarPx(counts: StatusCounts): number {
+  const segments = SERIES.filter((series) => counts[series.key] > 0).length;
+  return segments === 0 ? 0 : segments * 3 + (segments - 1) * 2;
+}
+
+export function percentText(counts: StatusCounts): string {
   const percent = bookedPercent(counts);
   return percent === null ? "No slots" : `${percent}%`;
 }
 
-// Опис дня для скрінрідера й підказки: «3 confirmed, 1 held, 8 free».
-function countsText(counts: StatusCounts): string {
-  return SERIES.map((series) => `${counts[series.key]} ${series.label.toLowerCase()}`).join(", ");
+// Рядки опису дня: ті самі для aria-label стовпця й підказки («4 confirmed, 1 held, 7 free, 42% booked»).
+function countRows(counts: StatusCounts) {
+  return [
+    ...SERIES.map((series) => ({
+      key: series.key,
+      value: String(counts[series.key]),
+      label: series.label,
+      mark: series.mark as string | null,
+    })),
+    { key: "booked", value: percentText(counts), label: "Booked", mark: null },
+  ];
 }
 
 // Стовпці «слоти за днями»: висота — усі ще не початі слоти дня, сегменти — статуси. Над стовпцем — підсумок дня,
-// під ним — день тижня й число (повна дата YYYY-MM-DD — у підказці й таблиці). Кожен день — у фокусі з клавіатури:
-// на hover і focus — підказка з усіма статусами (aria-hidden: те саме читає aria-label дня). Тло підказки непрозоре
-// (background): напівпрозоре popover у темній темі пропускає текст заголовка панелі під нею.
+// під ним — день тижня й число (повна дата YYYY-MM-DD — у підказці й таблиці). Кожен день — зображення з описом
+// (role="img", aria-label) у порядку Tab; на hover, фокусі й дотику (тап фокусує його) — підказка з тими самими
+// рядками (aria-hidden). Тло підказки непрозоре (background): напівпрозоре popover у темній темі пропускає текст
+// заголовка панелі під нею.
 export function DayChart({ days, today }: { days: DayStats[]; today: string }) {
   const max = Math.max(1, ...days.map(totalSlots));
   return (
@@ -65,40 +81,42 @@ export function DayChart({ days, today }: { days: DayStats[]; today: string }) {
       <ol aria-label="Upcoming slots by day" className="m-0 grid list-none grid-cols-7 gap-1 p-0">
         {days.map((day, index) => {
           const total = totalSlots(day);
+          const weekday = weekdayName(day.date);
+          const rows = countRows(day);
           const align = index < 2 ? "left-0" : index > days.length - 3 ? "right-0" : "left-1/2 -translate-x-1/2";
           return (
-            <li
-              key={day.date}
-              tabIndex={0}
-              aria-label={`${weekdayName(day.date)}, ${day.date}: ${countsText(day)}`}
-              data-testid="chart-day"
-              className="group relative flex flex-col items-center gap-2 rounded-md pt-7 pb-2 hover:bg-accent focus-visible:bg-accent"
-            >
-              <div aria-hidden className="flex h-40 w-full items-end justify-center border-b border-border">
-                <div
-                  className="relative flex w-6 flex-col-reverse gap-[2px]"
-                  style={{ height: `${(total / max) * 100}%` }}
-                >
-                  <span className="absolute bottom-full left-1/2 mb-1 -translate-x-1/2 text-xs font-semibold">
-                    {total}
-                  </span>
-                  <Segments counts={day} vertical />
-                </div>
-              </div>
-              <span aria-hidden className="flex flex-col items-center text-xs leading-4">
-                <span className="font-semibold">
-                  {day.date === today ? "Today" : weekdayName(day.date).slice(0, 3)}
-                </span>
-                <span className="text-muted-foreground">{day.date.slice(8)}</span>
-              </span>
+            <li key={day.date} className="flex">
               <div
-                aria-hidden
-                className={`pointer-events-none invisible absolute bottom-full z-20 mb-1 w-max min-w-[168px] rounded-md border border-card-border bg-background p-3 text-sm opacity-0 shadow-pop transition-opacity group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100 motion-reduce:transition-none ${align}`}
+                role="img"
+                tabIndex={0}
+                aria-label={`${weekday}, ${day.date}: ${rows.map((row) => `${row.value} ${row.label.toLowerCase()}`).join(", ")}`}
+                data-testid="chart-day"
+                className="group relative flex w-full flex-col items-center gap-2 rounded-md pt-7 pb-2 hover:bg-accent focus:bg-accent"
               >
-                <p className="m-0 mb-2 text-xs font-semibold text-muted-foreground">
-                  {weekdayName(day.date)}, {day.date}
-                </p>
-                <CountsList counts={day} />
+                <div aria-hidden className="flex h-40 w-full items-end justify-center border-b border-border">
+                  <div
+                    className="relative flex w-6 flex-col-reverse gap-[2px]"
+                    style={{ height: `max(${(total / max) * 100}%, ${minBarPx(day)}px)` }}
+                  >
+                    <span className="absolute bottom-full left-1/2 mb-1 -translate-x-1/2 text-xs font-semibold">
+                      {total}
+                    </span>
+                    <Segments counts={day} vertical />
+                  </div>
+                </div>
+                <span aria-hidden className="flex flex-col items-center text-xs leading-4">
+                  <span className="font-semibold">{day.date === today ? "Today" : weekday.slice(0, 3)}</span>
+                  <span className="text-muted-foreground">{day.date.slice(8)}</span>
+                </span>
+                <div
+                  aria-hidden
+                  className={`pointer-events-none invisible absolute bottom-full z-20 mb-1 w-max min-w-[168px] rounded-md border border-card-border bg-background p-3 text-sm opacity-0 shadow-pop transition-opacity group-hover:visible group-hover:opacity-100 group-focus:visible group-focus:opacity-100 motion-reduce:transition-none ${align}`}
+                >
+                  <p className="m-0 mb-2 text-xs font-semibold text-muted-foreground">
+                    {weekday}, {day.date}
+                  </p>
+                  <CountsList rows={rows} />
+                </div>
               </div>
             </li>
           );
@@ -109,16 +127,7 @@ export function DayChart({ days, today }: { days: DayStats[]; today: string }) {
 }
 
 // Значення попереду, підпис зі зразком кольору — за ним (підказка стовпця).
-function CountsList({ counts }: { counts: StatusCounts }) {
-  const rows = [
-    ...SERIES.map((series) => ({
-      key: series.key,
-      value: String(counts[series.key]),
-      label: series.label,
-      mark: series.mark,
-    })),
-    { key: "booked", value: percentText(counts), label: "Booked", mark: null },
-  ];
+function CountsList({ rows }: { rows: ReturnType<typeof countRows> }) {
   return (
     <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1">
       {rows.map((row) => (

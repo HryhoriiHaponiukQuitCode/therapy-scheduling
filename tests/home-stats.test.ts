@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { loadHomeStats } from "@/app/(app)/data";
+import { HOME_STATS_MESSAGES, loadHomeStats } from "@/app/(app)/data";
 import { DayChart } from "@/components/schedule-stats";
 import { practiceTimeToUtc, type HoldRecord } from "@/lib/slots";
 import { bookedPercent, scheduleStats } from "@/lib/stats";
@@ -33,8 +33,11 @@ const holds = [
   hold("later", "2026-11-12", 10, at("2026-11-04", 9)), // поза вікном 7 днів
 ];
 
+const therapist = { id: "t1", name: "Therapist One", availability: weekdays, holds };
+
 describe("scheduleStats", () => {
-  const stats = scheduleStats([{ id: "t1", name: "Therapist One", availability: weekdays, holds }], NOW);
+  // Як на /my-schedule (терапевт): години сеансів поза доступністю теж рахуються.
+  const stats = scheduleStats([therapist], NOW, { includeHoldHours: true });
 
   it("рахує 7 днів від сьогодні, лише слоти, що ще не почалися", () => {
     expect(stats.from).toBe("2026-11-04");
@@ -63,9 +66,22 @@ describe("scheduleStats", () => {
     expect(stats.therapists).toEqual([{ id: "t1", name: "Therapist One", confirmed: 2, held: 1, free: 34 }]);
   });
 
+  it("як на /slots (адміністратор і планувальник): сеанс поза доступністю не рахується", () => {
+    const slotsView = scheduleStats([therapist], NOW, { includeHoldHours: false });
+    expect(slotsView.days[3]).toEqual({ date: "2026-11-07", confirmed: 0, held: 0, free: 0 });
+    expect(slotsView.totals).toEqual({ confirmed: 1, held: 1, free: 34 });
+  });
+
   it("bookedPercent: частка утриманих і підтверджених; без слотів — null", () => {
     expect(bookedPercent({ confirmed: 1, held: 2, free: 1 })).toBe(75);
     expect(bookedPercent({ confirmed: 0, held: 0, free: 0 })).toBeNull();
+  });
+
+  it("bookedPercent: 100% лише без вільних, 0% лише без зайнятих", () => {
+    expect(bookedPercent({ confirmed: 199, held: 0, free: 1 })).toBe(99);
+    expect(bookedPercent({ confirmed: 1, held: 0, free: 299 })).toBe(1);
+    expect(bookedPercent({ confirmed: 2, held: 1, free: 0 })).toBe(100);
+    expect(bookedPercent({ confirmed: 0, held: 0, free: 5 })).toBe(0);
   });
 });
 
@@ -77,14 +93,16 @@ function fakeSupabase(tables: Record<string, Row[]>) {
   const calls: string[] = [];
   const from = (table: string) => {
     calls.push(table);
+    let rows = tables[table] ?? [];
     const chain = {
       select: () => chain,
       eq: () => chain,
       order: () => chain,
+      range: (a: number, b: number) => (calls.push(`range ${table} ${a}-${b}`), (rows = rows.slice(a, b + 1)), chain),
       gte: (_col: string, value: string) => (calls.push(`gte ${value}`), chain),
       lt: (_col: string, value: string) => (calls.push(`lt ${value}`), chain),
       ilike: (_col: string, value: string) => (calls.push(`ilike ${value}`), chain),
-      then: (resolve: (v: unknown) => void) => resolve({ data: tables[table] ?? [], error: null }),
+      then: (resolve: (v: unknown) => void) => resolve({ data: rows, error: null }),
     };
     return chain;
   };
@@ -114,7 +132,7 @@ describe("loadHomeStats", () => {
         },
       ],
     });
-    const stats = await loadHomeStats(client, { id: "s1", email: "s@example.test", role: "scheduler" }, NOW);
+    const { stats } = await loadHomeStats(client, { id: "s1", email: "s@example.test", role: "scheduler" }, NOW);
 
     expect(calls).toContain(`gte ${at("2026-11-04", 0).toISOString()}`);
     expect(calls).toContain(`lt ${at("2026-11-11", 0).toISOString()}`);
@@ -137,7 +155,7 @@ describe("loadHomeStats", () => {
         },
       ],
     });
-    const stats = await loadHomeStats(client, { id: "t1", email: "t_1@example.test", role: "therapist" }, NOW);
+    const { stats } = await loadHomeStats(client, { id: "t1", email: "t_1@example.test", role: "therapist" }, NOW);
 
     expect(calls).toEqual([
       "therapist_availability",
@@ -146,16 +164,53 @@ describe("loadHomeStats", () => {
     ]);
     expect(stats?.totals).toEqual({ confirmed: 1, held: 0, free: 35 });
   });
+
+  it("читає утримання сторінками: рядок понад 1000 не губиться", async () => {
+    const expired = Array.from({ length: 1000 }, (_, i) => ({
+      id: `e${String(i).padStart(4, "0")}`,
+      therapist_id: "t1",
+      slot_start: at("2026-11-09", 10).toISOString(),
+      created_at: at("2026-11-01", 9).toISOString(),
+      confirmed_at: null,
+      clients: { full_name: "client" },
+    }));
+    const held = {
+      ...expired[0],
+      id: "h1",
+      slot_start: at("2026-11-05", 10).toISOString(),
+      created_at: at("2026-11-04", 9).toISOString(),
+    };
+    const { client, calls } = fakeSupabase({
+      profiles: [{ id: "t1", full_name: "Therapist One", email: "one@example.test" }],
+      therapist_availability: weekdays.map((w) => ({ ...w, therapist_email: "one@example.test" })),
+      holds: [...expired, held],
+    });
+    const { stats } = await loadHomeStats(client, { id: "s1", email: "s@example.test", role: "admin" }, NOW);
+
+    expect(calls).toEqual(expect.arrayContaining(["range holds 0-999", "range holds 1000-1999"]));
+    expect(stats?.totals.held).toBe(1);
+  });
+
+  it("терапевт без email: окреме повідомлення без «Try again», без запитів", async () => {
+    const { client, calls } = fakeSupabase({});
+    const result = await loadHomeStats(client, { id: "t1", email: null, role: "therapist" }, NOW);
+
+    expect(result).toEqual({ stats: null, error: HOME_STATS_MESSAGES.NO_EMAIL });
+    expect(result.error).not.toContain("Try again");
+    expect(calls).toEqual([]);
+  });
 });
 
 describe("DayChart", () => {
-  const stats = scheduleStats([{ id: "t1", name: "Therapist One", availability: weekdays, holds }], NOW);
+  const stats = scheduleStats([therapist], NOW, { includeHoldHours: true });
   const html = renderToStaticMarkup(createElement(DayChart, { days: stats.days, today: stats.from }));
 
   it("стовпець на кожен день: у фокусі, з описом усіх статусів для скрінрідера", () => {
     expect(html.match(/data-testid="chart-day"/g)).toHaveLength(7);
     expect(html).toContain('tabindex="0"');
-    expect(html).toContain('aria-label="Thursday, 2026-11-05: 0 confirmed, 1 held, 7 free"');
+    expect(html).toContain('role="img"');
+    // Той самий опис, що в підказці, разом із часткою зайнятих.
+    expect(html).toContain('aria-label="Thursday, 2026-11-05: 0 confirmed, 1 held, 7 free, 13% booked"');
     expect(html).toContain(">Today<");
   });
 
@@ -163,7 +218,20 @@ describe("DayChart", () => {
     for (const label of ["Confirmed", "Held", "Free"]) expect(html).toContain(`</span>${label}</li>`);
     // Неділя: слотів немає — висота 0, без сегментів.
     const sunday = html.split('data-testid="chart-day"')[5];
-    expect(sunday).toContain("height:0%");
+    expect(sunday).toContain("height:max(0%, 0px)");
     expect(sunday).not.toContain("flex-grow");
+  });
+
+  it("малий стовпець не нижчий за свої сегменти й зазори", () => {
+    const small = scheduleStats(
+      [{ ...therapist, availability: [...weekdays, { weekday: 3, start_hour: 0, end_hour: 24 }] }],
+      NOW,
+      { includeHoldHours: true },
+    );
+    // Четвер: 1 Held і 7 Free — два сегменти: 2 × 3px + 2px.
+    const thursday = renderToStaticMarkup(createElement(DayChart, { days: small.days, today: small.from })).split(
+      'data-testid="chart-day"',
+    )[2];
+    expect(thursday).toContain(", 8px)");
   });
 });
