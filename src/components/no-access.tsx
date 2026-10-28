@@ -4,7 +4,7 @@ import { StandalonePanel } from "./standalone-panel";
 import { SubmitButton } from "./ui/submit-button";
 
 // Користувач увійшов, але ролі не має (AC-CARD-11): лише повідомлення і «Sign out» — без смуги, посилань і даних.
-// Вигляд — окрема скляна панель (StandalonePanel); DESIGN.md, розділ 6, «Відмова в доступі».
+// Вигляд — як сторінка входу (StandalonePanel); DESIGN.md, розділ 6, «Відмова в доступі».
 export function NoAccess() {
   return (
     <StandalonePanel labelledBy="no-access-title">

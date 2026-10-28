@@ -58,7 +58,7 @@
 Лише в `globals.css` (без класів Tailwind, у компонентних класах `.glass`, `.slot-*`, `.avatar`, `.hero-*`):
 
 - фон сторінки: `bg-1` → `bg-2` (лінійний градієнт 160°) і плями `blob-a` / `blob-b` / `blob-c` (ті самі плями
-  дрейфують у hero входу, `.hero-blob-*`);
+  дрейфують у hero лендінгу, `.hero-blob-*`);
 - фактури карток слотів: `hatch` (штриховка Held), `free-card` (майже прозоре тло Free);
 - коло з ініціалами: `avatar-from` → `avatar-to`.
 
@@ -119,7 +119,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 | Підпис поля | `text-[13px] leading-[18px] font-semibold` | `Label` |
 | Підпис, допоміжний текст | `text-xs text-muted-foreground` або `text-muted-foreground` | описи панелей, години |
 | Бейдж | `text-xs font-bold` | `StatusBadge` |
-| Назва в hero входу | `text-[clamp(48px,7.2vw,112px)] leading-[0.92] font-normal tracking-[-0.05em]`, тане донизу (`.hero-wordmark`) | `LoginHero`, декор (`aria-hidden`), до 760px прихована |
+| Назва в hero лендінгу | `text-[clamp(44px,11vw,200px)] leading-[0.9] font-normal tracking-[-0.05em]`, тане донизу (`.hero-wordmark`) | `LandingHero`, декор (`aria-hidden`) |
 
 ## 4. Відступи й радіуси
 
@@ -134,7 +134,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 ## 5. Компоненти й варіанти
 
 Примітиви — лише з `@/components/ui`. Складені компоненти застосунку (`AppShell`, `Calendar`, `ChoiceList`, `DayGrid`,
-`SlotCard`, `EmptyState`, `ActionMessage`, `LoginHero`) лежать у `src/components/` і будуються на цих примітивах і токенах.
+`SlotCard`, `EmptyState`, `ActionMessage`, `LandingHero`) лежать у `src/components/` і будуються на цих примітивах і токенах.
 
 | Компонент | Варіанти | Правило |
 |---|---|---|
@@ -159,8 +159,8 @@ tabular-nums` — час і дати вирівнюються без монош�
 | Порожній список чи день | `EmptyState`: пунктирна рамка `rounded-lg`, іконка в скляному колі, текст 600, `role="status"` | «No free slots on this day.» (AC-HOLD-18, AC-HOLD-24) |
 | Помилка дії | `ActionMessage` (`role="alert"`): пігулка `bg-destructive-surface text-destructive` з іконкою над чи під формою; введене лишається у формі | «This slot is no longer available.» (AC-HOLD-03) |
 | Успіх дії | `ActionMessage` (`role="status"`): пігулка `bg-success-surface text-success` | «Slot held for 24 hours.» |
-| Вхід (`/login`) | `LoginHero` зліва (до 1024px — зверху; до 760px без великої назви й лінії пульсу) і скляна панель форми 400px; знак і назва — лише в hero | «Calm scheduling for a busy practice.» |
-| Відмова в доступі | панель з поясненням, без даних (`StandalonePanel`) | текст — дослівно з AC відмови |
+| Лендінг (гість на `/`, сторінка `/welcome`) | одна суцільна сторінка без карток: hero на весь екран (`LandingHero`: плями, приклад дня на `SlotCard`-фактурах, лінія пульсу, велика назва), далі секції «How it works», ролі й заклик, поділені лінією `border`; «Sign in» веде на `/login` (форма — як була, `StandalonePanel`) | «Calm scheduling for a busy practice.» |
+| Відмова в доступі | панель з поясненням, без даних (`StandalonePanel`, як і вхід) | текст — дослівно з AC відмови |
 | Завантаження розділу | `loading.tsx` зі `Skeleton` і «Loading…» у постійній `role="status"`-області AppShell; іконка пункту смуги — спінер, поки перехід чекає сервера | «Loading…» |
 | Дія виконується | `Button` `pending`: спінер, `aria-busy`, `disabled` | «Holding…» |
 | Вимкнена дія | `disabled` + курсор `not-allowed`; причина — текстом поруч | — |
@@ -175,9 +175,11 @@ tabular-nums` — час і дати вирівнюються без монош�
 - Кнопки смуги без видимого тексту — `aria-label` і видима підказка на hover і focus.
 - Спершу семантичний HTML (`<button>`, `<table>` / `role="table"`, `<label>`); `aria-*` — там, де HTML бракує.
 - Спінер і пульс скелетона вимикаються при `prefers-reduced-motion: reduce`.
-- Рух на вході (поява по черзі `.rise` / `.reveal-line`, дрейф плям, малювання лінії пульсу) — лише в
-  `@media (prefers-reduced-motion: no-preference)`: без нього все одразу на місці й нерухоме. Рух — декор, змісту не
-  несе; тривалість появи ≤ 1 с, плями — 24–36 с туди й назад.
+- Рух на лендінгу (поява по черзі `.rise` / `.reveal-line`, дрейф плям, малювання лінії пульсу, `.float`; під час
+  прокрутки — `.scroll-rise` і `.scroll-word` на `animation-timeline`) — лише в
+  `@media (prefers-reduced-motion: no-preference)`, а прокрутковий — ще й за `@supports (animation-timeline: view())`:
+  без них усе одразу на місці й нерухоме. Рух — декор, змісту не несе; тривалість появи ≤ 1 с, плями — 24–36 с туди й
+  назад; слова тези починають з `muted-foreground`, тож і до прокрутки контраст ≥ 4.5.
 
 ## 8. Do / Don't
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { BrandMark } from "./brand-mark";
 
-// Окрема скляна панель 400px по центру, без смуги (DESIGN.md, розділ 5): екран без доступу (NoAccess).
+// Окрема скляна панель 400px по центру, без смуги (DESIGN.md, розділ 5): вхід (/login) і екран без доступу (NoAccess).
 export function StandalonePanel({ labelledBy, children }: { labelledBy: string; children: ReactNode }) {
   return (
     <main className="flex min-h-dvh w-full flex-1 items-center justify-center px-4 py-16">

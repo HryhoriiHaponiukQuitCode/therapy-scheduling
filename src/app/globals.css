@@ -211,7 +211,7 @@ body {
     line-height: 1;
   }
 
-  /* Hero входу (LoginHero, DESIGN.md, розділ 6): плями фону, лінія пульсу, назва, що тане донизу. Декор. */
+  /* Hero лендінгу (LandingHero, DESIGN.md, розділ 6): плями фону, лінія пульсу, назва, що тане донизу. Декор. */
   .hero-blob {
     position: absolute;
     border-radius: 9999px;
@@ -256,9 +256,31 @@ body {
     animation-duration: 36s;
   }
   .hero-pulse {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: draw 2.4s ease-out 0.7s forwards;
+    animation: draw 2.4s ease-out 0.7s both;
+  }
+  .float {
+    animation: float 7s ease-in-out infinite alternate;
+  }
+}
+
+/* Лендінг під час прокрутки: секції спливають, слова тези темнішають по одному (від muted-foreground — і в
+   початковому стані контраст ≥ 4.5). Без підтримки animation-timeline чи без згоди на рух — усе одразу на місці. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-rise {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    .statement {
+      view-timeline: --statement block;
+    }
+    .scroll-word {
+      color: var(--muted-foreground);
+      animation: word-in linear both;
+      animation-timeline: --statement;
+      animation-range: cover var(--from) cover var(--to);
+    }
   }
 }
 
@@ -279,7 +301,17 @@ body {
   }
 }
 @keyframes draw {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+@keyframes float {
   to {
-    stroke-dashoffset: 0;
+    transform: translateY(-10px);
+  }
+}
+@keyframes word-in {
+  to {
+    color: var(--foreground);
   }
 }
