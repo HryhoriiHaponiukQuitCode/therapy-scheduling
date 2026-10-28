@@ -23,7 +23,8 @@
   --ring: #2a5bd7;
   --background: var(--bg-1);
   --card-foreground: var(--foreground);
-  --popover: var(--accent);
+  /* Спливаючі панелі (Select, Combobox, меню акаунта) — непрозорі: напівпрозоре тло пропускало поля під ними. */
+  --popover: #ffffff;
   --popover-foreground: var(--foreground);
   --secondary: var(--accent);
   --secondary-foreground: var(--primary);
@@ -60,24 +61,27 @@
 
 /* Темна тема — лише за вибором у перемикачі смуги (cookie theme → клас .dark на <html>); за замовчуванням світла. */
 .dark {
-  --bg-1: #0b1024;
-  --bg-2: #120f2a;
-  --blob-a: #1b2a63;
-  --blob-b: #2a1f5c;
-  --blob-c: #123056;
-  --card: rgba(255, 255, 255, 0.06);
-  --accent: rgba(255, 255, 255, 0.1);
-  --card-border: rgba(255, 255, 255, 0.12);
-  --border: rgba(238, 241, 255, 0.1);
-  --foreground: #eef1ff;
-  --muted-foreground: #a5acc8;
-  --input: #8a93b5; /* ≥ 3:1 і на тлі поля accent (DESIGN.md, «Контраст») */
-  --primary: #c9d6ff;
-  --primary-foreground: #0d1330;
-  --ring: #8fb0ff;
+  /* Стримана темна тема (DESIGN.md, розділ 2): майже нейтральне тло з ледь холодним відтінком, без кольорових плям;
+     непрозорі поверхні, що світлішають із підйомом (тло → card → accent / popover); межі 1px замість світіння;
+     основна дія — світла нейтральна пігулка (інверсія світлої теми), а не пастельна лавандова. */
+  --bg-1: #0e1015;
+  --bg-2: #0e1015;
+  --blob-a: #141925;
+  --blob-b: #12141b;
+  --blob-c: #111620;
+  --card: #16181e;
+  --accent: #1f222a;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.07);
+  --foreground: #e9ebf0;
+  --muted-foreground: #9ba1ae;
+  --input: #6b7282; /* ≥ 3:1 і на card, і на тлі поля accent (DESIGN.md, «Контраст») */
+  --primary: #e9ebf0;
+  --primary-foreground: #14161b;
+  --ring: #7ea2ff;
   --background: var(--bg-1);
   --card-foreground: var(--foreground);
-  --popover: var(--accent);
+  --popover: #1f222a;
   --popover-foreground: var(--foreground);
   --secondary: var(--accent);
   --secondary-foreground: var(--primary);
@@ -99,11 +103,11 @@
   --status-expired-foreground: #c3c7d4;
   --status-expired: #262b3d;
   --free-card: rgba(255, 255, 255, 0.03);
-  --avatar-from: #2a3364;
-  --avatar-to: #1b2147;
-  --shadow-value: 0 18px 48px rgba(0, 0, 0, 0.35);
-  --shadow-pop-value: 0 24px 56px rgba(0, 0, 0, 0.55);
-  --shadow-primary-value: 0 8px 20px rgba(0, 0, 0, 0.4);
+  --avatar-from: #2b2f39;
+  --avatar-to: #20232b;
+  --shadow-value: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.24);
+  --shadow-pop-value: 0 4px 12px rgba(0, 0, 0, 0.45), 0 16px 40px rgba(0, 0, 0, 0.4);
+  --shadow-primary-value: 0 1px 2px rgba(0, 0, 0, 0.4);
   color-scheme: dark;
 }
 

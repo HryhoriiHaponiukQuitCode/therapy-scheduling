@@ -68,7 +68,7 @@ export function AccountMenu({ email, role }: { email: string | null; role: strin
           role="menu"
           aria-label="Account"
           onKeyDown={onMenuKey}
-          className="absolute top-[calc(100%+8px)] right-0 z-40 min-w-[200px] rounded-lg border border-card-border bg-accent p-1.5 shadow-pop backdrop-blur-[24px]"
+          className="absolute top-[calc(100%+8px)] right-0 z-40 min-w-[200px] rounded-lg border border-card-border bg-popover p-1.5 text-popover-foreground shadow-pop"
         >
           <form action={signOut}>
             <SignOutItem itemRef={itemRef} />
@@ -89,7 +89,7 @@ function SignOutItem({ itemRef }: { itemRef: RefObject<HTMLButtonElement | null>
       role="menuitem"
       disabled={pending}
       aria-busy={pending || undefined}
-      className="flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-md px-3 text-sm font-semibold text-foreground hover:bg-card focus-visible:bg-card focus-visible:outline-offset-0 disabled:cursor-progress"
+      className="flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-md px-3 text-sm font-semibold text-foreground hover:bg-foreground/[0.07] focus-visible:bg-foreground/[0.07] focus-visible:outline-offset-0 disabled:cursor-progress"
     >
       {pending ? (
         <span
