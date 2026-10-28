@@ -1,17 +1,16 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getPageAccess } from "@/lib/request-user";
-import { addDays, formatPracticeTime, practiceClock, practiceDate, weekdayName } from "@/lib/slots";
+import { addDays, formatPracticeTime, practiceClock, practiceDate } from "@/lib/slots";
 import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
 import { DayGrid } from "@/components/day-grid";
 import { EmptyState } from "@/components/empty-state";
 import { NoAccess } from "@/components/no-access";
 import { CalendarIcon } from "@/components/icons";
-import { PageHeader } from "@/components/page-header";
 import { buttonClass } from "@/components/ui/button";
-import { Panel } from "@/components/ui/panel";
 import { loadMySchedule } from "./data";
+import { DayPanel, MyScheduleShell } from "./shell";
 
 // Розклад терапевта: власні слоти, утримання й сеанси за тиждень пн–нд з перемиканням тижнів (AC-HOLD-09, 21, 30,
 // 31, 40). Вигляд — панель на кожен день із погодинною сіткою DayGrid (одна колонка без шапки) без дій
@@ -41,31 +40,27 @@ export default async function MySchedulePage({ searchParams }: PageProps<"/my-sc
   const weekLink = (start: string) => `/my-schedule?week=${start}`;
 
   return (
-    <>
-      <PageHeader
-        title="My schedule"
-        description={`Week ${weekStart} – ${addDays(weekStart, 6)}, times in America/Los_Angeles.`}
-      />
-      <nav aria-label="Weeks" className="flex flex-wrap gap-2">
-        <Link href={weekLink(addDays(weekStart, -7))} className={buttonClass("glass")}>
-          Previous week
-        </Link>
-        <Link href="/my-schedule" className={buttonClass("glass")}>
-          This week
-        </Link>
-        <Link href={weekLink(addDays(weekStart, 7))} className={buttonClass("glass")}>
-          Next week
-        </Link>
-      </nav>
+    <MyScheduleShell
+      week={{ start: weekStart, end: addDays(weekStart, 6) }}
+      weekNav={
+        <>
+          <Link href={weekLink(addDays(weekStart, -7))} className={buttonClass("glass")}>
+            Previous week
+          </Link>
+          <Link href="/my-schedule" className={buttonClass("glass")}>
+            This week
+          </Link>
+          <Link href={weekLink(addDays(weekStart, 7))} className={buttonClass("glass")}>
+            Next week
+          </Link>
+        </>
+      }
+    >
       {error ? (
         <ActionMessage state={{ status: "error", message: "Could not load your schedule. Try again later." }} />
       ) : (
         days.map((day) => (
-          <Panel
-            key={day.date}
-            id={`day-${day.date}`}
-            title={`${weekdayName(day.date)}, ${day.date}${day.date === today ? ", today" : ""}`}
-          >
+          <DayPanel key={day.date} date={day.date} today={day.date === today}>
             {day.slots.length === 0 ? (
               <EmptyState icon={<CalendarIcon />}>No slots on this day.</EmptyState>
             ) : (
@@ -86,9 +81,9 @@ export default async function MySchedulePage({ searchParams }: PageProps<"/my-sc
                 ]}
               />
             )}
-          </Panel>
+          </DayPanel>
         ))
       )}
-    </>
+    </MyScheduleShell>
   );
 }

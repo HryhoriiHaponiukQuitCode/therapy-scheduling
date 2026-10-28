@@ -1,5 +1,4 @@
 import { Fragment } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getPageAccess } from "@/lib/request-user";
 import { APP_ROLES } from "@/lib/roles";
@@ -8,8 +7,7 @@ import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
 import { NoAccess } from "@/components/no-access";
 import { PageHeader } from "@/components/page-header";
-import { buttonClass } from "@/components/ui/button";
-import { Panel } from "@/components/ui/panel";
+import { CARD_GRID, ClientCardShell } from "./shell";
 
 // Картка клієнта з усіма даними анкети (AC-CARD-01, AC-CARD-04, AC-CARD-10). Що видно — вирішує RLS: планувальник і
 // адміністратор — будь-яку картку, терапевт — лише свого клієнта. Немає рядка → для терапевта «You don't have access
@@ -55,29 +53,17 @@ export default async function ClientCardPage({ params }: PageProps<"/clients/[id
   ];
 
   return (
-    <>
-      <PageHeader title={card.full_name} description="Client card" />
-      <Panel
-        id="client-card"
-        title="Intake form"
-        actions={
-          <Link href="/clients" className={buttonClass("glass")}>
-            All clients
-          </Link>
-        }
-        className="max-w-[640px]"
-      >
-        <dl className="m-0 grid grid-cols-[minmax(0,180px)_minmax(0,1fr)] gap-x-6 gap-y-4" data-testid="client-card">
-          {rows.map(([label, value]) => (
-            <Fragment key={label}>
-              <dt className="text-[13px] font-semibold text-muted-foreground">{label}</dt>
-              <dd className={`m-0 break-all ${value ? "font-semibold" : "text-muted-foreground"}`}>
-                {value ?? NOT_PROVIDED}
-              </dd>
-            </Fragment>
-          ))}
-        </dl>
-      </Panel>
-    </>
+    <ClientCardShell name={card.full_name}>
+      <dl className={CARD_GRID} data-testid="client-card">
+        {rows.map(([label, value]) => (
+          <Fragment key={label}>
+            <dt className="text-[13px] font-semibold text-muted-foreground">{label}</dt>
+            <dd className={`m-0 break-all ${value ? "font-semibold" : "text-muted-foreground"}`}>
+              {value ?? NOT_PROVIDED}
+            </dd>
+          </Fragment>
+        ))}
+      </dl>
+    </ClientCardShell>
   );
 }

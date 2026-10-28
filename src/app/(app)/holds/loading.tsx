@@ -1,18 +1,21 @@
-import { PageHeader } from "@/components/page-header";
-import { Panel } from "@/components/ui/panel";
 import { LoadingStatus } from "@/components/route-status";
-import { Skeleton, SkeletonRows } from "@/components/ui/skeleton";
+import { HOLD_LIST, HoldRowSkeleton, HoldsShell } from "./shell";
 
-// Миттєвий стан переходу на /holds: та сама панель зі скелетонами рядків утримань.
+// Миттєвий стан переходу на /holds: той самий каркас (HoldsShell) — панель «Upcoming holds», рядки — скелетонами.
 export default function HoldsLoading() {
   return (
     <>
       <LoadingStatus />
-      <PageHeader title="Holds" description="Held and expired holds of upcoming slots. Times in America/Los_Angeles." />
-      <Panel className="max-w-[880px]">
-        <Skeleton className="mb-5 h-7 w-44" />
-        <SkeletonRows rows={4} rowClassName="min-h-12" columns={["h-4 w-32", "h-4 flex-1", "h-6 w-20 rounded-full"]} />
-      </Panel>
+      <HoldsShell>
+        {/* mt-4 — відступ, який на сторінці дає порожня форма підтвердження над списком (gap-4). */}
+        <ul aria-hidden className={`${HOLD_LIST} mt-4`}>
+          {Array.from({ length: 4 }, (_, i) => (
+            <li key={i}>
+              <HoldRowSkeleton />
+            </li>
+          ))}
+        </ul>
+      </HoldsShell>
     </>
   );
 }
