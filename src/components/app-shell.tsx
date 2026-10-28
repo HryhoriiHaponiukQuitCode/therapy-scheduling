@@ -1,18 +1,17 @@
 import type { ReactNode } from "react";
-import { signOut } from "@/app/login/actions";
 import { getRequestTheme } from "@/lib/request-theme";
 import { isStaff, type AppRole } from "@/lib/roles";
 import type { Theme } from "@/lib/theme";
-import { Avatar } from "./ui/avatar";
+import { AccountMenu } from "./account-menu";
 import { BrandMark } from "./brand-mark";
-import { HoldsIcon, HomeIcon, ScheduleIcon, SignOutIcon, SlotsIcon, UsersIcon } from "./icons";
-import { RailLink, RailSignOut, RailThemeToggle } from "./rail-link";
+import { HoldsIcon, HomeIcon, ScheduleIcon, SlotsIcon, UsersIcon } from "./icons";
+import { RailLink, RailThemeToggle } from "./rail-link";
 import { ROUTE_STATUS_ID } from "./route-status-id";
 
 type ShellUser = { email: string | null; role: AppRole | null };
 
-// Бічна смуга (розділ 3): знак, круглі скляні кнопки пунктів за роллю, унизу перемикач теми і «Sign out»
-// (наявна форма signOut).
+// Бічна смуга (розділ 3): знак, круглі скляні кнопки пунктів за роллю, унизу перемикач теми. «Sign out» — у меню
+// акаунта праворуч угорі (AccountMenu).
 // До 760px — плаваюча скляна панель-пігулка внизу екрана, знак ховається.
 export function Rail({ user, theme }: { user: ShellUser; theme: Theme }) {
   return (
@@ -31,30 +30,14 @@ export function Rail({ user, theme }: { user: ShellUser; theme: Theme }) {
       </nav>
       <div className="mt-auto flex flex-col items-center gap-3.5 max-[760px]:mt-0 max-[760px]:flex-row max-[760px]:gap-1">
         <RailThemeToggle initial={theme} />
-        <form action={signOut}>
-          <RailSignOut label="Sign out" icon={<SignOutIcon />} />
-        </form>
       </div>
     </aside>
   );
 }
 
-// Пігулка акаунта праворуч у шапці контенту (розділ 3): email 600, роль muted-foreground, коло з першою літерою.
-// До 760px email і роль лишаються лише для скрінрідера (sr-only).
-function AccountPill({ user }: { user: ShellUser }) {
-  return (
-    <div className="glass col-start-2 row-start-1 col-span-1! flex items-center gap-3 self-start rounded-full py-2 pr-2 pl-[18px] max-[760px]:p-1">
-      <span className="min-w-0 max-[760px]:sr-only">
-        <span className="block truncate text-[13px] leading-4 font-semibold">{user.email ?? "No email"}</span>
-        <span className="text-xs text-muted-foreground">{user.role ?? "No role"}</span>
-      </span>
-      <Avatar name={user.email ?? ""} className="size-11 text-sm" />
-    </div>
-  );
-}
-
 // Каркас усіх сторінок, крім /login (розділ 3): сітка 96px | 1fr на тлі градієнта з плямами.
-// Перший ряд контенту — PageHeader сторінки зліва і пігулка акаунта справа; решта дітей — на всю ширину.
+// Перший ряд контенту — PageHeader сторінки зліва і пігулка акаунта (меню з «Sign out») справа; решта дітей — на всю
+// ширину.
 export async function AppShell({ user, children }: { user: ShellUser; children: ReactNode }) {
   const theme = await getRequestTheme();
   return (
@@ -64,7 +47,7 @@ export async function AppShell({ user, children }: { user: ShellUser; children: 
       <p id={ROUTE_STATUS_ID} role="status" className="sr-only" />
       <main className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] content-start gap-6 pt-7 pr-8 pb-10 pl-2 max-[760px]:px-4 max-[760px]:pt-5 max-[760px]:pb-28 [&>*]:col-span-2">
         {children}
-        <AccountPill user={user} />
+        <AccountMenu email={user.email} role={user.role} />
       </main>
     </div>
   );
