@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { CSSProperties } from "react";
+import { type CSSProperties, Fragment } from "react";
 import { HoldsIcon, ScheduleIcon, SlotsIcon } from "@/components/icons";
 import { LandingHero } from "@/components/landing-hero";
 import { RevealOnScroll } from "@/components/reveal-on-scroll";
@@ -45,18 +45,28 @@ export default function WelcomePage() {
           className="flex flex-col gap-16 px-16 pt-28 pb-28 max-[760px]:gap-10 max-[760px]:px-6 max-[760px]:pt-16 max-[760px]:pb-20"
         >
           <div className="grid gap-8 min-[1024px]:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)]">
-            <h2 id="how-title" data-reveal="" className="m-0 text-[13px] leading-[18px] font-semibold text-muted-foreground">
-              How it works
+            <h2 id="how-title" data-reveal="" className="reveal-heading m-0 text-[13px] leading-[18px] font-semibold text-muted-foreground">
+              <span className="block">How it works</span>
             </h2>
-            <p className="statement m-0 text-[34px] leading-[44px] tracking-[-0.02em] max-[760px]:text-[24px] max-[760px]:leading-8">
+            <p
+              data-reveal=""
+              className="statement reveal-words m-0 text-[34px] leading-[44px] tracking-[-0.02em] max-[760px]:text-[24px] max-[760px]:leading-8"
+            >
               {words.map((word, i) => (
-                <span
-                  key={i}
-                  className="scroll-word"
-                  style={{ "--from": `${(i / words.length) * 45}%`, "--to": `${((i + 1) / words.length) * 45 + 5}%` } as CSSProperties}
-                >
-                  {word}{" "}
-                </span>
+                <Fragment key={i}>
+                  <span
+                    className="scroll-word"
+                    style={
+                      {
+                        "--from": `${(i / words.length) * 45}%`,
+                        "--to": `${((i + 1) / words.length) * 45 + 5}%`,
+                        "--w": `${120 + i * 30}ms`,
+                      } as CSSProperties
+                    }
+                  >
+                    {word}
+                  </span>{" "}
+                </Fragment>
               ))}
             </p>
           </div>
