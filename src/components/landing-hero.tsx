@@ -27,7 +27,7 @@ export function LandingHero() {
   return (
     <section
       aria-labelledby="landing-title"
-      className="relative isolate flex min-h-dvh flex-col justify-between gap-12 overflow-hidden px-10 pt-8 max-[760px]:min-h-0 max-[760px]:gap-10 max-[760px]:px-5 max-[760px]:pt-5"
+      className="relative isolate flex min-h-dvh flex-col justify-between gap-12 overflow-hidden px-16 pt-10 max-[760px]:min-h-0 max-[760px]:gap-10 max-[760px]:px-6 max-[760px]:pt-6"
     >
       <div aria-hidden className="hero-blobs absolute inset-0 -z-10">
         <span className="hero-blob hero-blob-a top-[-15%] left-[-10%] size-[55%]" />

@@ -44,7 +44,7 @@ export default function WelcomePage() {
         <section
           id="how"
           aria-labelledby="how-title"
-          className="flex flex-col gap-12 px-10 pt-16 pb-20 max-[760px]:gap-8 max-[760px]:px-5 max-[760px]:pt-10 max-[760px]:pb-14"
+          className="flex flex-col gap-16 px-16 pt-28 pb-28 max-[760px]:gap-10 max-[760px]:px-6 max-[760px]:pt-16 max-[760px]:pb-20"
         >
           <div className="grid gap-8 min-[1024px]:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)]">
             <h2 id="how-title" data-reveal="" className="m-0 text-[13px] leading-[18px] font-semibold text-muted-foreground">
@@ -62,12 +62,12 @@ export default function WelcomePage() {
               ))}
             </p>
           </div>
-          <ol className="m-0 grid list-none gap-6 p-0 max-[760px]:gap-4 min-[900px]:grid-cols-3">
+          <ol className="m-0 grid list-none gap-8 p-0 max-[760px]:gap-5 min-[900px]:grid-cols-3">
             {STEPS.map(({ icon: Icon, title, text }, i) => (
               <li
                 key={title}
                 data-reveal=""
-                className="glass flex flex-col gap-3 rounded-xl p-[26px] max-[760px]:rounded-lg max-[760px]:p-5"
+                className="glass flex flex-col gap-3 rounded-xl p-8 max-[760px]:rounded-lg max-[760px]:p-6"
                 style={delay(i * 140)}
               >
                 <span className="flex items-center gap-3">
@@ -85,7 +85,7 @@ export default function WelcomePage() {
 
         <section
           aria-labelledby="roles-title"
-          className="flex flex-col gap-10 px-10 pb-20 max-[760px]:gap-8 max-[760px]:px-5 max-[760px]:pb-14"
+          className="flex flex-col gap-12 px-16 pb-28 max-[760px]:gap-8 max-[760px]:px-6 max-[760px]:pb-20"
         >
           <h2
             id="roles-title"
@@ -94,12 +94,12 @@ export default function WelcomePage() {
           >
             <span className="block">One place, three roles.</span>
           </h2>
-          <ul className="m-0 grid list-none gap-6 p-0 max-[760px]:gap-4 min-[900px]:grid-cols-3">
+          <ul className="m-0 grid list-none gap-8 p-0 max-[760px]:gap-5 min-[900px]:grid-cols-3">
             {ROLES.map(({ title, text }, i) => (
               <li
                 key={title}
                 data-reveal=""
-                className="glass flex flex-col gap-2 rounded-xl p-[26px] max-[760px]:rounded-lg max-[760px]:p-5"
+                className="glass flex flex-col gap-2 rounded-xl p-8 max-[760px]:rounded-lg max-[760px]:p-6"
                 style={delay(150 + i * 140)}
               >
                 <h3 className="m-0 text-lg leading-6 font-semibold">{title}</h3>
@@ -109,10 +109,10 @@ export default function WelcomePage() {
           </ul>
         </section>
 
-        <section aria-labelledby="cta-title" className="px-10 pb-20 max-[760px]:px-5 max-[760px]:pb-14">
+        <section aria-labelledby="cta-title" className="px-16 pb-28 max-[760px]:px-6 max-[760px]:pb-20">
           <div
             data-reveal=""
-            className="glass flex flex-col items-center gap-6 rounded-xl px-8 py-16 text-center max-[760px]:rounded-lg max-[760px]:px-5 max-[760px]:py-12">
+            className="glass flex flex-col items-center gap-6 rounded-xl px-10 py-20 text-center max-[760px]:rounded-lg max-[760px]:px-5 max-[760px]:py-12">
             <h2
               id="cta-title"
               data-reveal=""
@@ -128,7 +128,7 @@ export default function WelcomePage() {
         </section>
       </main>
 
-      <footer className="px-10 pb-8 text-xs text-muted-foreground max-[760px]:px-5">
+      <footer className="px-16 pb-10 text-xs text-muted-foreground max-[760px]:px-6">
         Practice scheduling — an internal tool for one therapy practice.
       </footer>
     </div>
