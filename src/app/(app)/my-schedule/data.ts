@@ -13,6 +13,15 @@ type ServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export type ScheduleDay = { date: string; slots: DaySlot[] };
 
+// Доступність терапевта за його email: без урахування регістру, як у RLS і hold_slot; % і _ екрануємо, щоб ilike був
+// точним збігом. Спільне для /my-schedule і статистики головної.
+export function ownAvailability(supabase: ServerClient, email: string) {
+  return supabase
+    .from("therapist_availability")
+    .select("weekday, start_hour, end_hour")
+    .ilike("therapist_email", email.replace(/[\\%_]/g, (ch) => `\\${ch}`));
+}
+
 // Понеділок тижня, у який потрапляє дата (тиждень пн–нд, AC-HOLD-30).
 export function weekStartOf(date: string): string {
   return addDays(date, 1 - isoWeekday(date));
@@ -31,11 +40,7 @@ export async function loadMySchedule(
   const weekStart = weekStartOf(isPracticeDate(week) ? week : practiceDate(now));
 
   const [availability, holds] = await Promise.all([
-    supabase
-      .from("therapist_availability")
-      .select("weekday, start_hour, end_hour")
-      // Без урахування регістру, як у RLS і hold_slot; % і _ екрануємо, щоб ilike був точним збігом.
-      .ilike("therapist_email", user.email.replace(/[\\%_]/g, (ch) => `\\${ch}`)),
+    ownAvailability(supabase, user.email),
     supabase.rpc("my_schedule", { p_from: weekStart, p_to: addDays(weekStart, 7) }),
   ]);
 

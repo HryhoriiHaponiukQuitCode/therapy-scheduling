@@ -12,8 +12,8 @@ const MUTATION = /\.(insert|update|upsert|delete)\(|\.rpc\(/;
 const DEPENDENT_PATHS: { call: RegExp; paths: string[] }[] = [
   // Список клієнтів і поле «Client» на /slots.
   { call: /from\("clients"\)\s*\.(insert|update|upsert|delete)\(/, paths: ["/clients", "/slots"] },
-  // Статуси слотів і список утримань.
-  { call: /\.rpc\("(hold_slot|confirm_hold)"/, paths: ["/slots", "/holds"] },
+  // Статуси слотів, список утримань і статистика головної.
+  { call: /\.rpc\("(hold_slot|confirm_hold)"/, paths: ["/slots", "/holds", "/"] },
 ];
 
 function files(dir: string): string[] {

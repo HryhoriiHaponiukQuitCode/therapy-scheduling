@@ -45,6 +45,9 @@
   --status-confirmed: #e4e9ff;
   --status-expired-foreground: #4f566b;
   --status-expired: #eaedf3;
+  /* Заливки графіка статистики (головна): перевірено валідатором палітри dataviz і ≥ 3:1 на card (DESIGN.md, розділ 2). */
+  --chart-confirmed: #2a78d6;
+  --chart-held: #a87800;
   --free-card: rgba(255, 255, 255, 0.28);
   --avatar-from: #ffffff;
   --avatar-to: #dfe6ff;
@@ -102,6 +105,8 @@
   --status-confirmed: #1e2650;
   --status-expired-foreground: #c3c7d4;
   --status-expired: #262b3d;
+  --chart-confirmed: #3987e5;
+  --chart-held: #c98500;
   --free-card: rgba(255, 255, 255, 0.03);
   --avatar-from: #2b2f39;
   --avatar-to: #20232b;
@@ -144,6 +149,8 @@
   --color-status-confirmed-foreground: var(--status-confirmed-foreground);
   --color-status-expired: var(--status-expired);
   --color-status-expired-foreground: var(--status-expired-foreground);
+  --color-chart-confirmed: var(--chart-confirmed);
+  --color-chart-held: var(--chart-held);
   --font-sans: var(--font-manrope), system-ui, sans-serif;
   --shadow-glass: var(--shadow-value);
   --shadow-pop: var(--shadow-pop-value);
