@@ -57,20 +57,12 @@ export function LandingHero() {
           <p className="rise m-0 max-w-[480px] text-base leading-6 text-muted-foreground" style={delay(220)}>
             Hold a slot for a client, confirm it as a session, and let every therapist see their week.
           </p>
-          <div className="rise flex flex-wrap gap-3" style={delay(320)}>
-            <Link href="/login" className={buttonClass("primary")}>
-              Sign in
-            </Link>
-            <a href="#how" className={buttonClass("glass")}>
-              How it works
-            </a>
-          </div>
           <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
             {POINTS.map(({ icon: Icon, text }, i) => (
               <li
                 key={text}
                 className="rise flex items-center gap-2 rounded-full border border-card-border bg-accent px-3.5 py-2 text-[13px] font-semibold"
-                style={delay(420 + i * 80)}
+                style={delay(320 + i * 80)}
               >
                 <Icon className="size-4 text-muted-foreground" />
                 {text}
