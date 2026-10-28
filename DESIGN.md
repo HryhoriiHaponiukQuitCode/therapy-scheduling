@@ -59,8 +59,12 @@
 
 - фон сторінки: `bg-1` → `bg-2` (лінійний градієнт 160°) і плями `blob-a` / `blob-b` / `blob-c`;
 - фактури карток слотів: `hatch` (штриховка Held), `free-card` (майже прозоре тло Free);
-- коло з ініціалами: `avatar-from` → `avatar-to`;
-- знак застосунку: `brand-a-from`, `brand-a-to`, `brand-b-from`, `brand-b-to`, `brand-shine` — однакові в обох темах.
+- коло з ініціалами: `avatar-from` → `avatar-to`.
+
+**Знак застосунку** — не токени, а файл `public/brand/practice-scheduling-icon.svg` (хрест із серцем і пульсом, власні
+кольори SVG, однакові в обох темах). Той самий файл — `src/app/icon.svg` (вкладка браузера), з нього ж
+`src/app/favicon.ico` 48×48. У сторінках — лише `BrandMark` (`src/components/brand-mark.tsx`): декоративний
+(`alt=""`, `aria-hidden`), назва «Practice scheduling» — текстом поруч.
 
 **Статуси й фактура карток слотів** (статус ніколи не лише кольором):
 
