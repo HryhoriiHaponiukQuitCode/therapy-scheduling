@@ -1,6 +1,7 @@
 // Куди вести запит без входу (src/lib/supabase/proxy.ts): гість на «/» бачить лендінг /welcome за тією самою адресою,
 // публічні сторінки відкриваються як є, решта — перенаправлення на /login.
-export const PUBLIC_PATHS = ["/login", "/auth", "/welcome"];
+// /api/health — публічна перевірка проду (D0 WS8): smoke і перевірка курсу читають її без входу.
+export const PUBLIC_PATHS = ["/login", "/auth", "/welcome", "/api/health"];
 
 export type GuestRoute =
   | { kind: "next" }
