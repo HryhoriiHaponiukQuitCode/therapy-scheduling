@@ -26,7 +26,7 @@ export async function loadHolds(supabase: ServerClient, now: Date): Promise<{ ho
     ...toHoldRecord(row),
     clientId: row.client_id,
     therapistId: row.therapist_id,
-    therapistName: row.therapist?.full_name ?? row.therapist?.email ?? "—",
+    therapistName: row.therapist?.full_name ?? row.therapist?.email ?? "Unknown therapist",
   }));
   return { holds: holdsList(records, now), error: false };
 }

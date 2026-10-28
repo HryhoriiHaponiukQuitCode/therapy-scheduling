@@ -3,10 +3,8 @@
 // Cache-Control/Expires/Pragma копіюємо у відповідь, щоб CDN не кешував auth-відповіді.
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { guestRoute } from "@/lib/guest-route";
 import type { Database } from "./database.types";
-
-// Сторінки, доступні без входу.
-const PUBLIC_PATHS = ["/login", "/auth"];
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -41,14 +39,26 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
 
-  const isPublic = PUBLIC_PATHS.some((path) =>
-    request.nextUrl.pathname.startsWith(path),
-  );
-
-  if (!claims && !isPublic) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+  if (!claims) {
+    const route = guestRoute(request.nextUrl.pathname);
+    if (route.kind === "redirect") {
+      const url = request.nextUrl.clone();
+      url.pathname = route.pathname;
+      return NextResponse.redirect(url);
+    }
+    if (route.kind === "rewrite") {
+      // Лендінг за адресою «/»: rewrite, а не redirect. Cookie сесії (зокрема очищені) і заголовки проти кешування
+      // з setAll — як у supabaseResponse, щоб CDN не закешував відповідь із Set-Cookie.
+      const url = request.nextUrl.clone();
+      url.pathname = route.pathname;
+      const response = NextResponse.rewrite(url, { request });
+      supabaseResponse.cookies.getAll().forEach((cookie) => response.cookies.set(cookie));
+      for (const header of ["cache-control", "expires", "pragma"]) {
+        const value = supabaseResponse.headers.get(header);
+        if (value) response.headers.set(header, value);
+      }
+      return response;
+    }
   }
 
   // Повертаємо саме supabaseResponse: у ньому оновлені cookie сесії.

@@ -55,11 +55,16 @@
 | `status-confirmed` / `-foreground` | бейдж «Confirmed» | `#e4e9ff` / `#2a3c9a` | `#1e2650` / `#bcc8ff` | `bg-status-confirmed`, `text-status-confirmed-foreground` |
 | `status-expired` / `-foreground` | бейдж «Expired» і «Past» | `#eaedf3` / `#4f566b` | `#262b3d` / `#c3c7d4` | `bg-status-expired`, `text-status-expired-foreground` |
 
-Лише в `globals.css` (без класів Tailwind, у компонентних класах `.glass`, `.slot-*`, `.avatar`):
+Лише в `globals.css` (без класів Tailwind, у компонентних класах `.glass`, `.slot-*`, `.avatar`, `.hero-*`,
+`.pill-fallback`):
 
-- фон сторінки: `bg-1` → `bg-2` (лінійний градієнт 160°) і плями `blob-a` / `blob-b` / `blob-c`;
+- фон сторінки: `bg-1` → `bg-2` (лінійний градієнт 160°) і плями `blob-a` / `blob-b` / `blob-c` (ті самі плями
+  дрейфують у hero лендінгу, `.hero-blob-*`);
 - фактури карток слотів: `hatch` (штриховка Held), `free-card` (майже прозоре тло Free);
-- коло з ініціалами: `avatar-from` → `avatar-to`.
+- коло з ініціалами: `avatar-from` → `avatar-to`;
+- 3D-капсула лендінгу: `pill-a` → `pill-b` → `pill-c` (градієнт лого: ковпачок, гранули) і `pill-glass` (відтінок
+  скляного корпусу, світлі гранули), однакові в обох темах. Їх читає в рантаймі `landing-pill-scene.tsx`
+  (`getComputedStyle`), тож у коді немає літералів кольору; без WebGL — той самий градієнт у `.pill-fallback`.
 
 **Знак застосунку** — не токени, а файл `public/brand/practice-scheduling-icon.svg` (хрест із серцем і пульсом, власні
 кольори SVG, однакові в обох темах). Той самий файл — `src/app/icon.svg` (вкладка браузера), з нього ж
@@ -108,6 +113,7 @@ WCAG 2.1, найгірший випадок: напівпрозорі повер
 Шрифт — **Manrope** через `next/font/google` (`--font-sans`), ваги 400–700. Глобально `font-variant-numeric:
 tabular-nums` — час і дати вирівнюються без моноширинного шрифту. Мова інтерфейсу — лише англійська (заголовки,
 кнопки, помилки, `aria-label`, `<title>`, `lang="en"`); дати й час — `YYYY-MM-DD HH:MM`.
+Довгого тире «—» у текстах інтерфейсу немає: замість нього кома, двокрапка, крапка або слова («No role», «Not set»).
 
 | Роль | Клас | Де |
 |---|---|---|
@@ -118,11 +124,13 @@ tabular-nums` — час і дати вирівнюються без монош�
 | Підпис поля | `text-[13px] leading-[18px] font-semibold` | `Label` |
 | Підпис, допоміжний текст | `text-xs text-muted-foreground` або `text-muted-foreground` | описи панелей, години |
 | Бейдж | `text-xs font-bold` | `StatusBadge` |
+| Назва в hero лендінгу | `text-[clamp(44px,min(11vw,22dvh),260px)] leading-[0.9] font-normal tracking-[-0.05em]` (на низьких екранах менша, щоб уміститися), тане донизу (`.hero-wordmark`) | `LandingHero`, декор (`aria-hidden`) |
 
 ## 4. Відступи й радіуси
 
 - Каркас: бічна смуга 96px + контент; до 760px смуга — плаваюча пігулка внизу, контенту — нижній відступ 96px. Без
-  горизонтальної прокрутки сторінки (широка сітка прокручується всередині своєї панелі).
+  горизонтальної прокрутки сторінки (широка сітка прокручується всередині своєї панелі) і без «гумової» прокрутки
+  за краї (`overscroll-behavior: none` на `html` і `body`).
 - Відступи: панель `p-[26px]` (`p-5` до 760px); між панелями `gap-6`; поля у формі `gap-4`; висота години в сітці ≥ 104px.
 - Радіуси (`@theme`): `rounded-sm` 10px, `rounded-md` 14px (рядки списків), `rounded-lg` 24px (картки слотів,
   порожній стан), `rounded-xl` 28px (панелі), `rounded-full` (кнопки, поля, бейджі, повідомлення).
@@ -132,7 +140,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 ## 5. Компоненти й варіанти
 
 Примітиви — лише з `@/components/ui`. Складені компоненти застосунку (`AppShell`, `Calendar`, `ChoiceList`, `DayGrid`,
-`SlotCard`, `EmptyState`, `ActionMessage`) лежать у `src/components/` і будуються на цих примітивах і токенах.
+`SlotCard`, `EmptyState`, `ActionMessage`, `LandingHero`, `LandingPill`) лежать у `src/components/` і будуються на цих примітивах і токенах.
 
 | Компонент | Варіанти | Правило |
 |---|---|---|
@@ -157,7 +165,8 @@ tabular-nums` — час і дати вирівнюються без монош�
 | Порожній список чи день | `EmptyState`: пунктирна рамка `rounded-lg`, іконка в скляному колі, текст 600, `role="status"` | «No free slots on this day.» (AC-HOLD-18, AC-HOLD-24) |
 | Помилка дії | `ActionMessage` (`role="alert"`): пігулка `bg-destructive-surface text-destructive` з іконкою над чи під формою; введене лишається у формі | «This slot is no longer available.» (AC-HOLD-03) |
 | Успіх дії | `ActionMessage` (`role="status"`): пігулка `bg-success-surface text-success` | «Slot held for 24 hours.» |
-| Відмова в доступі | панель з поясненням, без даних | текст — дослівно з AC відмови |
+| Лендінг (гість на `/`, сторінка `/welcome`) | одна суцільна сторінка без карток: hero на один екран (`LandingHero`: плями, текст угорі ліворуч, праворуч велика 3D-капсула `LandingPill` (three.js, від 1100px; полотно на всю праву частину hero від шапки до низу, не заходить на текст і «Sign in»; промпт — `docs/design/landing-pill-prompt.md`), унизу велика назва, яку видно повністю), плями якого тануть донизу (`.hero-blobs`), тож межі з рештою сторінки не видно; далі «How it works» і ролі — кроки й ролі скляними блоками (`glass rounded-xl`, як `Panel`); «Sign in» (у шапці hero) веде на `/login` (форма — як була, `StandalonePanel`) | «Calm scheduling for a busy practice.» |
+| Відмова в доступі | панель з поясненням, без даних (`StandalonePanel`, як і вхід) | текст — дослівно з AC відмови |
 | Завантаження розділу | `loading.tsx` зі `Skeleton` і «Loading…» у постійній `role="status"`-області AppShell; іконка пункту смуги — спінер, поки перехід чекає сервера | «Loading…» |
 | Дія виконується | `Button` `pending`: спінер, `aria-busy`, `disabled` | «Holding…» |
 | Вимкнена дія | `disabled` + курсор `not-allowed`; причина — текстом поруч | — |
@@ -172,6 +181,18 @@ tabular-nums` — час і дати вирівнюються без монош�
 - Кнопки смуги без видимого тексту — `aria-label` і видима підказка на hover і focus.
 - Спершу семантичний HTML (`<button>`, `<table>` / `role="table"`, `<label>`); `aria-*` — там, де HTML бракує.
 - Спінер і пульс скелетона вимикаються при `prefers-reduced-motion: reduce`.
+- Рух на лендінгу — лише в `@media (prefers-reduced-motion: no-preference)`; без нього все одразу на місці й нерухоме:
+  - hero: поява по черзі `.rise` / `.reveal-line`, дрейф плям;
+  - блоки й заголовки нижче (`data-reveal`, `RevealOnScroll`): з'являються за часом (≈ 1 с, по черзі в ряду), коли до
+    них доходить прокрутка; що видно одразу, не ховається; без JS — на місці;
+  - 3D-капсула (`LandingPill`): нахиляється до курсора, на наведенні трохи росте, перетягуванням крутиться з інерцією
+    й повертається, кліком відкривається на 0.8 с. Поява, плавання й повільне обертання — лише без
+    `reduce`; з `reduce` вона нерухома, крутиться тільки рукою й одразу стає на місце. Декоративна (`aria-hidden`,
+    без фокусу); цикл рендеру зупиняється поза екраном і в прихованій вкладці; three.js — окремий чанк, що вантажиться
+    лише від 1100px;
+  - слова тези темнішають під час прокрутки (`.scroll-word`, ще й за `@supports (animation-timeline: view())`), від
+    `muted-foreground`, тож і до прокрутки контраст ≥ 4.5.
+  Рух — декор, змісту не несе; плями — 24–36 с туди й назад.
 
 ## 8. Do / Don't
 
@@ -196,6 +217,8 @@ tabular-nums` — час і дати вирівнюються без монош�
 - `npm run check:design` — жодного hex, довільного кольору, сирої палітри чи кольору в inline style поза
   `src/components/ui` і `globals.css`. CI: `.github/workflows/architecture.yml`, job «Дизайн-система: лише токени».
 - Виняток — коментар `design-ok: <причина>` у тому самому рядку; кожен виняток — з реальною причиною (зараз їх немає).
+- `npm run lint` — правило `no-restricted-syntax` в `eslint.config.mjs`: жодного «—» у рядках, шаблонах і JSX-тексті
+  `src/` (у коментарях можна). CI: job `app` (lint з `--max-warnings 0`).
 - Візуально: знімки `/login` і `/slots` у світлій і темній темі в `docs/img/design/`: `*-ws6.png` — до дизайн-системи
   (стан WS6, коміт `c19c470`), `*-before.png` і `*-after.png` — до й після переходу на семантичні токени й
   `src/components/ui` (вигляд не змінився). Плюс ширина 390px без горизонтальної прокрутки, Tab по формах, контраст.
