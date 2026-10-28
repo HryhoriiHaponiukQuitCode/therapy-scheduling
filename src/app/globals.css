@@ -246,14 +246,14 @@ body {
     -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
   }
-  /* Капсула без WebGL: статичний стадіон 2:1 у градієнті лого, по діагоналі, як 3D-версія. */
+  /* Капсула без WebGL: статичний стадіон 2:1 у градієнті лого, по діагоналі, як 3D-версія (скло вгорі ліворуч). */
   .pill-fallback {
     width: 72%;
     aspect-ratio: 2 / 1;
     border-radius: 9999px;
-    background: linear-gradient(90deg, var(--pill-a), var(--pill-b) 48%, var(--pill-glass) 52%, var(--pill-glass));
+    background: linear-gradient(270deg, var(--pill-a), var(--pill-b) 48%, var(--pill-glass) 52%, var(--pill-glass));
     box-shadow: var(--shadow-value);
-    rotate: -33deg;
+    rotate: 33deg;
   }
 }
 

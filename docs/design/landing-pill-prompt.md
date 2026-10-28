@@ -24,7 +24,7 @@ drei, no images or models): one React client component in a Next.js 16 App Route
   downloaded.
 - **Background:** none. The canvas is transparent and sits on the "Airy glass" page (blue-lavender gradient with soft
   blobs), so the capsule reads as part of the page, not a box.
-- **Camera:** perspective, fov 30°, moved back just enough that the capsule (4 × 4.2 units with hover and shadow) fits
+- **Camera:** perspective, fov 30°, moved back so that a 4.6 × 4.8 unit frame (the capsule with hover, shadow and some air) fits
   both the width and the height of the canvas, whatever its proportions.
 - **Renderer:** alpha, antialias, Neutral tone mapping (brand colours stay true), DPR capped at 2.
 - **Environment:** PMREM `RoomEnvironment` for soft studio reflections, `environmentIntensity` 1 in light theme, .7 in
@@ -33,11 +33,11 @@ drei, no images or models): one React client component in a Next.js 16 App Route
 ## The capsule
 
 - **Shape:** a 2:1 stadium capsule (radius .8, total length ≈ 3.4), lying diagonally at about 33° from horizontal, top
-  end to the right. Built from two `LatheGeometry` halves:
-  - **Cap (lower-left half):** a touch wider (radius × 1.035) and it overlaps the body by .12, like a real capsule cap.
+  end to the left. Built from two `LatheGeometry` halves:
+  - **Cap (lower-right half):** a touch wider (radius × 1.035) and it overlaps the body by .12, like a real capsule cap.
     Matte-satin plastic: `MeshPhysicalMaterial`, roughness .32, clearcoat 1, clearcoat roughness .18, sheen .4. A
     vertex-colour gradient along its length in the **logo gradient** (cyan → blue → violet).
-  - **Body (upper-right half):** clear glass. `MeshPhysicalMaterial` with transmission 1, thickness .7, IOR 1.45,
+  - **Body (upper-left half):** clear glass. `MeshPhysicalMaterial` with transmission 1, thickness .7, IOR 1.45,
     roughness .05, clearcoat 1, a faint lavender-white tint and a light iridescence (.25) for a thin sheen at grazing
     angles.
 - **Beads:** about 55 small spheres (radius .06 to .11, one `InstancedMesh`) inside the glass half, in the logo colours

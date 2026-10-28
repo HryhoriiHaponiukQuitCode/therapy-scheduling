@@ -35,13 +35,15 @@ const RADIUS = 0.8;
 const LENGTH = 0.9;
 const CAP_SCALE = 1.035;
 const CAP_OVERLAP = 0.12;
-const REST_TILT = -0.995; // ≈ 33° до горизонталі, корпус (скло) — вгорі праворуч
+const REST_TILT = 0.995; // ≈ 33° до горизонталі, корпус (скло) — вгорі ліворуч
 const BEADS = 55;
 const DRAG_RAD_PER_PX = 0.01;
 const OPEN_DISTANCE = 0.35;
 // Що має вміститися в кадр за будь-яких пропорцій полотна: капсула по діагоналі з наведенням і тінню.
-const FIT_WIDTH = 4;
-const FIT_HEIGHT = 4.2;
+// Капсула трохи вище центру полотна (тінь — разом із нею).
+const RAISE = 0.35;
+const FIT_WIDTH = 4.6;
+const FIT_HEIGHT = 4.8;
 
 /** Профіль половини капсули для LatheGeometry: від шва (y = from) уздовж циліндра й далі півкулею до осі. */
 function halfProfile(radius: number, from: number): Vector2[] {
@@ -167,7 +169,7 @@ export function LandingPillScene() {
     const shadowGeometry = new PlaneGeometry(1, 1);
     const shadowMaterial = new MeshBasicMaterial({ alphaMap: shadowTexture, transparent: true, depthWrite: false });
     const shadow = new Mesh(shadowGeometry, shadowMaterial);
-    shadow.position.set(0, -1.95, -1);
+    shadow.position.set(0, RAISE - 1.95, -1);
     scene.add(shadow);
 
     let shadowOpacity = 0.18;
@@ -336,7 +338,7 @@ export function LandingPillScene() {
       tilt.y = reduced ? 0 : damp(tilt.y, targetTilt.y, 3.3, dt);
       root.rotation.set(tilt.x, tilt.y, 0);
       const float = reduced ? 0 : Math.sin((elapsed / 7) * Math.PI * 2) * 0.08;
-      root.position.y = float;
+      root.position.y = RAISE + float;
 
       if (!reduced) spinAngle += 0.18 * dt;
       spin.rotation.y = spinAngle;
