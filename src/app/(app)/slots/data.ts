@@ -116,6 +116,20 @@ export function selectTherapists(therapists: Therapist[], ids: string[]): Therap
   return chosen.length > 0 ? chosen : therapists.slice(0, DEFAULT_THERAPIST_COLUMNS);
 }
 
+// Терапевти за іменем (RLS: admin і scheduler бачать їхні профілі); ім'я — full_name, інакше email чи id.
+// Спільне для /slots і статистики головної.
+export async function loadTherapists(supabase: ServerClient): Promise<{ therapists: Therapist[]; error: boolean }> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, email")
+    .eq("role", "therapist")
+    .order("full_name");
+  return {
+    therapists: (data ?? []).map((p) => ({ id: p.id, name: p.full_name ?? p.email ?? p.id, email: p.email ?? "" })),
+    error: Boolean(error),
+  };
+}
+
 // Дані сторінки /slots: терапевти, доступність вибраного дня й утримання кожного вибраного терапевта, клієнти
 // для утримання (AC-HOLD-01, 05, 06, 18, 24, 32, 33; AC-HOLD-10 — вибір клієнта). Список утримань — /holds.
 // Запити — по одному на всіх вибраних (in), далі групуємо за терапевтом.
@@ -128,17 +142,7 @@ export async function loadDayView(
   const date = isPracticeDate(params.date) ? params.date : practiceDate(now);
   const today = practiceDate(now);
 
-  const { data: profiles, error: profilesError } = await supabase
-    .from("profiles")
-    .select("id, full_name, email")
-    .eq("role", "therapist")
-    .order("full_name");
-
-  const therapists: Therapist[] = (profiles ?? []).map((p) => ({
-    id: p.id,
-    name: p.full_name ?? p.email ?? p.id,
-    email: p.email ?? "",
-  }));
+  const { therapists, error: profilesError } = await loadTherapists(supabase);
   const selected = selectTherapists(therapists, params.therapists);
   const empty = { therapists, selected, date, today, days: [], clients: NO_CLIENTS };
 
