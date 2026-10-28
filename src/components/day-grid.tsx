@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import type { BadgeStatus } from "./ui/badge";
+import { CalendarIcon } from "./icons";
 import { SlotCard } from "./slot-card";
 
 export type DayGridSlot = {
@@ -13,9 +14,29 @@ export type DayGridSlot = {
 
 export type DayGridColumn = {
   key: string;
-  header?: ReactNode; // шапка колонки (терапевт); без шапок — одна колонка без рядка заголовків
-  message?: ReactNode; // повідомлення над слотами колонки (AC-HOLD-18, AC-HOLD-24)
+  header?: ReactNode; // шапка колонки (терапевт, повідомлення колонки); без шапок — одна колонка без рядка заголовків
   slots: DayGridSlot[];
+};
+
+// Повідомлення колонки одним рядком у її шапці («No free slots on this day.», AC-HOLD-18, AC-HOLD-24): не займає
+// окремого рядка сітки й не зсуває слоти інших колонок (DESIGN.md, «Патерни взаємодії»). role і data-testid — як є.
+export function ColumnNotice({ children, ...props }: HTMLAttributes<HTMLParagraphElement> & { "data-testid"?: string }) {
+  return (
+    <p
+      {...props}
+      className="m-0 mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-dashed border-input px-2.5 py-1 text-xs font-semibold"
+    >
+      <CalendarIcon className="size-3.5 flex-none text-primary" />
+      <span className="min-w-0">{children}</span>
+    </p>
+  );
+}
+
+// Минула година — коли в ній у жодної колонки немає слота, крім «Past»: такий рядок компактний (56px замість
+// 124px), щоб минуле не відсувало вільні слоти за перший екран.
+const pastHour = (columns: DayGridColumn[], hour: number) => {
+  const slots = columns.flatMap((column) => column.slots.filter((slot) => hourOf(slot.time) === hour));
+  return slots.length > 0 && slots.every((slot) => slot.status === "Past");
 };
 
 const hourOf = (time: string) => Number(time.slice(0, 2));
@@ -44,7 +65,6 @@ export function DayGrid({
   const range = hours.length > 0 ? Array.from({ length: last - first + 1 }, (_, i) => first + i) : [];
 
   const withHeader = columns.some((column) => column.header);
-  const withMessages = columns.some((column) => column.message);
 
   let nowIndex = -1;
   let nowTop = 0;
@@ -84,20 +104,9 @@ export function DayGrid({
           </div>
         ) : null}
 
-        {withMessages ? (
-          <div role="row" className={row}>
-            <span role="rowheader" className={cell}>
-              <span className="sr-only">Day</span>
-            </span>
-            {columns.map((column) => (
-              <div key={column.key} role="cell" className={`${cell} border-l p-1.5`}>
-                {column.message}
-              </div>
-            ))}
-          </div>
-        ) : null}
-
-        {range.map((hour, index) => (
+        {range.map((hour, index) => {
+          const past = pastHour(columns, hour);
+          return (
           <div key={hour} role="row" className={row}>
             <span role="rowheader" className={`${cell} border-t pt-2.5 text-sm font-medium text-muted-foreground`}>
               {label(hour)}
@@ -105,7 +114,7 @@ export function DayGrid({
             {columns.map((column) => {
               const slot = column.slots.find((s) => hourOf(s.time) === hour);
               return (
-                <div key={column.key} role="cell" className={`${cell} min-h-[124px] border-t border-l p-1.5`}>
+                <div key={column.key} role="cell" className={`${cell} ${past ? "min-h-14" : "min-h-[124px]"} border-t border-l p-1.5`}>
                   {slot ? (
                     <SlotCard
                       status={slot.status}
@@ -130,7 +139,8 @@ export function DayGrid({
               </div>
             ) : null}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
