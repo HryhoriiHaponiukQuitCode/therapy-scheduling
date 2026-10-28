@@ -12,7 +12,7 @@ export default function ClientCardLoading() {
         <div className={CARD_GRID}>
           {Array.from({ length: 4 }, (_, i) => [
             <Skeleton key={`label-${i}`} className="h-[18px] w-28" />,
-            <Skeleton key={`value-${i}`} className="h-5 w-48" />,
+            <Skeleton key={`value-${i}`} className="h-5 w-48 max-w-full" />,
           ])}
         </div>
       </ClientCardShell>

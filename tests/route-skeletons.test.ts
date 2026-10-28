@@ -40,10 +40,18 @@ describe("route skeletons share the page shell", () => {
   });
 
   it.each(routes)("$name: page.tsx and loading.tsx render the same shell component", ({ dir }) => {
-    const pageShells = shellImports(read(dir, "page.tsx")).filter((name) => name.endsWith("Shell"));
-    const loadingShells = shellImports(read(dir, "loading.tsx")).filter((name) => name.endsWith("Shell"));
+    const page = read(dir, "page.tsx");
+    const loading = read(dir, "loading.tsx");
+    const pageShells = shellImports(page).filter((name) => name.endsWith("Shell"));
+    const loadingShells = shellImports(loading).filter((name) => name.endsWith("Shell"));
     expect(pageShells.length).toBeGreaterThan(0);
     expect(loadingShells).toEqual(expect.arrayContaining(pageShells));
+    // Імпорту мало: обидва файли мають рендерити каркас у JSX.
+    for (const name of pageShells) {
+      const usage = new RegExp(`<${name}[\\s>/]`);
+      expect(page).toMatch(usage);
+      expect(loading).toMatch(usage);
+    }
   });
 
   it.each(routes)("$name: loading.tsx announces loading and does not rebuild the page layout by hand", ({ dir }) => {
