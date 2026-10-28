@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { BrandMark } from "./brand-mark";
 import { HoldsIcon, SuccessIcon, UsersIcon } from "./icons";
+import { Avatar } from "./ui/avatar";
 import { type BadgeStatus, StatusBadge } from "./ui/badge";
 import { buttonClass } from "./ui/button";
 
@@ -13,9 +14,10 @@ const POINTS = [
 
 // Приклад дня в hero: синтетичні дані, ті самі статуси й фактури, що в розкладі (SlotCard).
 const PREVIEW: { time: string; name: string; status: BadgeStatus; note: string; texture: string }[] = [
+  { time: "09:00", name: "Free slot", status: "Free", note: "Ready to hold", texture: "slot-free" },
   { time: "10:00", name: "Client One", status: "Confirmed", note: "Session", texture: "slot-confirmed" },
   { time: "11:00", name: "Client Seven", status: "Held", note: "Held until 14:43", texture: "slot-held" },
-  { time: "12:00", name: "Free slot", status: "Free", note: "Therapist One", texture: "slot-free" },
+  { time: "12:00", name: "Free slot", status: "Free", note: "Ready to hold", texture: "slot-free" },
 ];
 
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
@@ -46,10 +48,10 @@ export function LandingHero() {
       </header>
 
       <div className="flex items-center justify-between gap-10">
-        <div className="flex max-w-[600px] flex-col gap-6">
+        <div className="flex max-w-[600px] flex-col gap-6 min-[1600px]:max-w-[720px]">
           <h1
             id="landing-title"
-            className="rise m-0 text-[52px] leading-[58px] font-normal tracking-[-0.03em] max-[760px]:text-[34px] max-[760px]:leading-10"
+            className="rise m-0 text-[52px] leading-[58px] font-normal tracking-[-0.03em] max-[760px]:text-[34px] max-[760px]:leading-10 min-[1600px]:text-[64px] min-[1600px]:leading-[70px]"
             style={delay(120)}
           >
             Calm scheduling for a busy practice.
@@ -71,21 +73,31 @@ export function LandingHero() {
           </ul>
         </div>
 
-        <div aria-hidden className="float hidden w-[340px] shrink-0 flex-col gap-3 min-[1100px]:flex">
-          {PREVIEW.map((slot, i) => (
-            <div
-              key={slot.time}
-              className={`rise ${slot.texture} flex items-center gap-4 rounded-lg px-5 py-4`}
-              style={delay(500 + i * 120)}
-            >
-              <span className="text-sm font-semibold text-muted-foreground">{slot.time}</span>
-              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-sm leading-5 font-semibold">{slot.name}</span>
-                <span className="text-xs text-muted-foreground">{slot.note}</span>
+        <div aria-hidden className="float hidden w-[clamp(360px,30vw,560px)] shrink-0 min-[1100px]:block">
+          <div className="rise glass flex flex-col gap-3 rounded-xl p-5" style={delay(450)}>
+            <div className="flex items-center gap-3 px-1 pb-1">
+              <Avatar name="Therapist One" />
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="text-sm leading-5 font-semibold">Therapist One</span>
+                <span className="text-xs text-muted-foreground">Wednesday · 2026-10-28</span>
               </span>
-              <StatusBadge status={slot.status} />
+              <span className="text-xs font-semibold text-muted-foreground">2 free of 4</span>
             </div>
-          ))}
+            {PREVIEW.map((slot, i) => (
+              <div
+                key={slot.time}
+                className={`rise ${slot.texture} flex items-center gap-4 rounded-lg px-5 py-4`}
+                style={delay(600 + i * 110)}
+              >
+                <span className="text-sm font-semibold text-muted-foreground">{slot.time}</span>
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="text-sm leading-5 font-semibold">{slot.name}</span>
+                  <span className="text-xs text-muted-foreground">{slot.note}</span>
+                </span>
+                <StatusBadge status={slot.status} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -104,7 +116,7 @@ export function LandingHero() {
             d="M0 40H400L414 40L426 8L442 72L456 24L466 40H600"
           />
         </svg>
-        <p className="hero-wordmark m-0 text-[clamp(44px,11vw,200px)] leading-[0.9] tracking-[-0.05em]">
+        <p className="hero-wordmark m-0 text-[clamp(44px,11vw,260px)] leading-[0.9] tracking-[-0.05em]">
           <span className="block overflow-hidden">
             <span className="reveal-line block" style={delay(200)}>
               Practice

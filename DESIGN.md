@@ -120,7 +120,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 | Підпис поля | `text-[13px] leading-[18px] font-semibold` | `Label` |
 | Підпис, допоміжний текст | `text-xs text-muted-foreground` або `text-muted-foreground` | описи панелей, години |
 | Бейдж | `text-xs font-bold` | `StatusBadge` |
-| Назва в hero лендінгу | `text-[clamp(44px,11vw,200px)] leading-[0.9] font-normal tracking-[-0.05em]`, тане донизу (`.hero-wordmark`) | `LandingHero`, декор (`aria-hidden`) |
+| Назва в hero лендінгу | `text-[clamp(44px,11vw,260px)] leading-[0.9] font-normal tracking-[-0.05em]`, тане донизу (`.hero-wordmark`) | `LandingHero`, декор (`aria-hidden`) |
 
 ## 4. Відступи й радіуси
 
@@ -161,7 +161,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 | Порожній список чи день | `EmptyState`: пунктирна рамка `rounded-lg`, іконка в скляному колі, текст 600, `role="status"` | «No free slots on this day.» (AC-HOLD-18, AC-HOLD-24) |
 | Помилка дії | `ActionMessage` (`role="alert"`): пігулка `bg-destructive-surface text-destructive` з іконкою над чи під формою; введене лишається у формі | «This slot is no longer available.» (AC-HOLD-03) |
 | Успіх дії | `ActionMessage` (`role="status"`): пігулка `bg-success-surface text-success` | «Slot held for 24 hours.» |
-| Лендінг (гість на `/`, сторінка `/welcome`) | одна суцільна сторінка без карток: hero на весь екран (`LandingHero`: плями, приклад дня на `SlotCard`-фактурах, лінія пульсу, велика назва), плями якого тануть донизу (`.hero-blobs`), тож межі з рештою сторінки не видно; далі «How it works» і ролі — кроки й ролі скляними блоками (`glass rounded-xl`, як `Panel`); «Sign in» (у шапці hero) веде на `/login` (форма — як була, `StandalonePanel`) | «Calm scheduling for a busy practice.» |
+| Лендінг (гість на `/`, сторінка `/welcome`) | одна суцільна сторінка без карток: hero на весь екран (`LandingHero`: плями, приклад дня терапевта: скляна панель з аватаром і 4 слотами на `SlotCard`-фактурах, від 1100px, лінія пульсу, велика назва), плями якого тануть донизу (`.hero-blobs`), тож межі з рештою сторінки не видно; далі «How it works» і ролі — кроки й ролі скляними блоками (`glass rounded-xl`, як `Panel`); «Sign in» (у шапці hero) веде на `/login` (форма — як була, `StandalonePanel`) | «Calm scheduling for a busy practice.» |
 | Відмова в доступі | панель з поясненням, без даних (`StandalonePanel`, як і вхід) | текст — дослівно з AC відмови |
 | Завантаження розділу | `loading.tsx` зі `Skeleton` і «Loading…» у постійній `role="status"`-області AppShell; іконка пункту смуги — спінер, поки перехід чекає сервера | «Loading…» |
 | Дія виконується | `Button` `pending`: спінер, `aria-busy`, `disabled` | «Holding…» |
