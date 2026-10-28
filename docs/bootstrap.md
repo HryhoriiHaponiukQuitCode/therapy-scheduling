@@ -57,6 +57,9 @@ Docker не потрібен: локально — лише npm run dev прот
 - [x] Settings → Deployment Protection → **Require Log In** вимкнено → Save (інакше PM і викладач не відкриють ваші preview;
       точну назву перемикача перевірте в інтерфейсі) — ![require log in](img/vercel-require-login.png)
 - [x] Після змінних — редеплой; прод-URL відкривається — https://therapy-scheduling-two.vercel.app/login
+- [x] Регіон функцій = регіон бази: `vercel.json` → `"regions": ["fra1"]` (Франкфурт), бо Supabase — `eu-central-1`.
+      За замовчуванням Vercel запускає функції в `iad1` (США), і кожен запит сторінки до бази йшов через Атлантику
+      (2026-10-28: `x-vercel-id: arn1::iad1::…`). Перевірка після деплою: у `x-vercel-id` другий сегмент — `fra1`.
 
 ## 5. База й перший зелений CI
 
