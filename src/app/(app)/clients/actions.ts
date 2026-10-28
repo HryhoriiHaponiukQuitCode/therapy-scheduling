@@ -50,5 +50,7 @@ export async function createClientCard(_prevState: ClientCardState, formData: Fo
   }
 
   revalidatePath("/clients");
+  // Поле «Client» на /slots бере перших клієнтів із тієї ж таблиці (ADR 0002: кеш навігації 30 с).
+  revalidatePath("/slots");
   return { status: "success", message: `Client "${result.value.full_name}" created.`, at: Date.now() };
 }

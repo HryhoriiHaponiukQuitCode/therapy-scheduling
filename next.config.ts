@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Кеш навігації в браузері (docs/decisions/0002-router-cache.md): повернення на динамічну сторінку протягом 30 с
+  // не йде на сервер і в базу. Вхід і вихід очищають кеш вкладки (revalidatePath("/", "layout")); Hold, Confirm і
+  // створення клієнта — revalidatePath кожного шляху зі зміненими даними. Чужі зміни видно щонайбільше через 30 с,
+  // остаточну перевірку робить база.
+  experimental: {
+    staleTimes: {
+      dynamic: 30,
+    },
+  },
   turbopack: {
     rules: {
       "*.css": {
