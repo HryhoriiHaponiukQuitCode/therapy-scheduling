@@ -4,7 +4,8 @@ import { getRequestTheme } from "@/lib/request-theme";
 import { isStaff, type AppRole } from "@/lib/roles";
 import type { Theme } from "@/lib/theme";
 import { Avatar } from "./ui/avatar";
-import { BrandMark, HoldsIcon, HomeIcon, ScheduleIcon, SignOutIcon, SlotsIcon, UsersIcon } from "./icons";
+import { BrandMark } from "./brand-mark";
+import { HoldsIcon, HomeIcon, ScheduleIcon, SignOutIcon, SlotsIcon, UsersIcon } from "./icons";
 import { RailLink, RailSignOut, RailThemeToggle } from "./rail-link";
 import { ROUTE_STATUS_ID } from "./route-status-id";
 
