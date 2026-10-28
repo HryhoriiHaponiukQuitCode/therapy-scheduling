@@ -34,22 +34,28 @@
 варіант Tailwind `dark:` відповідає саме йому (`@custom-variant dark`). Вибір зберігається в cookie `theme` на рік
 (`src/lib/theme.ts`); кореневий layout одразу віддає сторінку в потрібній темі, без спалаху.
 
+**Темна тема — стримана, не «неонова».** Майже нейтральне тло з ледь холодним відтінком, без кольорових плям (плями —
+на півтону світліші за тло, ледь помітні); поверхні непрозорі й світлішають із підйомом: тло `#0e1015` → `card`
+`#16181e` → `accent` і `popover` `#1f222a`; межі 1px замість світіння й великих тіней. Основна дія — світла нейтральна
+пігулка (`primary` `#e9ebf0` з темним текстом, інверсія світлої теми), а не пастельна лавандова; синій — лише кільце
+фокусу й «зараз». Кольори статусів ті самі.
+
 | Токен | Для чого | Світла | Темна | Клас |
 |---|---|---|---|---|
-| `background` / `foreground` | тло сторінки (основа градієнта) й основний текст | `#eef2fd` / `#141a38` | `#0b1024` / `#eef1ff` | `bg-background`, `text-foreground` |
-| `card` / `card-foreground` | скляні панелі, кнопки смуги, плашка акаунта | `rgba(255,255,255,.66)` / `foreground` | `rgba(255,255,255,.06)` / `foreground` | `bg-card`, `text-card-foreground` |
-| `card-border` | межа 1px скляних елементів | `rgba(255,255,255,.9)` | `rgba(255,255,255,.12)` | `border-card-border` |
-| `popover` / `popover-foreground` | спливаюча панель Select | `rgba(255,255,255,.85)` / `foreground` | `rgba(255,255,255,.10)` / `foreground` | `bg-popover` |
-| `primary` / `primary-foreground` | основна дія (одна на картку), активний пункт смуги, вибраний день | `#1b2658` / `#ffffff` | `#c9d6ff` / `#0d1330` | `bg-primary`, `text-primary-foreground` |
-| `secondary` / `secondary-foreground` | другорядна дія («Confirm») | `rgba(255,255,255,.85)` / `#1b2658` | `rgba(255,255,255,.10)` / `#c9d6ff` | `bg-secondary`, `text-secondary-foreground` |
-| `muted` / `muted-foreground` | приглушене тло; підписи, години, допоміжний текст | `rgba(255,255,255,.85)` / `#535b7a` | `rgba(255,255,255,.10)` / `#a5acc8` | `bg-muted`, `text-muted-foreground` |
-| `accent` / `accent-foreground` | поля, наведення, вибраний рядок, картка Confirmed | `rgba(255,255,255,.85)` / `foreground` | `rgba(255,255,255,.10)` / `foreground` | `bg-accent`, `hover:bg-accent` |
+| `background` / `foreground` | тло сторінки (основа градієнта) й основний текст | `#eef2fd` / `#141a38` | `#0e1015` / `#e9ebf0` | `bg-background`, `text-foreground` |
+| `card` / `card-foreground` | скляні панелі, кнопки смуги, плашка акаунта | `rgba(255,255,255,.66)` / `foreground` | `#16181e` / `foreground` | `bg-card`, `text-card-foreground` |
+| `card-border` | межа 1px скляних елементів | `rgba(255,255,255,.9)` | `rgba(255,255,255,.08)` | `border-card-border` |
+| `popover` / `popover-foreground` | спливаючі панелі Select, Combobox і меню акаунта — непрозорі, без розмиття: крізь напівпрозоре тло просвічували поля під ними | `#ffffff` / `foreground` | `#1f222a` / `foreground` | `bg-popover`, `text-popover-foreground` |
+| `primary` / `primary-foreground` | основна дія (одна на картку), активний пункт смуги, вибраний день | `#1b2658` / `#ffffff` | `#e9ebf0` / `#14161b` | `bg-primary`, `text-primary-foreground` |
+| `secondary` / `secondary-foreground` | другорядна дія («Confirm») | `rgba(255,255,255,.85)` / `#1b2658` | `#1f222a` / `#e9ebf0` | `bg-secondary`, `text-secondary-foreground` |
+| `muted` / `muted-foreground` | приглушене тло; підписи, години, допоміжний текст | `rgba(255,255,255,.85)` / `#535b7a` | `#1f222a` / `#9ba1ae` | `bg-muted`, `text-muted-foreground` |
+| `accent` / `accent-foreground` | поля, наведення, вибраний рядок, картка Confirmed | `rgba(255,255,255,.85)` / `foreground` | `#1f222a` / `foreground` | `bg-accent`, `hover:bg-accent` |
 | `destructive` / `destructive-surface` | текст і межа помилки / тло повідомлення про помилку | `#a3283a` / `#fde8ec` | `#ffadb9` / `#3a1820` | `text-destructive`, `bg-destructive-surface` |
 | `success` / `success-surface` | повідомлення про успіх | `#1d6942` / `#e0f4e7` | `#a3e3bd` / `#14301f` | `text-success`, `bg-success-surface` |
-| `border` | роздільники годин і колонок у сітці | `rgba(20,26,56,.08)` | `rgba(238,241,255,.10)` | `border-border` |
-| `input` | межа поля, пунктир картки Free, рамка чекбокса | `#7d86a3` | `#8a93b5` | `border-input` |
-| `ring` | кільце фокусу | `#2a5bd7` | `#8fb0ff` | `outline-ring`, глобальний `:focus-visible` |
-| `now` / `now-foreground` | лінія й пігулка «зараз», крапка «сьогодні» в календарі | `#2a5bd7` / `#ffffff` | `#8fb0ff` / `#0d1330` | `bg-now`, `text-now-foreground` |
+| `border` | роздільники годин і колонок у сітці | `rgba(20,26,56,.08)` | `rgba(255,255,255,.07)` | `border-border` |
+| `input` | межа поля, пунктир картки Free, рамка чекбокса | `#7d86a3` | `#6b7282` | `border-input` |
+| `ring` | кільце фокусу | `#2a5bd7` | `#7ea2ff` | `outline-ring`, глобальний `:focus-visible` |
+| `now` / `now-foreground` | лінія й пігулка «зараз», крапка «сьогодні» в календарі | `#2a5bd7` / `#ffffff` | `#7ea2ff` / `#14161b` | `bg-now`, `text-now-foreground` |
 | `status-free` / `-foreground` | бейдж «Free» | `#e0f4e7` / `#1d6942` | `#14301f` / `#a3e3bd` | `bg-status-free`, `text-status-free-foreground` |
 | `status-held` / `-foreground` | бейдж «Held» | `#fbf0cf` / `#76520a` | `#2e260d` / `#f0d488` | `bg-status-held`, `text-status-held-foreground` |
 | `status-confirmed` / `-foreground` | бейдж «Confirmed» | `#e4e9ff` / `#2a3c9a` | `#1e2650` / `#bcc8ff` | `bg-status-confirmed`, `text-status-confirmed-foreground` |
@@ -85,32 +91,34 @@
 
 ### Контраст
 
-WCAG 2.1, найгірший випадок: напівпрозорі поверхні (`card`, `accent`, `secondary`) пораховано поверх кожного з
-кольорів фону (`bg-1`, `bg-2` і трьох плям) і взято найменше значення. Бейдж «Past» не бере `muted`: у темній темі
-`muted-foreground` на `muted` дає лише 4.37 (поверх `card` — 3.68), тому він на непрозорих токенах `status-expired`.
+WCAG 2.1, найгірший випадок: напівпрозорі поверхні світлої теми (`card`, `accent`, `secondary`) пораховано поверх
+кожного з кольорів фону (`bg-1`, `bg-2` і трьох плям) і взято найменше значення; поверхні темної теми непрозорі,
+а текст на тлі — поверх найсвітлішої плями. Бейдж «Past» не бере `muted`, а непрозорі токени `status-expired`: так у
+попередній, напівпрозорій темній палітрі він мав лише 4.37 (поверх `card` — 3.68).
 
 | Пара | Світла | Темна | Норма |
 |---|---|---|---|
-| `foreground` на `background` | 12.37 | 11.79 | ≥ 4.5 |
-| `foreground` на `card` | 15.32 | 9.89 | ≥ 4.5 |
-| `muted-foreground` на `background` | 4.86 | 5.90 | ≥ 4.5 |
-| `muted-foreground` на `card` | 6.01 | 4.95 | ≥ 4.5 |
-| `primary-foreground` на `primary` | 14.34 | 12.62 | ≥ 4.5 |
-| `secondary-foreground` на `secondary` | 13.70 | 6.81 | ≥ 4.5 |
-| `destructive` на `card` | 6.47 | 6.32 | ≥ 4.5 |
+| `foreground` на `background` | 12.37 | 14.73 | ≥ 4.5 |
+| `foreground` на `card` | 15.32 | 14.88 | ≥ 4.5 |
+| `foreground` на `popover` | 17.01 | 13.33 | ≥ 4.5 |
+| `muted-foreground` на `background` | 4.86 | 6.78 | ≥ 4.5 |
+| `muted-foreground` на `card` | 6.01 | 6.85 | ≥ 4.5 |
+| `primary-foreground` на `primary` | 14.34 | 15.17 | ≥ 4.5 |
+| `secondary-foreground` на `secondary` | 13.70 | 13.33 | ≥ 4.5 |
+| `destructive` на `card` | 6.47 | 10.08 | ≥ 4.5 |
 | `destructive` на `destructive-surface` | 6.14 | 8.96 | ≥ 4.5 |
 | `success` на `success-surface` | 5.80 | 9.70 | ≥ 4.5 |
 | `status-free-foreground` на `status-free` | 5.80 | 9.70 | ≥ 4.5 |
 | `status-held-foreground` на `status-held` | 6.19 | 10.35 | ≥ 4.5 |
 | `status-confirmed-foreground` на `status-confirmed` | 7.87 | 8.87 | ≥ 4.5 |
 | `status-expired-foreground` на `status-expired` (і бейдж «Past») | 6.23 | 8.32 | ≥ 4.5 |
-| `now-foreground` на `now` | 5.87 | 8.52 | ≥ 4.5 |
-| `input` на `card` | 3.25 | 3.67 | ≥ 3 |
-| `input` на `accent` (межа поля на його тлі) | 3.45 | 3.24 | ≥ 3 |
-| `chart-confirmed` на `card` (стовпець графіка) | 3.98 | 3.06 | ≥ 3 |
-| `chart-held` на `card` | 3.53 | 3.62 | ≥ 3 |
-| `ring` на `background` | 4.27 | 6.21 | ≥ 3 |
-| `ring` на `card` | 5.29 | 5.21 | ≥ 3 |
+| `now-foreground` на `now` | 5.87 | 7.32 | ≥ 4.5 |
+| `input` на `card` | 3.25 | 3.68 | ≥ 3 |
+| `input` на `accent` (межа поля на його тлі) | 3.45 | 3.30 | ≥ 3 |
+| `chart-confirmed` на `card` (стовпець графіка) | 3.98 | 4.88 | ≥ 3 |
+| `chart-held` на `card` | 3.53 | 5.78 | ≥ 3 |
+| `ring` на `background` | 4.27 | 7.11 | ≥ 3 |
+| `ring` на `card` | 5.29 | 7.18 | ≥ 3 |
 
 ## 3. Типографіка
 

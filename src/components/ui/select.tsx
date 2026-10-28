@@ -179,13 +179,14 @@ export function Select({
 }
 
 // Спільне для Select і Combobox (combobox.tsx): спливаюча панель, рядок варіанта й значення в закритому полі.
+// Панель непрозора (popover): крізь напівпрозоре тло з розмиттям просвічували поля під нею, особливо в темній темі.
 export const popupClass =
-  "absolute top-[calc(100%+8px)] left-0 z-20 min-w-full rounded-lg border border-card-border bg-accent shadow-pop backdrop-blur-[24px]";
+  "absolute top-[calc(100%+8px)] left-0 z-20 min-w-full rounded-lg border border-card-border bg-popover text-popover-foreground shadow-pop";
 
-// Активний (клавіатура, наведення) — фон і рамка; вибраний — жирний текст і галочка, без фону.
+// Активний (клавіатура, наведення) — легка підсвітка кольором тексту; вибраний — жирний текст і галочка, без фону.
 export const optionClass = (active: boolean, selected: boolean) =>
   `flex min-h-12 cursor-pointer items-center gap-2.5 rounded-md px-2.5 font-medium ${
-    active ? "bg-card ring-1 ring-input ring-inset" : ""
+    active ? "bg-foreground/[0.07]" : ""
   } ${selected ? "font-bold" : ""}`;
 
 export function OptionContent({ option, selected, avatars }: { option: SelectOption; selected: boolean; avatars: boolean }) {

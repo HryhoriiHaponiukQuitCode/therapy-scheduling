@@ -71,8 +71,8 @@ function countRows(counts: StatusCounts) {
 // Стовпці «слоти за днями»: висота — усі ще не початі слоти дня, сегменти — статуси. Над стовпцем — підсумок дня,
 // під ним — день тижня й число (повна дата YYYY-MM-DD — у підказці й таблиці). Кожен день — зображення з описом
 // (role="img", aria-label) у порядку Tab; на hover, фокусі й дотику (тап фокусує його) — підказка з тими самими
-// рядками (aria-hidden). Тло підказки непрозоре (background): напівпрозоре popover у темній темі пропускає текст
-// заголовка панелі під нею.
+// рядками (aria-hidden). Тло підказки — непрозорий popover, як у
+// дропдаунів: крізь напівпрозоре просвічував заголовок панелі під нею.
 export function DayChart({ days, today }: { days: DayStats[]; today: string }) {
   const max = Math.max(1, ...days.map(totalSlots));
   return (
@@ -110,7 +110,7 @@ export function DayChart({ days, today }: { days: DayStats[]; today: string }) {
                 </span>
                 <div
                   aria-hidden
-                  className={`pointer-events-none invisible absolute bottom-full z-20 mb-1 w-max min-w-[168px] rounded-md border border-card-border bg-background p-3 text-sm opacity-0 shadow-pop transition-opacity group-hover:visible group-hover:opacity-100 group-focus:visible group-focus:opacity-100 motion-reduce:transition-none ${align}`}
+                  className={`pointer-events-none invisible absolute bottom-full z-20 mb-1 w-max min-w-[168px] rounded-md border border-card-border bg-popover p-3 text-sm text-popover-foreground opacity-0 shadow-pop transition-opacity group-hover:visible group-hover:opacity-100 group-focus:visible group-focus:opacity-100 motion-reduce:transition-none ${align}`}
                 >
                   <p className="m-0 mb-2 text-xs font-semibold text-muted-foreground">
                     {weekday}, {day.date}
