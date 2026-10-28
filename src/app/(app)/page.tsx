@@ -5,7 +5,7 @@ import { ACCOUNT_GRID, HomeShell } from "./shell";
 
 // Головна сторінка шаблону: хто увійшов і з якою роллю (з таблиці profiles).
 // Сторінка читає cookies, тому рендериться динамічно (шаблон зібрано з --no-cache-components).
-// Меню й «Sign out» — у смузі AppShell (src/app/(app)/layout.tsx).
+// Меню — у смузі AppShell, «Sign out» — у меню акаунта праворуч угорі (src/app/(app)/layout.tsx).
 export default async function Home() {
   // getClaims() + власний профіль (RLS) — у getCurrentUser (через getRequestUser: той самий виклик, що в layout).
   // getSession() для авторизації не використовуємо.
