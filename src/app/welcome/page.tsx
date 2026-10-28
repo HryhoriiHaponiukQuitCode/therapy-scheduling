@@ -3,12 +3,15 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { HoldsIcon, ScheduleIcon, SlotsIcon } from "@/components/icons";
 import { LandingHero } from "@/components/landing-hero";
+import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import { buttonClass } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Practice scheduling",
   description: "Calm scheduling for a busy practice: hold a slot for a client, confirm it as a session.",
 };
+
+const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
 const STATEMENT =
   "A scheduler finds a free slot, holds it for the client for 24 hours, and confirms it as a session once the client agrees. Nobody else can take that time in between.";
@@ -28,12 +31,14 @@ const ROLES = [
 // Лендінг для гостя — одна суцільна сторінка: hero без рамки, нижче кроки, ролі й заклик — скляними блоками
 // (DESIGN.md, розділ 6, «Лендінг»): гість на «/» бачить цю сторінку за тією самою адресою
 // (src/lib/guest-route.ts), вхід — кнопкою «Sign in». Даних застосунку немає: сторінка статична.
-// Секції нижче з'являються під час прокрутки (.scroll-rise), слова тези темнішають по одному (.scroll-word).
+// Блоки й заголовки нижче з'являються, коли до них доходить прокрутка (data-reveal, RevealOnScroll), слова тези
+// темнішають по одному під час прокрутки (.scroll-word).
 export default function WelcomePage() {
   const words = STATEMENT.split(" ");
   return (
     <div className="flex w-full flex-1 flex-col">
       <LandingHero />
+      <RevealOnScroll />
 
       <main className="flex flex-col">
         <section
@@ -42,7 +47,7 @@ export default function WelcomePage() {
           className="flex flex-col gap-12 px-10 pt-16 pb-20 max-[760px]:gap-8 max-[760px]:px-5 max-[760px]:pt-10 max-[760px]:pb-14"
         >
           <div className="grid gap-8 min-[1024px]:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)]">
-            <h2 id="how-title" className="scroll-rise m-0 text-[13px] leading-[18px] font-semibold text-muted-foreground">
+            <h2 id="how-title" data-reveal="" className="m-0 text-[13px] leading-[18px] font-semibold text-muted-foreground">
               How it works
             </h2>
             <p className="statement m-0 text-[34px] leading-[44px] tracking-[-0.02em] max-[760px]:text-[24px] max-[760px]:leading-8">
@@ -59,7 +64,12 @@ export default function WelcomePage() {
           </div>
           <ol className="m-0 grid list-none gap-6 p-0 max-[760px]:gap-4 min-[900px]:grid-cols-3">
             {STEPS.map(({ icon: Icon, title, text }, i) => (
-              <li key={title} className="scroll-rise glass rounded-xl p-[26px] max-[760px]:rounded-lg max-[760px]:p-5 flex flex-col gap-3">
+              <li
+                key={title}
+                data-reveal=""
+                className="glass flex flex-col gap-3 rounded-xl p-[26px] max-[760px]:rounded-lg max-[760px]:p-5"
+                style={delay(i * 140)}
+              >
                 <span className="flex items-center gap-3">
                   <span className="grid size-10 place-items-center rounded-full border border-card-border bg-accent">
                     <Icon className="size-[18px]" />
@@ -79,13 +89,19 @@ export default function WelcomePage() {
         >
           <h2
             id="roles-title"
-            className="scroll-rise m-0 text-[34px] leading-10 font-normal tracking-[-0.02em] max-[760px]:text-[24px] max-[760px]:leading-8"
+            data-reveal=""
+            className="reveal-heading m-0 text-[34px] leading-10 font-normal tracking-[-0.02em] max-[760px]:text-[24px] max-[760px]:leading-8"
           >
-            One place, three roles.
+            <span className="block">One place, three roles.</span>
           </h2>
           <ul className="m-0 grid list-none gap-6 p-0 max-[760px]:gap-4 min-[900px]:grid-cols-3">
-            {ROLES.map(({ title, text }) => (
-              <li key={title} className="scroll-rise glass rounded-xl p-[26px] max-[760px]:rounded-lg max-[760px]:p-5 flex flex-col gap-2">
+            {ROLES.map(({ title, text }, i) => (
+              <li
+                key={title}
+                data-reveal=""
+                className="glass flex flex-col gap-2 rounded-xl p-[26px] max-[760px]:rounded-lg max-[760px]:p-5"
+                style={delay(150 + i * 140)}
+              >
                 <h3 className="m-0 text-lg leading-6 font-semibold">{title}</h3>
                 <p className="m-0 text-muted-foreground">{text}</p>
               </li>
@@ -94,12 +110,16 @@ export default function WelcomePage() {
         </section>
 
         <section aria-labelledby="cta-title" className="px-10 pb-20 max-[760px]:px-5 max-[760px]:pb-14">
-          <div className="scroll-rise glass flex flex-col items-center gap-6 rounded-xl px-8 py-16 text-center max-[760px]:rounded-lg max-[760px]:px-5 max-[760px]:py-12">
+          <div
+            data-reveal=""
+            className="glass flex flex-col items-center gap-6 rounded-xl px-8 py-16 text-center max-[760px]:rounded-lg max-[760px]:px-5 max-[760px]:py-12">
             <h2
               id="cta-title"
-              className="m-0 text-[34px] leading-10 font-normal tracking-[-0.02em] max-[760px]:text-[24px] max-[760px]:leading-8"
+              data-reveal=""
+              className="reveal-heading m-0 text-[34px] leading-10 font-normal tracking-[-0.02em] max-[760px]:text-[24px] max-[760px]:leading-8"
+              style={delay(200)}
             >
-              Ready for today&apos;s schedule?
+              <span className="block">Ready for today&apos;s schedule?</span>
             </h2>
             <Link href="/login" className={buttonClass("primary")}>
               Sign in
