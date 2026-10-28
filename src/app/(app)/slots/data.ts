@@ -1,5 +1,13 @@
 import type { createClient } from "@/lib/supabase/server";
-import { childGuardianLabel, CLIENT_OPTIONS_LIMIT, CLIENT_SEARCH_MAX, clientSearchFilter } from "@/lib/clients";
+import {
+  childGuardianLabel,
+  CLIENT_OPTIONS_LIMIT,
+  CLIENT_SEARCH_MAX,
+  clientSearchFilter,
+  MORE_CLIENTS_MESSAGE,
+  noClientMatchMessage,
+} from "@/lib/clients";
+import type { SelectOption } from "@/components/ui/select";
 import {
   addDays,
   buildDaySlots,
@@ -29,20 +37,50 @@ export function toClientOptions(
   }));
 }
 
-// Клієнти для утримання: усі або ті, чиє ім'я, email чи email опікуна містять q (RLS: admin і scheduler бачать усіх).
-// Не більше CLIENT_OPTIONS_LIMIT; на один рядок більше — щоб знати, що є ще.
-function clientsQuery(supabase: ServerClient, q: string) {
+export type ClientSearch = { q: string; clients: ClientOption[]; truncated: boolean; error: boolean };
+const NO_CLIENTS: ClientSearch = { q: "", clients: [], truncated: false, error: false };
+
+// Клієнти для утримання: усі або ті, чиє ім'я, email чи email опікуна містять q (AC-CARD-02; RLS: admin і scheduler
+// бачать усіх). Не більше CLIENT_OPTIONS_LIMIT; на один рядок більше — щоб знати, що є ще. q обрізаємо один раз:
+// той самий текст іде і в запит, і в повідомлення «нічого не знайдено».
+export async function searchClients(supabase: ServerClient, rawQ: string): Promise<ClientSearch> {
+  const q = rawQ.trim().slice(0, CLIENT_SEARCH_MAX).trim();
   const query = supabase
     .from("clients")
     .select("id, full_name, client_type, guardian_email")
     .order("full_name")
     .limit(CLIENT_OPTIONS_LIMIT + 1);
   const filter = clientSearchFilter(q);
-  return filter ? query.or(filter) : query;
+  const { data, error } = await (filter ? query.or(filter) : query);
+  if (error) return { q, clients: [], truncated: false, error: true };
+  return {
+    q,
+    clients: toClientOptions(data.slice(0, CLIENT_OPTIONS_LIMIT)),
+    truncated: data.length > CLIENT_OPTIONS_LIMIT,
+    error: false,
+  };
+}
+
+// Що бачить поле вибору клієнта: варіанти й підказка під ними (нічого не знайдено / показано не всіх) або помилка.
+export type ClientChoices = { options: SelectOption[]; notice: string | null; error: string | null };
+
+export const CLIENTS_ERROR_MESSAGE = "Could not load clients, so slots cannot be held right now.";
+
+export function toClientChoices(search: ClientSearch): ClientChoices {
+  if (search.error) return { options: [], notice: null, error: CLIENTS_ERROR_MESSAGE };
+  const notice =
+    search.clients.length === 0
+      ? search.q
+        ? noClientMatchMessage(search.q)
+        : null
+      : search.truncated
+        ? MORE_CLIENTS_MESSAGE
+        : null;
+  return { options: toSelectOptions(search.clients), notice, error: null };
 }
 
 // Варіанти Select «Client to hold a slot for»: біля дитини — email опікуна (AC-CARD-02).
-export function toSelectOptions(clients: ClientOption[]): { value: string; label: string; hint?: string }[] {
+export function toSelectOptions(clients: ClientOption[]): SelectOption[] {
   return clients.map((client) => ({
     value: client.id,
     label: client.name,
@@ -63,10 +101,8 @@ export type DayView = {
   date: string;
   today: string; // «сьогодні» в America/Los_Angeles — для Calendar
   days: TherapistDay[]; // колонка на кожного вибраного терапевта, у порядку списку
-  q: string; // пошук клієнта для утримання (AC-CARD-02)
-  clients: ClientOption[];
-  clientsTruncated: boolean; // знайдено більше за CLIENT_OPTIONS_LIMIT — показано перших
-  clientsError: boolean;
+  // Перші клієнти для вибору під час утримання; далі пошук у самому полі (findClients, AC-CARD-02).
+  clients: ClientSearch;
   error: boolean;
 };
 
@@ -86,13 +122,11 @@ export function selectTherapists(therapists: Therapist[], ids: string[]): Therap
 // RLS: admin і scheduler бачать профілі терапевтів і всі утримання.
 export async function loadDayView(
   supabase: ServerClient,
-  params: { therapists: string[]; date?: string; q?: string },
+  params: { therapists: string[]; date?: string },
 ): Promise<DayView> {
   const now = new Date();
   const date = isPracticeDate(params.date) ? params.date : practiceDate(now);
   const today = practiceDate(now);
-  // Один раз обрізаний q — і для запиту, і для поля, прихованих параметрів та повідомлень.
-  const q = (params.q ?? "").trim().slice(0, CLIENT_SEARCH_MAX).trim();
 
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
@@ -106,7 +140,7 @@ export async function loadDayView(
     email: p.email ?? "",
   }));
   const selected = selectTherapists(therapists, params.therapists);
-  const empty = { therapists, selected, date, today, days: [], q, clients: [], clientsTruncated: false, clientsError: false };
+  const empty = { therapists, selected, date, today, days: [], clients: NO_CLIENTS };
 
   if (profilesError || selected.length === 0) {
     return { ...empty, error: Boolean(profilesError) };
@@ -128,7 +162,7 @@ export async function loadDayView(
       .in("therapist_id", ids)
       .gte("slot_start", dayStart)
       .lt("slot_start", dayEnd),
-    clientsQuery(supabase, q),
+    searchClients(supabase, ""),
   ]);
 
   // Без клієнтів не працює лише вибір для утримання — статуси слотів однаково показуємо.
@@ -152,10 +186,7 @@ export async function loadDayView(
     date,
     today,
     days,
-    q,
-    clients: clients.error ? [] : toClientOptions(clients.data.slice(0, CLIENT_OPTIONS_LIMIT)),
-    clientsTruncated: !clients.error && clients.data.length > CLIENT_OPTIONS_LIMIT,
-    clientsError: Boolean(clients.error),
+    clients,
     error: false,
   };
 }

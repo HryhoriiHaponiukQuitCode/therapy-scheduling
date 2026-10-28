@@ -10,7 +10,8 @@ const TEXTURE: Record<BadgeStatus, string> = {
 };
 
 // Картка слота (розділ 2.3): фактура за статусом (пунктир / штриховка / суцільне / приглушене скло), імʼя клієнта
-// 600, «Held until …» muted-foreground, бейдж статусу; унизу проміжок часу «09:00 – 10:00»; дія — під ним на всю ширину картки.
+// 600, «Held until …» muted-foreground, бейдж статусу; унизу проміжок часу «09:00 – 10:00»; дія — під ним, за шириною
+// тексту (не на всю картку: десятки кнопок на всю ширину забивали статуси сітки).
 export function SlotCard({
   status,
   name,
@@ -24,6 +25,16 @@ export function SlotCard({
   range: string;
   action?: ReactNode;
 }) {
+  // «Past» — компактний рядок: слот уже недоступний, дії немає, а місце в сітці потрібне вільним слотам.
+  if (status === "Past") {
+    return (
+      <div className={`flex h-full min-h-11 flex-wrap items-center gap-x-2.5 gap-y-1 rounded-lg px-3.5 py-2 ${TEXTURE[status]}`}>
+        {name ? <span className="max-w-full truncate text-sm leading-5 font-semibold">{name}</span> : null}
+        <StatusBadge status={status} />
+        <span className="text-xs leading-4 font-medium text-muted-foreground">{range}</span>
+      </div>
+    );
+  }
   return (
     <div
       className={`relative flex h-full min-h-[108px] flex-col justify-between gap-2.5 overflow-hidden rounded-lg px-3.5 py-3 ${TEXTURE[status]}`}
@@ -34,7 +45,7 @@ export function SlotCard({
         <StatusBadge status={status} />
       </div>
       <span className="relative z-[1] text-xs leading-4 font-medium text-muted-foreground">{range}</span>
-      {action ? <div className="relative z-[1] [&>button]:w-full">{action}</div> : null}
+      {action ? <div className="relative z-[1]">{action}</div> : null}
     </div>
   );
 }

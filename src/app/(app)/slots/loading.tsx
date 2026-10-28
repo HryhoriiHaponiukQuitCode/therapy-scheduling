@@ -21,7 +21,7 @@ export default function SlotsLoading() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <Skeleton className="h-7 w-56" />
-            <Skeleton className="h-12 w-full max-w-[320px]" />
+            <Skeleton className="h-12 w-full max-w-[420px]" />
           </div>
           {/* Шапки колонок терапевтів і погодинні клітинки з картками. */}
           <div aria-hidden className="grid grid-cols-[64px_repeat(3,minmax(0,1fr))] gap-x-3 gap-y-3 max-[760px]:grid-cols-[52px_minmax(0,1fr)]">

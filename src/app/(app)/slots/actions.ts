@@ -13,6 +13,7 @@ import {
   holdErrorMessage,
 } from "@/lib/holds";
 import type { ActionResult } from "@/components/action-message";
+import { searchClients, toClientChoices, type ClientChoices } from "./data";
 
 export type HoldSlotState = ActionResult;
 export type ConfirmHoldState = ActionResult;
@@ -89,4 +90,15 @@ export async function confirmHold(
   revalidatePath("/slots");
   revalidatePath("/holds");
   return { status: "success", message: "Hold confirmed. The slot is now a session." };
+}
+
+// Пошук клієнта в полі «Client» під час утримання (AC-CARD-02): ім'я, email або email опікуна. Шукає лише staff
+// (як і утримує, AC-HOLD-08); остаточно межу тримає RLS таблиці clients.
+export async function findClients(q: string): Promise<ClientChoices> {
+  const supabase = await createClient();
+  const user = await getCurrentUser(supabase);
+  if (!user || !isStaff(user.role)) {
+    return { options: [], notice: null, error: HOLD_MESSAGES.NOT_STAFF };
+  }
+  return toClientChoices(await searchClients(supabase, typeof q === "string" ? q : ""));
 }

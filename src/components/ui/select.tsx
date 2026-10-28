@@ -146,24 +146,14 @@ export function Select({
         onKeyDown={onKeyDown}
         className={`${controlClass} cursor-pointer py-0 pr-2 ${selected && avatars ? "pl-1.5" : "pl-4"} ${open ? "outline-2 outline-offset-2 outline-ring" : ""}`}
       >
-        {selected && avatars ? <Avatar name={selected.label} className="size-[34px] text-xs" /> : null}
-        <span className={`min-w-0 flex-1 truncate ${selected ? "font-semibold" : "text-muted-foreground"}`}>
-          {selected ? selected.label : (placeholder ?? "")}
-          {/* Підказка вибраного й у закритому полі: двоє дітей з однаковим ім'ям розрізняються опікуном. */}
-          {selected?.hint ? (
-            <span className="block truncate text-xs font-medium text-muted-foreground">{selected.hint}</span>
-          ) : null}
-        </span>
-        <span aria-hidden className="grid size-[34px] flex-none place-items-center rounded-full text-muted-foreground">
-          <ChevronDownIcon className={`size-4 ${open ? "rotate-180" : ""}`} />
-        </span>
+        <TriggerValue selected={selected} placeholder={placeholder} avatars={avatars} open={open} />
       </button>
       {open ? (
         <ul
           id={listId}
           role="listbox"
           aria-labelledby={id}
-          className="absolute top-[calc(100%+8px)] left-0 z-20 m-0 max-h-80 min-w-full list-none overflow-y-auto rounded-lg border border-card-border bg-accent p-1.5 shadow-pop backdrop-blur-[24px]"
+          className={`${popupClass} m-0 max-h-80 list-none overflow-y-auto p-1.5`}
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;
@@ -176,28 +166,67 @@ export function Select({
                 onPointerDown={(event) => event.preventDefault()}
                 onClick={() => choose(index)}
                 onPointerEnter={() => setActive(index)}
-                // Активний (клавіатура, наведення) — фон і рамка; вибраний — жирний текст і галочка, без фону.
-                className={`flex min-h-12 cursor-pointer items-center gap-2.5 rounded-md px-2.5 font-medium ${
-                  index === active ? "bg-card ring-1 ring-input ring-inset" : ""
-                } ${isSelected ? "font-bold" : ""}`}
+                className={optionClass(index === active, isSelected)}
               >
-                {avatars ? <Avatar name={option.label} className="size-8 text-[11px]" /> : null}
-                <span className="min-w-0 flex-1">
-                  {option.label}
-                  {option.hint ? (
-                    <span className="block text-xs font-medium break-all text-muted-foreground">{option.hint}</span>
-                  ) : null}
-                </span>
-                {isSelected ? (
-                  <svg aria-hidden viewBox="0 0 12 12" className="size-3.5 flex-none text-primary" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path d="M2 6.5l2.5 2.5L10 3.5" />
-                  </svg>
-                ) : null}
+                <OptionContent option={option} selected={isSelected} avatars={avatars} />
               </li>
             );
           })}
         </ul>
       ) : null}
     </div>
+  );
+}
+
+// Спільне для Select і Combobox (combobox.tsx): спливаюча панель, рядок варіанта й значення в закритому полі.
+export const popupClass =
+  "absolute top-[calc(100%+8px)] left-0 z-20 min-w-full rounded-lg border border-card-border bg-accent shadow-pop backdrop-blur-[24px]";
+
+// Активний (клавіатура, наведення) — фон і рамка; вибраний — жирний текст і галочка, без фону.
+export const optionClass = (active: boolean, selected: boolean) =>
+  `flex min-h-12 cursor-pointer items-center gap-2.5 rounded-md px-2.5 font-medium ${
+    active ? "bg-card ring-1 ring-input ring-inset" : ""
+  } ${selected ? "font-bold" : ""}`;
+
+export function OptionContent({ option, selected, avatars }: { option: SelectOption; selected: boolean; avatars: boolean }) {
+  return (
+    <>
+      {avatars ? <Avatar name={option.label} className="size-8 text-[11px]" /> : null}
+      <span className="min-w-0 flex-1">
+        {option.label}
+        {option.hint ? <span className="block text-xs font-medium break-all text-muted-foreground">{option.hint}</span> : null}
+      </span>
+      {selected ? (
+        <svg aria-hidden viewBox="0 0 12 12" className="size-3.5 flex-none text-primary" fill="none" stroke="currentColor" strokeWidth={2}>
+          <path d="M2 6.5l2.5 2.5L10 3.5" />
+        </svg>
+      ) : null}
+    </>
+  );
+}
+
+export function TriggerValue({
+  selected,
+  placeholder,
+  avatars,
+  open,
+}: {
+  selected: SelectOption | null;
+  placeholder?: string;
+  avatars: boolean;
+  open: boolean;
+}) {
+  return (
+    <>
+      {selected && avatars ? <Avatar name={selected.label} className="size-[34px] text-xs" /> : null}
+      <span className={`min-w-0 flex-1 truncate ${selected ? "font-semibold" : "text-muted-foreground"}`}>
+        {selected ? selected.label : (placeholder ?? "")}
+        {/* Підказка вибраного й у закритому полі: двоє дітей з однаковим ім'ям розрізняються опікуном. */}
+        {selected?.hint ? <span className="block truncate text-xs font-medium text-muted-foreground">{selected.hint}</span> : null}
+      </span>
+      <span aria-hidden className="grid size-[34px] flex-none place-items-center rounded-full text-muted-foreground">
+        <ChevronDownIcon className={`size-4 ${open ? "rotate-180" : ""}`} />
+      </span>
+    </>
   );
 }

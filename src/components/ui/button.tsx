@@ -9,7 +9,7 @@ const VARIANT: Record<ButtonVariant, string> = {
 };
 
 export const buttonClass = (variant: ButtonVariant = "primary", extra = "") =>
-  `inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-transparent px-5 text-sm leading-none font-semibold transition-[filter,background-color] duration-150 focus-visible:outline-offset-3 disabled:cursor-not-allowed aria-busy:cursor-progress aria-busy:opacity-70 ${VARIANT[variant]} ${extra}`;
+  `inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full border border-transparent px-5 text-sm leading-none font-semibold transition-[filter,background-color] duration-150 focus-visible:outline-offset-3 disabled:cursor-not-allowed [&:disabled:not([aria-busy])]:opacity-50 aria-busy:cursor-progress aria-busy:opacity-70 ${VARIANT[variant]} ${extra}`;
 
 // Усі кнопки — пігулки (розділ 1): primary — темно-синя основна дія, secondary — біла з синьою межею,
 // glass — нейтральна скляна. pending: спінер, aria-busy і disabled; решта пропсів <button> (form, name, value) — як є.
