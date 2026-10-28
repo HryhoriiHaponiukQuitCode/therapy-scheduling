@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { CSSProperties } from "react";
 import { HoldsIcon, ScheduleIcon, SlotsIcon } from "@/components/icons";
 import { LandingHero } from "@/components/landing-hero";
 import { RevealOnScroll } from "@/components/reveal-on-scroll";
-import { buttonClass } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Practice scheduling",
@@ -28,9 +26,9 @@ const ROLES = [
   { title: "Admin", text: "Runs the practice and can do everything a scheduler can." },
 ];
 
-// Лендінг для гостя — одна суцільна сторінка: hero без рамки, нижче кроки, ролі й заклик — скляними блоками
+// Лендінг для гостя — одна суцільна сторінка: hero без рамки, нижче кроки й ролі — скляними блоками
 // (DESIGN.md, розділ 6, «Лендінг»): гість на «/» бачить цю сторінку за тією самою адресою
-// (src/lib/guest-route.ts), вхід — кнопкою «Sign in». Даних застосунку немає: сторінка статична.
+// (src/lib/guest-route.ts), вхід — кнопкою «Sign in» у шапці hero. Даних застосунку немає: сторінка статична.
 // Блоки й заголовки нижче з'являються, коли до них доходить прокрутка (data-reveal, RevealOnScroll), слова тези
 // темнішають по одному під час прокрутки (.scroll-word).
 export default function WelcomePage() {
@@ -107,24 +105,6 @@ export default function WelcomePage() {
               </li>
             ))}
           </ul>
-        </section>
-
-        <section aria-labelledby="cta-title" className="px-16 pb-28 max-[760px]:px-6 max-[760px]:pb-20">
-          <div
-            data-reveal=""
-            className="glass flex flex-col items-center gap-6 rounded-xl px-10 py-20 text-center max-[760px]:rounded-lg max-[760px]:px-5 max-[760px]:py-12">
-            <h2
-              id="cta-title"
-              data-reveal=""
-              className="reveal-heading m-0 text-[34px] leading-10 font-normal tracking-[-0.02em] max-[760px]:text-[24px] max-[760px]:leading-8"
-              style={delay(200)}
-            >
-              <span className="block">Ready for today&apos;s schedule?</span>
-            </h2>
-            <Link href="/login" className={buttonClass("primary")}>
-              Sign in
-            </Link>
-          </div>
         </section>
       </main>
 
