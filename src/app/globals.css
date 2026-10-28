@@ -47,6 +47,11 @@
   --free-card: rgba(255, 255, 255, 0.28);
   --avatar-from: #ffffff;
   --avatar-to: #dfe6ff;
+  /* 3D-капсула лендінгу (landing-pill-scene.tsx читає їх у рантаймі): градієнт лого й відтінок скла, однакові в обох темах. */
+  --pill-a: #4fc3e8;
+  --pill-b: #5b8df6;
+  --pill-c: #8a7cf4;
+  --pill-glass: #f4f6ff;
   --shadow-value: 0 1px 1px rgba(27, 38, 88, 0.03), 0 18px 48px rgba(44, 62, 140, 0.08);
   --shadow-pop-value: 0 2px 4px rgba(27, 38, 88, 0.06), 0 24px 56px rgba(44, 62, 140, 0.18);
   --shadow-primary-value: 0 8px 20px rgba(27, 38, 88, 0.22);
@@ -244,6 +249,15 @@ body {
   .hero-wordmark {
     -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+  }
+  /* Капсула без WebGL: статичний стадіон 2:1 у градієнті лого, по діагоналі, як 3D-версія. */
+  .pill-fallback {
+    width: 72%;
+    aspect-ratio: 2 / 1;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, var(--pill-a), var(--pill-b) 48%, var(--pill-glass) 52%, var(--pill-glass));
+    box-shadow: var(--shadow-value);
+    rotate: -33deg;
   }
 }
 

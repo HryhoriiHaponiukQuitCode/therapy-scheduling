@@ -2,8 +2,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { BrandMark } from "./brand-mark";
 import { HoldsIcon, SuccessIcon, UsersIcon } from "./icons";
-import { Avatar } from "./ui/avatar";
-import { type BadgeStatus, StatusBadge } from "./ui/badge";
+import { LandingPill } from "./landing-pill";
 import { buttonClass } from "./ui/button";
 
 const POINTS = [
@@ -12,18 +11,10 @@ const POINTS = [
   { icon: UsersIcon, text: "Access by role" },
 ];
 
-// Приклад дня в hero: синтетичні дані, ті самі статуси й фактури, що в розкладі (SlotCard).
-const PREVIEW: { time: string; name: string; status: BadgeStatus; note: string; texture: string }[] = [
-  { time: "09:00", name: "Free slot", status: "Free", note: "Ready to hold", texture: "slot-free" },
-  { time: "10:00", name: "Client One", status: "Confirmed", note: "Session", texture: "slot-confirmed" },
-  { time: "11:00", name: "Client Seven", status: "Held", note: "Held until 14:43", texture: "slot-held" },
-  { time: "12:00", name: "Free slot", status: "Free", note: "Ready to hold", texture: "slot-free" },
-];
-
 const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
-// Hero лендінгу на весь екран, без рамки картки (DESIGN.md, розділ 6, «Лендінг»): плями, що повільно дрейфують, приклад дня, лінія пульсу зі знака
-// і велика назва, що тане донизу. Поява — по черзі (.rise, .reveal-line, затримка --d); при prefers-reduced-motion
+// Hero лендінгу на весь екран, без рамки картки (DESIGN.md, розділ 6, «Лендінг»): плями, що повільно дрейфують,
+// 3D-капсула праворуч (LandingPill, від 1100px), лінія пульсу зі знака і велика назва, що тане донизу. Поява — по черзі (.rise, .reveal-line, затримка --d); при prefers-reduced-motion
 // усе статичне.
 export function LandingHero() {
   return (
@@ -73,31 +64,8 @@ export function LandingHero() {
           </ul>
         </div>
 
-        <div aria-hidden className="float hidden w-[clamp(360px,30vw,560px)] shrink-0 min-[1100px]:block">
-          <div className="rise glass flex flex-col gap-3 rounded-xl p-5" style={delay(450)}>
-            <div className="flex items-center gap-3 px-1 pb-1">
-              <Avatar name="Therapist One" />
-              <span className="flex min-w-0 flex-1 flex-col">
-                <span className="text-sm leading-5 font-semibold">Therapist One</span>
-                <span className="text-xs text-muted-foreground">Wednesday · 2026-10-28</span>
-              </span>
-              <span className="text-xs font-semibold text-muted-foreground">2 free of 4</span>
-            </div>
-            {PREVIEW.map((slot, i) => (
-              <div
-                key={slot.time}
-                className={`rise ${slot.texture} flex items-center gap-4 rounded-lg px-5 py-4`}
-                style={delay(600 + i * 110)}
-              >
-                <span className="text-sm font-semibold text-muted-foreground">{slot.time}</span>
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="text-sm leading-5 font-semibold">{slot.name}</span>
-                  <span className="text-xs text-muted-foreground">{slot.note}</span>
-                </span>
-                <StatusBadge status={slot.status} />
-              </div>
-            ))}
-          </div>
+        <div aria-hidden className="hidden aspect-square w-[clamp(360px,30vw,560px)] shrink-0 min-[1100px]:block">
+          <LandingPill />
         </div>
       </div>
 

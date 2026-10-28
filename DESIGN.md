@@ -55,12 +55,16 @@
 | `status-confirmed` / `-foreground` | бейдж «Confirmed» | `#e4e9ff` / `#2a3c9a` | `#1e2650` / `#bcc8ff` | `bg-status-confirmed`, `text-status-confirmed-foreground` |
 | `status-expired` / `-foreground` | бейдж «Expired» і «Past» | `#eaedf3` / `#4f566b` | `#262b3d` / `#c3c7d4` | `bg-status-expired`, `text-status-expired-foreground` |
 
-Лише в `globals.css` (без класів Tailwind, у компонентних класах `.glass`, `.slot-*`, `.avatar`, `.hero-*`):
+Лише в `globals.css` (без класів Tailwind, у компонентних класах `.glass`, `.slot-*`, `.avatar`, `.hero-*`,
+`.pill-fallback`):
 
 - фон сторінки: `bg-1` → `bg-2` (лінійний градієнт 160°) і плями `blob-a` / `blob-b` / `blob-c` (ті самі плями
   дрейфують у hero лендінгу, `.hero-blob-*`);
 - фактури карток слотів: `hatch` (штриховка Held), `free-card` (майже прозоре тло Free);
-- коло з ініціалами: `avatar-from` → `avatar-to`.
+- коло з ініціалами: `avatar-from` → `avatar-to`;
+- 3D-капсула лендінгу: `pill-a` → `pill-b` → `pill-c` (градієнт лого: ковпачок, гранули) і `pill-glass` (відтінок
+  скляного корпусу, світлі гранули), однакові в обох темах. Їх читає в рантаймі `landing-pill-scene.tsx`
+  (`getComputedStyle`), тож у коді немає літералів кольору; без WebGL — той самий градієнт у `.pill-fallback`.
 
 **Знак застосунку** — не токени, а файл `public/brand/practice-scheduling-icon.svg` (хрест із серцем і пульсом, власні
 кольори SVG, однакові в обох темах). Той самий файл — `src/app/icon.svg` (вкладка браузера), з нього ж
@@ -136,7 +140,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 ## 5. Компоненти й варіанти
 
 Примітиви — лише з `@/components/ui`. Складені компоненти застосунку (`AppShell`, `Calendar`, `ChoiceList`, `DayGrid`,
-`SlotCard`, `EmptyState`, `ActionMessage`, `LandingHero`) лежать у `src/components/` і будуються на цих примітивах і токенах.
+`SlotCard`, `EmptyState`, `ActionMessage`, `LandingHero`, `LandingPill`) лежать у `src/components/` і будуються на цих примітивах і токенах.
 
 | Компонент | Варіанти | Правило |
 |---|---|---|
@@ -161,7 +165,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 | Порожній список чи день | `EmptyState`: пунктирна рамка `rounded-lg`, іконка в скляному колі, текст 600, `role="status"` | «No free slots on this day.» (AC-HOLD-18, AC-HOLD-24) |
 | Помилка дії | `ActionMessage` (`role="alert"`): пігулка `bg-destructive-surface text-destructive` з іконкою над чи під формою; введене лишається у формі | «This slot is no longer available.» (AC-HOLD-03) |
 | Успіх дії | `ActionMessage` (`role="status"`): пігулка `bg-success-surface text-success` | «Slot held for 24 hours.» |
-| Лендінг (гість на `/`, сторінка `/welcome`) | одна суцільна сторінка без карток: hero на весь екран (`LandingHero`: плями, приклад дня терапевта: скляна панель з аватаром і 4 слотами на `SlotCard`-фактурах, від 1100px, лінія пульсу, велика назва), плями якого тануть донизу (`.hero-blobs`), тож межі з рештою сторінки не видно; далі «How it works» і ролі — кроки й ролі скляними блоками (`glass rounded-xl`, як `Panel`); «Sign in» (у шапці hero) веде на `/login` (форма — як була, `StandalonePanel`) | «Calm scheduling for a busy practice.» |
+| Лендінг (гість на `/`, сторінка `/welcome`) | одна суцільна сторінка без карток: hero на весь екран (`LandingHero`: плями, праворуч 3D-капсула `LandingPill` (three.js, від 1100px; промпт — `docs/design/landing-pill-prompt.md`), лінія пульсу, велика назва), плями якого тануть донизу (`.hero-blobs`), тож межі з рештою сторінки не видно; далі «How it works» і ролі — кроки й ролі скляними блоками (`glass rounded-xl`, як `Panel`); «Sign in» (у шапці hero) веде на `/login` (форма — як була, `StandalonePanel`) | «Calm scheduling for a busy practice.» |
 | Відмова в доступі | панель з поясненням, без даних (`StandalonePanel`, як і вхід) | текст — дослівно з AC відмови |
 | Завантаження розділу | `loading.tsx` зі `Skeleton` і «Loading…» у постійній `role="status"`-області AppShell; іконка пункту смуги — спінер, поки перехід чекає сервера | «Loading…» |
 | Дія виконується | `Button` `pending`: спінер, `aria-busy`, `disabled` | «Holding…» |
@@ -181,6 +185,11 @@ tabular-nums` — час і дати вирівнюються без монош�
   - hero: поява по черзі `.rise` / `.reveal-line`, дрейф плям, малювання лінії пульсу, `.float`;
   - блоки й заголовки нижче (`data-reveal`, `RevealOnScroll`): з'являються за часом (≈ 1 с, по черзі в ряду), коли до
     них доходить прокрутка; що видно одразу, не ховається; без JS — на місці;
+  - 3D-капсула (`LandingPill`): нахиляється до курсора, на наведенні трохи росте, перетягуванням крутиться з інерцією
+    й повертається, кліком відкривається на 0.8 с. Поява, плавання й повільне обертання — лише без
+    `reduce`; з `reduce` вона нерухома, крутиться тільки рукою й одразу стає на місце. Декоративна (`aria-hidden`,
+    без фокусу); цикл рендеру зупиняється поза екраном і в прихованій вкладці; three.js — окремий чанк, що вантажиться
+    лише від 1100px;
   - слова тези темнішають під час прокрутки (`.scroll-word`, ще й за `@supports (animation-timeline: view())`), від
     `muted-foreground`, тож і до прокрутки контраст ≥ 4.5.
   Рух — декор, змісту не несе; плями — 24–36 с туди й назад.
