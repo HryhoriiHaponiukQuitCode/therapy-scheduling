@@ -13,6 +13,7 @@ import { DaysPanel, HomeShell, StatTiles, TherapistsPanel } from "./shell";
 // Головна: статистика найближчих 7 днів (DESIGN.md, розділ 6b). Адміністратор і планувальник — уся практика й розбивка
 // за терапевтами, терапевт — власний розклад. Вимог PM до вмісту головної немає: це довідка, не AC.
 // Сторінка читає cookies, тому рендериться динамічно (шаблон зібрано з --no-cache-components).
+// Меню — у смузі AppShell, «Sign out» — у меню акаунта праворуч угорі (src/app/(app)/layout.tsx).
 export default async function Home() {
   // getClaims() + власний профіль (RLS) — у getCurrentUser (через getRequestUser: той самий виклик, що в layout).
   // getSession() для авторизації не використовуємо.

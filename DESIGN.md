@@ -144,7 +144,7 @@ tabular-nums` — час і дати вирівнюються без монош�
 ## 5. Компоненти й варіанти
 
 Примітиви — лише з `@/components/ui`. Складені компоненти застосунку (`AppShell`, `Calendar`, `ChoiceList`, `DayGrid`,
-`SlotCard`, `EmptyState`, `ActionMessage`, `LandingHero`, `LandingPill`, `StatTile`, `DayChart`, `CountsTable`) лежать у `src/components/` і будуються на цих примітивах і токенах.
+`SlotCard`, `EmptyState`, `ActionMessage`, `LandingHero`, `LandingPill`, `StatTile`, `DayChart`, `CountsTable`, `AccountMenu` — пігулка акаунта праворуч угорі, кнопка меню з «Sign out») лежать у `src/components/` і будуються на цих примітивах і токенах.
 
 | Компонент | Варіанти | Правило |
 |---|---|---|
