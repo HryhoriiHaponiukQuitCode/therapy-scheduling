@@ -1,0 +1,129 @@
+{
+  "kind": "uat",
+  "generatedAt": "2026-10-29T10:04:43.047Z",
+  "baseURL": "https://therapy-scheduling-two.vercel.app",
+  "deployedSha": "482e07e93fa9970e44ca5fb3aef133781ee5eba9",
+  "testsCommit": "f62561bb4285078fcf4a086332a3a74f7ae9be30",
+  "reviewer": {
+    "model": "claude-haiku-5-5",
+    "disputes": "claude-sonnet-5-5"
+  },
+  "note": "Відео й траси не в git (test-results/ локально, артефакт CI). check-recordings конвеєра WS9 вимагає відео на диску — для нього цей manifest треба доповнити.",
+  "results": [
+    {
+      "id": "AC-CARD-05",
+      "proof": "AC-CARD-05",
+      "title": "AC-CARD-05: therapist1 відкриває картку клієнта therapist2 за прямим посиланням — «You don't have access to this client.», даних немає, картка не змінилась",
+      "screenshot": "docs/qa/uat/2026-10-29/frames/AC-CARD-05-then-1.png",
+      "video": "test-results/artifacts/client-access-терапевт-AC--cff9b-х-немає-картка-не-змінилась-chromium/video.webm",
+      "trace": "test-results/artifacts/client-access-терапевт-AC--cff9b-х-немає-картка-не-змінилась-chromium/trace.zip",
+      "asserted": true,
+      "vision": {
+        "met": true,
+        "readable": true,
+        "notes": "На кадрі сторінки /clients/… під заголовком «Client» видно одну картку з текстом «You don't have access to this client.», без жодних даних клієнта. Текст читабельний і збігається з критерієм посимвольно; апостроф виглядає як прямий, але на кадрі це не можна гарантувати на 100%. Інші частини «Тоді» (відсутність даних, незмінність картки) не з кадрів і не оцінювалися."
+      },
+      "agentModel": "claude-haiku-5-5",
+      "agentVerdicts": {
+        "claude-haiku-5-5": "PASS",
+        "claude-sonnet-5-5": null
+      },
+      "escalated": false,
+      "quotesVerified": [
+        {
+          "quote": "You don't have access to this client.",
+          "onPage": true
+        }
+      ],
+      "verdict": "PASS",
+      "factoryGate": "PASS",
+      "rule": "R6: перевірки, агент і цитати збігаються",
+      "playwrightMs": 5293,
+      "reviewCostUsd": 0.0021,
+      "reviewWallMs": 8029
+    },
+    {
+      "id": "AC-CARD-06",
+      "proof": "AC-CARD-06",
+      "title": "AC-CARD-06: therapist1 відкриває форму нової картки за прямим посиланням — форми немає, «Only schedulers and admins can create client cards.», кількість карток та сама",
+      "screenshot": "docs/qa/uat/2026-10-29/frames/AC-CARD-06-then-1.png",
+      "video": "test-results/artifacts/client-access-терапевт-AC--d8e4b--»-кількість-карток-та-сама-chromium/video.webm",
+      "trace": "test-results/artifacts/client-access-терапевт-AC--d8e4b--»-кількість-карток-та-сама-chromium/trace.zip",
+      "asserted": true,
+      "vision": {
+        "met": true,
+        "readable": true,
+        "notes": "На кадрі /clients/new видно заголовок «New client» і одне повідомлення «Only schedulers and admins can create client cards.» — текст збігається з критерієм посимвольно. Полів введення й кнопки створення картки на кадрі немає, лише навігація й картка повідомлення. Частина про незмінну кількість карток не з кадрів, тому не оцінювалася."
+      },
+      "agentModel": "claude-haiku-5-5",
+      "agentVerdicts": {
+        "claude-haiku-5-5": "PASS",
+        "claude-sonnet-5-5": null
+      },
+      "escalated": false,
+      "quotesVerified": [
+        {
+          "quote": "Only schedulers and admins can create client cards.",
+          "onPage": true
+        },
+        {
+          "quote": "New client",
+          "onPage": true
+        },
+        {
+          "quote": "Only schedulers and admins can create client cards.",
+          "onPage": true
+        }
+      ],
+      "verdict": "PASS",
+      "factoryGate": "PASS",
+      "rule": "R6: перевірки, агент і цитати збігаються",
+      "playwrightMs": 4727,
+      "reviewCostUsd": 0.00254,
+      "reviewWallMs": 7616
+    },
+    {
+      "id": "AC-CARD-16",
+      "proof": "AC-CARD-16",
+      "title": "AC-CARD-16: scheduler1, а потім therapist1 відкривають посилання на картку, якої немає — «This client card doesn't exist.» і «You don't have access to this client.», даних клієнтів немає",
+      "screenshot": "docs/qa/uat/2026-10-29/frames/AC-CARD-16-then-1.png",
+      "video": "test-results/artifacts/client-access-посилання-на-4de47-ient-»-даних-клієнтів-немає-chromium/video.webm",
+      "trace": "test-results/artifacts/client-access-посилання-на-4de47-ient-»-даних-клієнтів-немає-chromium/trace.zip",
+      "asserted": true,
+      "vision": {
+        "met": true,
+        "readable": true,
+        "notes": "На frame-then-1.png (scheduler1) видно «This client card doesn't exist.» і немає картки клієнта чи чужих email, крім scheduler1 @example.test у шапці. На frame-then-2.png (therapist1) видно «You don't have access to this client.» і немає даних клієнта, крім therapist1 @example.test у шапці. Апостроф у кадрах прочитано як прямий, як у критерії; при дуже дрібному шрифті це варто підтвердити очима."
+      },
+      "agentModel": "claude-haiku-5-5",
+      "agentVerdicts": {
+        "claude-haiku-5-5": "PASS",
+        "claude-sonnet-5-5": null
+      },
+      "escalated": false,
+      "quotesVerified": [
+        {
+          "quote": "This client card doesn't exist.",
+          "onPage": true
+        },
+        {
+          "quote": "You don't have access to this client.",
+          "onPage": true
+        }
+      ],
+      "verdict": "PASS",
+      "factoryGate": "PASS",
+      "rule": "R6: перевірки, агент і цитати збігаються",
+      "playwrightMs": 4201,
+      "reviewCostUsd": 0.00273,
+      "reviewWallMs": 9758
+    }
+  ],
+  "negativeControls": [],
+  "cleanup": {
+    "at": "2026-10-29T10:04:31.947Z",
+    "deleted": [],
+    "remaining": [],
+    "leftoverRequests": 0
+  }
+}
