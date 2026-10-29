@@ -6,7 +6,7 @@ WS8 (A → B → C → D). Посилання — на коміти (…/blob/<s
 - Прод-URL: https://therapy-scheduling-two.vercel.app
 - Вимоги: https://github.com/Sofiia-pm/therapy-scheduling-spec · джерело: issues · знімок 2026-10-27
   (`requirements/19-planuvalnyk-zapovniuie-kartku-kliienta.md`)
-- `/api/health` на момент UAT: заповнюється в PR кроку C
+- `/api/health` на момент UAT (29.10.2026, 12:13 Київ): `ok`, коміт `482e07e` (= `main` на той момент), `db: ok`
 
 ## 3 AC
 
@@ -104,8 +104,60 @@ TS — Stryker 10.1.1, `npm run mutation:ts -- --mutate src/lib/clients.ts,src/l
 
 ## C. UAT на проді
 
-Заповнюється в PR кроку C (`task/uat`).
+`npm run uat -- --url https://therapy-scheduling-two.vercel.app` — запускав розробник у своєму терміналі; PR кроку C:
+https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/46.
+
+| AC | Специфікація | Тест (твердження) | Агент | Вердикт | Кадр |
+|---|---|---|---|---|---|
+| AC-CARD-05 | [client-access.spec.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/22aa4bd/tests/e2e/client-access.spec.ts) | passed | Haiku: PASS | **PASS** — R6 | [AC-CARD-05-then-1.png](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-05-then-1.png) |
+| AC-CARD-06 | [client-access.spec.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/22aa4bd/tests/e2e/client-access.spec.ts) | passed | Haiku: PASS | **PASS** — R6 | [AC-CARD-06-then-1.png](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-06-then-1.png) |
+| AC-CARD-16 | [client-access.spec.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/22aa4bd/tests/e2e/client-access.spec.ts) | passed | Haiku: PASS | **PASS** — R6 | [then-1 (scheduler1)](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-16-then-1.png), [then-2 (therapist1)](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-16-then-2.png) |
+
+- Звіт: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md (прогін 29.10.2026 12:13 Київ, код тестів `task/uat` @ `22aa4bd`; перший прогін 12:04 дав те саме).
+- Відео: вкладення в описі https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/46 (розділ «Відео»: AC-CARD-05, AC-CARD-06, AC-CARD-16).
+- Рецензент: `claude-haiku-5-5`, суперечки — `claude-sonnet-5-5` (в основному прогоні суперечок не було); разом
+  $0.0072.
+- Негативний контроль (`npm run uat:nc`, https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/46, розділ «Негативний контроль»): **NC-1** (AC-CARD-06) — у
+  твердженні навмисно інший текст «Only admins can create client cards.» → перевірка впала, Haiku на кадрі каже PASS,
+  вердикт **FAIL** (R1: агент не перекриває впале твердження). **NC-2** (AC-CARD-06) — у анотації `ac-text` «Тоді» з
+  іншим повідомленням, тест і застосунок без змін → перевірки пройшли, Haiku: NEEDS-HUMAN, Sonnet: FAIL, вердикт
+  **NEEDS-HUMAN** (R3).
+- Дані: **лише читання** — ні `@writes`, ні синтетичних `uat-*` («Прибирання»: видалено 0, лишилось 0). «Дано»
+  AC-CARD-05 (client9 — свій клієнт лише therapist2) підготовлено один раз через інтерфейс від scheduler1; для CI —
+  фікстура `tests/e2e/fixtures/card-05-given.sql`.
+- Бонус: `.github/workflows/e2e.yml` — ті самі специфікації на одноразовій базі, зелений прогін на гілці:
+  https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40866217260.
+
+### Приймання PM
+
+| AC | Рішення PM | Посилання |
+|---|---|---|
+| AC-CARD-05 | очікує рішення PM | [звіт, розділ AC-CARD-05](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md#ac-card-05--pass) |
+| AC-CARD-06 | очікує рішення PM | [звіт, розділ AC-CARD-06](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md#ac-card-06--pass) |
+| AC-CARD-16 | очікує рішення PM | [звіт, розділ AC-CARD-16](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md#ac-card-16--pass) |
 
 ## D. Eval рецензента
 
-Заповнюється після eval рецензента.
+- PR з вадами (не злитий, закритий): https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/47
+- Ключ і таблиця: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/47#issuecomment-6495311989
+
+| # | Вада (ключ) | CodeRabbit | `/code-review high` |
+|---|---|---|---|
+| 1 | права в даних: `supabase/migrations/20261029085645_staff_profiles_select.sql:9` — політика читання профілів без `private.is_staff()` (умови на того, хто читає) | **частково**: лише в тексті pre-merge («нова дозволяє кожному `authenticated` читати профілі…»), а перевірка міграцій — Passed; inline немає | **знайшов**: «The recreated policy drops the `(select private.is_staff())` condition. Any authenticated user can now read every therapist, scheduler and admin profile, including email, full_name and role.» |
+| 2 | авторизація: `src/lib/roles.ts:70` `getCurrentUser` — роль спершу з `claims.user_metadata.role` | **знайшов, Minor** (`roles.ts:76`): «`user_metadata` може змінювати автентифікований користувач…» | **знайшов**: «Any signed-in user can write user_metadata, so this is a privilege escalation.» |
+| 3 | логіка AC-HOLD-06: `src/lib/slots.ts:168` `buildDaySlots` — прибрано фільтр `"Expired"` | **пропустив**: Walkthrough — «Прострочені записи, як і раніше, не вибираються як активне утримання.» | **знайшов**: «The `active` set no longer filters out Expired holds…» + «This breaks AC-HOLD-06» |
+| П | приманка: `canCreateClientCards(role) = isStaff(role)` (поведінка та сама) | без хибної тривоги | без хибної тривоги; зауваження про підтримуваність: «canCreateClientCards is a pass-through wrapper around isStaff…» |
+
+- Інші знахідки: `/code-review` `roles.ts:77` (роль з токена перекриває пониження, AC-CARD-11) — слушна, корінь V2;
+  `slots.ts:168` (немає тесту на прострочене утримання) — слушна; `staff_profiles_select.sql:3` (назва й опис ховають
+  зміну доступу) — слушна; `roles.ts:59` (зайвий запит `profiles`) — шум. CodeRabbit pre-merge «AC ID у тестах і
+  матриці» — слушна.
+- Правило, що закриває пропуск: рядок «Рев'ю (CodeRabbit, `/code-review`)…» в `AGENTS.md` — зміна, що прибирає чи
+  послаблює умову (фільтр статусу чи межа в `src/lib/**`, `using` / `with check` політики RLS), — must fix без тесту з
+  AC ID у тому самому PR: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/48, https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/commit/7a7016e9b1af3fcffbdf42d3fdec7940cc10c9e5
+- Повторний прогін (після `git merge main` у PR вад, код вад без змін): https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/47#issuecomment-6498319349.
+  CodeRabbit (`full review`) — **V1 і V3 знайшов, обидві Major**. V3: «Якщо `input.holds` містить утримання зі
+  статусом `Expired`, цей рядок додає його час до `active`. … така година стає `Free` з `canHold: true`.» і «Підстава:
+  правило для `src/lib/slots.ts`…». V1: «Умова перевіряє роль профілю, але не того, хто виконує запит.» V2 —
+  тред першого рев'ю лишився. Разом 3 з 3. `/code-review high` — знову 3 з 3, плюс окрема знахідка з цитатою нового правила. Межа
+  висновку: по одному прогону до й після.
