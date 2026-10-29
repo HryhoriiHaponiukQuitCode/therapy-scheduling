@@ -16,7 +16,22 @@ const LAYERS = [
 const layerIndex = (file) => LAYERS.findIndex((l) => l.test.test(file));
 const pct = (m) => (m.total === 0 ? "—" : `${Math.floor(m.pct)} %`);
 
-const summary = JSON.parse(readFileSync(process.argv[2] ?? "coverage/coverage-summary.json", "utf8"));
+const fail = (message) => {
+  console.error(`coverage:summary: ${message}`);
+  process.exit(1);
+};
+const file = process.argv[2] ?? "coverage/coverage-summary.json";
+let summary;
+try {
+  summary = JSON.parse(readFileSync(file, "utf8"));
+} catch (error) {
+  fail(
+    error instanceof SyntaxError
+      ? `${file} — некоректний JSON (${error.message}). Перезапустіть npm run test:coverage.`
+      : `немає ${file} — спершу npm run test:coverage (репортер json-summary).`,
+  );
+}
+if (!summary?.total) fail(`${file} без розділу total — це не звіт json-summary Vitest.`);
 const rows = Object.entries(summary)
   .filter(([file]) => file !== "total")
   .map(([file, m]) => ({ file: path.relative(process.cwd(), file).replaceAll("\\", "/"), layer: layerIndex(file), m }))
@@ -33,5 +48,9 @@ for (const r of rows) {
   if (r.layer !== 0 && r.m.lines.pct === 100) continue;
   md += `| ${LAYERS[r.layer].name} | \`${r.file}\` | ${pct(r.m.lines)} | ${pct(r.m.branches)} | ${pct(r.m.functions)} |\n`;
 }
-if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
-else process.stdout.write(md);
+try {
+  if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+  else process.stdout.write(md);
+} catch (error) {
+  fail(`не вдалося записати таблицю в Summary (${error.message}).`);
+}
