@@ -76,7 +76,10 @@ test.describe("терапевт", () => {
           expect(await visibleEmails(page)).toEqual(["therapist1@example.test"]);
           const owner = await sessionOf(browser, "therapist2");
           await owner.page.goto(link);
-          await expect(owner.page.getByTestId("client-card")).toHaveText(before);
+          // Обидва знімки картки — innerText: toHaveText порівнює з textContent (без переносів), і на Linux у CI
+          // innerText і textContent тієї самої картки відрізняються.
+          await expect(owner.page.getByTestId("client-card")).toBeVisible();
+          expect(await owner.page.getByTestId("client-card").innerText()).toBe(before);
           await owner.context.close();
         },
       );
