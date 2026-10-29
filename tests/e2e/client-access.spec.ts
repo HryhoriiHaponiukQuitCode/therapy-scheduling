@@ -51,7 +51,9 @@ test.describe("терапевт", () => {
         link = ownerLinks.find((href) => !mine.has(href)) ?? "";
         expect(link, "у therapist2 на проді має бути клієнт, якого немає в therapist1").not.toBe("");
         await owner.page.goto(link);
-        before = await owner.page.getByTestId("client-card").innerText();
+        // textContent, а не innerText: innerText залежить від того, чи вже застосовано CSS (переноси рядків у сітці).
+        before = (await owner.page.getByTestId("client-card").textContent()) ?? "";
+        expect(before).toContain("client9@example.test");
         await owner.context.close();
       });
 
@@ -76,10 +78,7 @@ test.describe("терапевт", () => {
           expect(await visibleEmails(page)).toEqual(["therapist1@example.test"]);
           const owner = await sessionOf(browser, "therapist2");
           await owner.page.goto(link);
-          // Обидва знімки картки — innerText: toHaveText порівнює з textContent (без переносів), і на Linux у CI
-          // innerText і textContent тієї самої картки відрізняються.
-          await expect(owner.page.getByTestId("client-card")).toBeVisible();
-          expect(await owner.page.getByTestId("client-card").innerText()).toBe(before);
+          await expect(owner.page.getByTestId("client-card")).toHaveText(before);
           await owner.context.close();
         },
       );
