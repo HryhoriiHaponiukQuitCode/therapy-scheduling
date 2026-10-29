@@ -12,6 +12,13 @@ describe("guestRoute: куди веде запит без входу", () => {
     }
   });
 
+  it("/api/health відкривається без входу (D0: smoke і перевірка курсу), а схожі адреси — ні", () => {
+    expect(guestRoute("/api/health")).toEqual({ kind: "next" });
+    for (const path of ["/api/healthx", "/api", "/api/other"]) {
+      expect(guestRoute(path)).toEqual({ kind: "redirect", pathname: "/login" });
+    }
+  });
+
   it("AC-CARD-07: сторінки застосунку за прямим посиланням ведуть на /login, а не на лендінг", () => {
     for (const path of ["/clients", "/clients/new", "/holds", "/slots", "/my-schedule"]) {
       expect(guestRoute(path)).toEqual({ kind: "redirect", pathname: "/login" });
