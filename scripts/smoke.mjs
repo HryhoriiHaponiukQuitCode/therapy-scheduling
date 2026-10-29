@@ -12,7 +12,12 @@ const base = (/^https?:\/\//.test(rawBase) ? rawBase : rawBase ? `https://${rawB
 
 const get = async (path) => {
   try {
-    const r = await fetch(base + path, { redirect: "manual", headers: { "user-agent": "smoke/1.0 (D0)" } });
+    // 15 с на запит: завислий сервер — зрозуміле «недоступний», а не шестихвилинний тайм-аут job.
+    const r = await fetch(base + path, {
+      redirect: "manual",
+      headers: { "user-agent": "smoke/1.0 (D0)" },
+      signal: AbortSignal.timeout(15_000),
+    });
     return {
       status: r.status,
       location: r.headers.get("location") ?? "",
@@ -34,6 +39,9 @@ async function main() {
   else if (root.status >= 400) {
     const hint = root.vercelError === "MIDDLEWARE_INVOCATION_FAILED" ? " — у Vercel бракує NEXT_PUBLIC_SUPABASE_*?" : "";
     fail.push(`"/": HTTP ${root.status} ${root.vercelError}${hint}`.trim());
+  } else if (root.status >= 300 && new URL(root.location, base).href !== new URL("/login", base).href) {
+    // «/» — лендінг (200) або перенаправлення саме на /login цього ж застосунку; інше перенаправлення — збій.
+    fail.push(`"/": HTTP ${root.status} → ${root.location || "(без адреси)"} — очікувався 200 або перенаправлення на /login`);
   }
 
   const login = await get("/login");
