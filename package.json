@@ -19,7 +19,8 @@
     "users:demo": "node --env-file=.env.local scripts/create-demo-users.mjs",
     "gates": "npm run lint && npm run typecheck && fallow audit --base origin/main",
     "test:coverage": "vitest run --config vitest.coverage.config.mts --coverage",
-    "coverage:summary": "node scripts/coverage-summary.mjs"
+    "coverage:summary": "node scripts/coverage-summary.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
