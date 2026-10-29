@@ -24,7 +24,8 @@ WS8 (A → B → C → D). Посилання — на коміти (…/blob/<s
 - PR воріт: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/43 (розбір знахідок — в описі PR)
 - Зелений `quality` на `main`: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40852708722
 - Обов'язкові перевірки в `solo-main` з 29.10.2026: `spec`, `app`, `conformance`, `db-check`, «Ворота: fallow audit»,
-  «Покриття: доменна підлога». «Порада: вразливі залежності» — дорадча.
+  «Покриття: доменна підлога»; після злиття #46 і зеленого прогону на `main` — ще `e2e`. «Порада: вразливі
+  залежності» — дорадча.
 
 Розбір першого повного прогону `fallow` на `main` (той самий — в описі PR воріт): до —
 `dead-code (2 issues), dupes (5 clone groups), health (32 above threshold)`; після — `dead-code (1 issue), dupes (5), health (32)`.
@@ -125,8 +126,13 @@ https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/46.
 - Дані: **лише читання** — ні `@writes`, ні синтетичних `uat-*` («Прибирання»: видалено 0, лишилось 0). «Дано»
   AC-CARD-05 (client9 — свій клієнт лише therapist2) підготовлено один раз через інтерфейс від scheduler1; для CI —
   фікстура `tests/e2e/fixtures/card-05-given.sql`.
-- Бонус: `.github/workflows/e2e.yml` — ті самі специфікації на одноразовій базі, зелений прогін на гілці:
-  https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40866217260.
+- Бонус: `.github/workflows/e2e.yml` — ті самі специфікації на одноразовій базі. Зелені прогони: на гілці
+  https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40866217260, на `main` (push) https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40907026242, `workflow_dispatch` на `main`
+  https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40907043406. `e2e` — обов'язкова перевірка `solo-main`.
+- Після звіту специфікацію змінено в одному місці (`client-access.spec.ts`, крок «Дано» AC-CARD-05): `innerText` →
+  `textContent` і додатково `expect(before).toContain("client9@example.test")` — заради стабільності в CI.
+  «Коли» і «Тоді» не змінилися. Повторний UAT на проді з кодом `main` ще не проводився: звіт вище — на `22aa4bd`, а
+  код `main` у CI e2e зелений.
 
 ### Приймання PM
 
