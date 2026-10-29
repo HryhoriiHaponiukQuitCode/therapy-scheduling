@@ -25,6 +25,12 @@ const child = (name: string, birth: string, guardianEmail: string): Card => [
   guardianEmail,
 ];
 
+// Значення картки, яку валідація прийняла; інакше тест падає з причиною (замість умовного return у тілі тесту).
+function validCard(result: ReturnType<typeof validateClientCard>) {
+  if (!result.ok) throw new Error(`validateClientCard відмовила: ${JSON.stringify(result.errors)}`);
+  return result.value;
+}
+
 const count = async () => {
   const [row] = await t.asService<{ n: number }>("select count(*)::int as n from public.clients");
   return row.n;
@@ -107,9 +113,8 @@ describe("перевірки полів у базі", () => {
       { ...EMPTY_CLIENT_CARD, client_type: "adult", full_name: "Client Three", birth_date: "1990-05-14", session_language: "English", email: " Client3@Example.TEST " },
       "2026-11-03",
     );
-    expect(result.ok && result.value.email).toBe("client3@example.test");
-    if (!result.ok) return;
-    const v = result.value;
+    const v = validCard(result);
+    expect(v.email).toBe("client3@example.test");
     await t.asUser(scheduler1, INSERT, [v.client_type, v.full_name, v.birth_date, v.session_language, v.email, null, null]);
     const [row] = await t.asService<{ email: string }>("select email from public.clients where full_name = 'Client Three'");
     expect(row.email).toBe("client3@example.test");
@@ -138,8 +143,8 @@ describe("дублікати", () => {
       "2026-11-03",
     );
     expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    await expect(t.asUser(scheduler2, INSERT, adult(result.value.full_name, result.value.email!))).rejects.toThrow(
+    const v = validCard(result);
+    await expect(t.asUser(scheduler2, INSERT, adult(v.full_name, v.email!))).rejects.toThrow(
       /clients_email_lower_key/,
     );
     expect(await count()).toBe(before);
