@@ -10,12 +10,9 @@ import {
 // Пошук клієнта під час утримання на /slots (AC-CARD-02): текст у полі «Client» → server action findClients →
 // умова PostgREST or() для запиту клієнтів. Сам ilike виконує PostgREST під RLS staff; тут перевіряємо, що q
 // доходить до запиту, біля дитини видно опікуна, а підказки й межі (50 клієнтів, лише staff) — ті самі.
-const mocks = vi.hoisted(() => ({ supabase: null as unknown, user: null as { role: string | null } | null }));
+// Роль читає справжній getCurrentUser (@/lib/roles) з підміненого клієнта Supabase: власний модуль не мокаємо.
+const mocks = vi.hoisted(() => ({ supabase: null as unknown }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => mocks.supabase }));
-vi.mock("@/lib/roles", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/lib/roles")>()),
-  getCurrentUser: async () => mocks.user,
-}));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 
@@ -26,11 +23,11 @@ const { HOLD_MESSAGES } = await import("@/lib/holds");
 
 beforeEach(() => {
   mocks.supabase = null;
-  mocks.user = null;
 });
 
 // Підмінений клієнт Supabase: кожен ланцюжок запиту — thenable з даними таблиці; виклики or() записуємо.
-function fakeSupabase(tables: Record<string, unknown[]>) {
+// role — хто увійшов: getClaims дає sub, а профіль з цією роллю віддає maybeSingle() з таблиці profiles.
+function fakeSupabase(tables: Record<string, unknown[]>, role?: string | null) {
   const orCalls: { table: string; filter: string }[] = [];
   const limits: { table: string; count: number }[] = [];
   const from = (table: string) => {
@@ -47,9 +44,14 @@ function fakeSupabase(tables: Record<string, unknown[]>) {
       return builder;
     };
     builder.then = (resolve: (value: unknown) => unknown) => resolve({ data: tables[table] ?? [], error: null });
+    builder.maybeSingle = async () => ({
+      data: table === "profiles" && role !== undefined ? { email: "user@example.test", full_name: "User", role } : null,
+      error: null,
+    });
     return builder;
   };
-  return { client: { from } as never, orCalls, limits };
+  const auth = { getClaims: async () => ({ data: role === undefined ? null : { claims: { sub: "u1" } } }) };
+  return { client: { from, auth } as never, orCalls, limits };
 }
 
 const CLIENT7 = {
@@ -61,9 +63,8 @@ const CLIENT7 = {
 
 describe("пошук клієнта під час утримання", () => {
   it("AC-CARD-02: client7 шукають за email опікуна guardian7@example.test, біля client7 — email опікуна", async () => {
-    const { client, orCalls } = fakeSupabase({ clients: [CLIENT7] });
+    const { client, orCalls } = fakeSupabase({ clients: [CLIENT7] }, "scheduler");
     mocks.supabase = client;
-    mocks.user = { role: "scheduler" };
 
     const choices = await findClients(" guardian7@example.test ");
 
@@ -82,9 +83,8 @@ describe("пошук клієнта під час утримання", () => {
   });
 
   it("шукати клієнтів може лише staff: терапевт отримує відмову без запиту до бази", async () => {
-    const { client, orCalls, limits } = fakeSupabase({ clients: [CLIENT7] });
+    const { client, orCalls, limits } = fakeSupabase({ clients: [CLIENT7] }, "therapist");
     mocks.supabase = client;
-    mocks.user = { role: "therapist" };
 
     await expect(findClients("guardian7")).resolves.toEqual({ options: [], notice: null, error: HOLD_MESSAGES.NOT_STAFF });
     expect(orCalls).toEqual([]);
