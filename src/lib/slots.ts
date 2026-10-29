@@ -165,9 +165,7 @@ export function buildDaySlots(input: {
   includeHoldHours?: boolean;
 }): DaySlot[] {
   const beyondHorizon = input.date > addDays(practiceDate(input.now), AVAILABILITY_HORIZON_DAYS);
-  const active = new Set(
-    input.holds.filter((hold) => holdStatus(hold, input.now) !== "Expired").map((h) => h.slotStart.getTime()),
-  );
+  const active = new Set(input.holds.map((h) => h.slotStart.getTime()));
   const isActive = (hour: number) => active.has(practiceTimeToUtc(input.date, hour).getTime());
   const hours = new Set<number>();
   for (const window of input.availability) {

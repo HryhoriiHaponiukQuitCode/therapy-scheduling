@@ -18,6 +18,11 @@ export function isStaff(role: string | null | undefined): role is (typeof STAFF_
   return (STAFF_ROLES as readonly string[]).includes(role ?? "");
 }
 
+// Хто створює картки клієнтів (AC-CARD-06): ті самі ролі, що й «працівник».
+export function canCreateClientCards(role: string | null | undefined): boolean {
+  return isStaff(role);
+}
+
 // Тексти PM (openspec/specs/client-access/spec.md, slot-holds/spec.md).
 export const NO_ROLE_MESSAGE = "Your account has no access yet. Contact an administrator."; // AC-CARD-11
 export const STAFF_ONLY_PAGE_MESSAGE = "Only schedulers and admins can view this page."; // AC-HOLD-44
@@ -61,10 +66,13 @@ export async function getCurrentUser(supabase: ServerClient) {
     throw new Error("Could not load your profile. Try again.");
   }
 
+  // Роль із токена, якщо її вже передано в метаданих сесії; інакше — з профілю.
+  const tokenRole = claims.user_metadata?.role;
+
   return {
     id: claims.sub,
     email: profile?.email ?? (typeof claims.email === "string" ? claims.email : null),
     // Невідома роль (наприклад, міграцію ще не застосовано) — як відсутність ролі.
-    role: isAppRole(profile?.role) ? profile.role : null,
+    role: isAppRole(tokenRole) ? tokenRole : isAppRole(profile?.role) ? profile.role : null,
   };
 }

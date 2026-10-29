@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser, isStaff } from "@/lib/roles";
+import { canCreateClientCards, getCurrentUser } from "@/lib/roles";
 import {
   CLIENT_FORBIDDEN_MESSAGE,
   clientInsertErrorMessage,
@@ -35,7 +35,7 @@ export async function createClientCard(_prevState: ClientCardState, formData: Fo
     (Object.keys(EMPTY_CLIENT_CARD) as ClientCardField[]).map((field) => [field, String(formData.get(field) ?? "")]),
   ) as ClientCardValues;
 
-  if (!isStaff(user.role)) {
+  if (!canCreateClientCards(user.role)) {
     return { status: "error", message: CLIENT_FORBIDDEN_MESSAGE, errors: {}, values };
   }
 
