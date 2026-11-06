@@ -45,7 +45,9 @@ ADR `0001-auth-boundary` і `0002-router-cache` діють без змін; но
   треба.
 - **Форма** — нова клієнтська частина `insurance-status-form.tsx` поруч зі сторінкою: `useActionState` з дією
   `setInsuranceStatus`, `Select` і `SubmitButton` з `@/components/ui`. «Not set» у списку немає: повернути його не
-  можна. Поточний статус — вибраний за замовчуванням, якщо він не «Not set».
+  можна. Поточний статус — вибраний за замовчуванням, якщо він не «Not set». Поки статус не вибрано (картка з «Not
+  set»), «Save» вимкнена, а поруч текст «Choose a status to save.» (`DESIGN.md`, 6a: дія без передумови вимкнена з
+  причиною поруч; формулювання наше, PM тексту не задав).
 - **Каркас** (`shell.tsx`, `loading.tsx`) не змінюється: рядок статусу — усередині панелі картки.
 - Після збереження `revalidatePath("/clients/[id]", "page")`: повторне відкриття показує новий статус (AC-INS-02).
 
@@ -53,7 +55,7 @@ ADR `0001-auth-boundary` і `0002-router-cache` діють без змін; но
 
 Одна міграція на задачу. Застосованих міграцій не змінюємо.
 
-### Статус у картці (задача 1, міграція `client_insurance_status`) — AC-INS-01, AC-INS-06
+### Статус у картці (задача 1, міграція `client_insurance_status`) — AC-INS-01
 
 | Колонка | Тип і обмеження | AC |
 |---|---|---|
@@ -64,7 +66,7 @@ ADR `0001-auth-boundary` і `0002-router-cache` діють без змін; но
   видна тим самим, кому видна картка. `anon` прав не має (AC-INS-06).
 - Колонковий `grant insert` не змінюємо: при створенні картки статус завжди `not_set` за `default`.
 
-### Зміна статусу (задача 2, міграція `client_insurance_update`) — AC-INS-02, AC-INS-03, AC-INS-05
+### Зміна статусу (задача 2, міграція `client_insurance_update`) — AC-INS-02, AC-INS-03, AC-INS-05, AC-INS-06
 
 - `grant update (insurance_status) on public.clients to authenticated` — колонковий: інші поля картки, як і раніше,
   ніхто не змінює.
@@ -81,14 +83,21 @@ ADR `0001-auth-boundary` і `0002-router-cache` діють без змін; но
     update: `update` змінює 0 рядків, статус той самий (AC-INS-05).
   - `with check … <> 'not_set'` — повернути «Not set» не можна (вимога «Позначення статусу…»): база відповідає
     `42501`.
+  - Явного `(select auth.uid())` у політиці немає свідомо, як і в наявних `clients_select_staff` і
+    `clients_insert_staff`: `private.is_staff()` бере роль з `profiles` за `auth.uid()` і для анонімного чи
+    невідомого користувача повертає `false`. Окрема умова на `auth.uid()` нічого б не додала. Правило AGENTS.md про
+    `(select auth.uid())` тут виконує хелпер, а `(select …)` навколо нього так само обчислюється один раз на запит.
 - Окремої функції `rpc` не треба: один запис в одну колонку, перевірку й запис робить один `update`.
 
 ## Auth
 
 - **Сторінка `/clients/[id]`** — як у зрізі 2: `getPageAccess()` → роль з `profiles` за `claims.sub`. Форму
   показуємо лише для `isStaff(role)` (AC-INS-04). Це UX: захист — RLS і дія.
-- **Server Action `setInsuranceStatus(clientId, formData)`** (`src/app/(app)/clients/[id]/actions.ts`), порядок:
+- **Server Action `setInsuranceStatus(clientId, prevState, formData)`** (`src/app/(app)/clients/[id]/actions.ts`;
+  форма викликає `setInsuranceStatus.bind(null, id)` через `useActionState`), порядок:
   1. `getCurrentUser()` → `getClaims()`; немає claims → `redirect("/login")` без запису (AC-INS-06);
+  1a. `isClientId(clientId)` — аргумент дії приходить від клієнта; не UUID → «This client doesn't exist.» без
+     звернення до бази (інакше Postgres відповів би `22P02`);
   2. роль не staff → «Only schedulers and admins can change the insurance status.» без запису (AC-INS-05);
      формулювання наше: PM тексту для цієї відмови не задав, бо терапевту форму не показуємо;
   3. `parseInsuranceStatus(value)` — лише `verified`, `not_accepted`, `private_pay`, інакше помилка без запису;
@@ -96,7 +105,9 @@ ADR `0001-auth-boundary` і `0002-router-cache` діють без змін; но
      «This client doesn't exist.» (немає картки або RLS не пустила);
   5. успіх → «Insurance status saved.» (AC-INS-02).
   - Правило `npm run check:auth` вимагає `getCurrentUser(` до першого `.from(` — дія його виконує.
-- **Admin-клієнт не потрібен.** `SUPABASE_SECRET_KEY` у зрізі 3 не використовуємо.
+- **Admin-клієнт у застосунку не потрібен.** `SUPABASE_SECRET_KEY` немає ні в `src/`, ні у Vercel, ні в GitHub
+  Secrets. Він потрібен лише локально в `.env.local` для прибирання UAT-даних на проді (`tests/e2e/support/admin.ts`,
+  розділ «Тести»); без ключа UAT запускаємо лише AC без запису (`--grep-invert '@writes'`).
 
 ## Доменний модуль
 
@@ -124,16 +135,32 @@ ADR `0001-auth-boundary` і `0002-router-cache` діють без змін; но
 
 - Назва кожного тесту починається з AC ID; очікування в `expect` — значення з «Тоді».
 - Тести відмов (AC-INS-05, AC-INS-06 і «Not set» в AC-INS-02) пише нова сесія агента або до коду (maker ≠ checker).
-- **Доказ, що тест здатен упасти:** SQL-мутанти в `scripts/mutants.mjs` для нової міграції задачі 2 —
-  `using (true)` замість `is_staff()` (має вбити AC-INS-05) і без `<> 'not_set'` (має вбити AC-INS-02);
-  `npm run mutation:sql` → `KILLED`.
+- **Доказ, що тест здатен упасти:** SQL-мутанти в `scripts/mutants.mjs` для нової міграції задачі 2:
+  - «без ролі» — одна заміна всього блоку `using (…) with check (…)` на
+    `using (true) with check (insurance_status <> 'not_set')`, тобто `is_staff()` зникає з обох частин. Терапевт
+    тоді змінює статус, і тест AC-INS-05 падає. Мутант лише в `using` вижив би: `with check` усе одно не пустив би
+    терапевта;
+  - «без заборони Not set» — прибрати `and insurance_status <> 'not_set'` (має вбити AC-INS-02);
+  - `npm run mutation:sql` → `KILLED` для обох.
+- **Тест AC-INS-05** чекає саме «0 рядків, без помилки» і незмінний статус для scheduler1: так він відрізняє відмову
+  RLS від інших причин.
 - **e2e** — `tests/e2e/client-insurance.spec.ts`: назва з AC ID, анотація `ac`, тег `@uat`, `given` / `when` /
-  `thenStep`, «Тоді» дослівно з AC PM. Дані — синтетичні `uat-<запуск>@example.test` з прибиранням після себе.
+  `thenStep`, «Тоді» дослівно з AC PM.
+- **Дані UAT на проді.** Кожен прогін створює власну картку клієнта з email `uat-<запуск>@example.test`, тож AC-INS-01
+  щоразу бачить свіжу «Not set», а незворотність статусу не заважає повторним прогонам. AC, що пишуть (AC-INS-02,
+  AC-INS-03, AC-INS-04), мають тег `@writes`.
+  - **AC-INS-04:** щоб клієнт став «своїм» для therapist1, тест від scheduler1 утримує за ним вільний майбутній слот
+    therapist1 (статус «Held», без підтвердження). «Confirmed» не робимо: він назавжди зайняв би слот.
+  - **Прибирання:** наявний `deleteUatUsers` видаляє лише рядки uat-користувачів, а картку створює scheduler1. Тому
+    в `tests/e2e/support/admin.ts` додаємо `deleteUatClients()`: admin-клієнтом видалити утримання й картки
+    клієнтів з email `uat-%@example.test` і перевірити, що їх 0. Викликаємо в `afterAll` специфікації й у
+    `cleanup.teardown.ts`.
 
 ## Risks / Trade-offs
 
-- **UAT змінює статус на проді** → картку для AC-INS-02, AC-INS-03 створює сам тест (`uat-…@example.test`) і прибирає
-  її після прогону. AC-INS-05 на проді не відтворюємо: його доводить тест бази.
+- **UAT змінює статус на проді** → картку й утримання створює сам тест (`uat-…@example.test`), прибирає
+  `deleteUatClients()` з admin-ключем лише з `.env.local` (розділ «Тести»). AC-INS-05 на проді не відтворюємо: його
+  доводить тест бази.
 - **Колонковий `grant update`** → якщо пізніше знадобиться змінювати інші поля картки, кожне поле — окремим grant у
   новій міграції, а не `grant update` на всю таблицю.
 - **«Not set» у формі немає** → інтерфейс не надсилає такого запиту. Якщо хтось надішле його в обхід форми,

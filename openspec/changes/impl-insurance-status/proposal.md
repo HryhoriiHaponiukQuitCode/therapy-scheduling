@@ -12,8 +12,8 @@ HryhoriiHaponiukQuitCode/therapy-scheduling-spec#33 (знімок вимог 202
 План покриває всі AC зрізу 3 зі статусом «відкладено (чекає реалізації)» у `docs/conformance.md`. Це дві вертикальні
 задачі й одна задача доказів (`tasks.md`), кожна окремим PR «Реалізація»:
 
-1. Статус у картці — AC-INS-01, AC-INS-06.
-2. Зміна статусу — AC-INS-02, AC-INS-03, AC-INS-04, AC-INS-05.
+1. Статус у картці — AC-INS-01.
+2. Зміна статусу — AC-INS-02, AC-INS-03, AC-INS-04, AC-INS-05, AC-INS-06.
 3. UAT на проді й proof pack — усі AC-INS-01…06.
 
 Специфікацію ця зміна не змінює (`skip_specs: true`).
