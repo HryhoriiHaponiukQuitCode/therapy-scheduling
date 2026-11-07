@@ -11,10 +11,10 @@
 - [x] 1.1 Міграція `client_insurance_status`: колонка `insurance_status` з `default 'not_set'` і check на чотири
   значення.
 - [ ] 1.2 Типи БД: `database.types.ts` з Summary job `db-check` (або `npm run db:types`).
-- [ ] 1.3 `src/lib/insurance.ts`: `INSURANCE_STATUSES`, `insuranceLine`, тексти; unit-тести.
-- [ ] 1.4 `/clients/[id]`: рядок «Insurance: <статус>» (`data-testid="insurance-status"`) для всіх ролей, що бачать
+- [x] 1.3 `src/lib/insurance.ts`: `INSURANCE_STATUSES`, `insuranceLine`, тексти; unit-тести.
+- [x] 1.4 `/clients/[id]`: рядок «Insurance: <статус>» (`data-testid="insurance-status"`) для всіх ролей, що бачать
   картку.
-- [ ] 1.5 Тести з AC ID:
+- [x] 1.5 Тести з AC ID:
   - AC-INS-01 — PGlite: нова картка й картка зрізу 2 мають `not_set`; unit `insuranceLine`.
   Done when: AC-INS-01 — тести зелені, рядок «реалізовано».
 
