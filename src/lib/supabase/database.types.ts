@@ -49,6 +49,7 @@ export type Database = {
           guardian_email: string | null;
           created_by: string | null;
           created_at: string;
+          insurance_status: string;
         };
         Insert: {
           id?: string;
@@ -61,6 +62,7 @@ export type Database = {
           guardian_email?: string | null;
           created_by?: string | null;
           created_at?: string;
+          insurance_status?: string;
         };
         Update: {
           id?: string;
@@ -73,6 +75,7 @@ export type Database = {
           guardian_email?: string | null;
           created_by?: string | null;
           created_at?: string;
+          insurance_status?: string;
         };
         Relationships: [
           {
