@@ -44,13 +44,15 @@
 
 - [ ] 3.1 `tests/e2e/client-insurance.spec.ts`: специфікація на кожен AC-INS-01…06 (назва з AC ID, анотація `ac`,
   тег `@uat`, «Тоді» дослівно). Дані:
-  - кожен прогін створює свою картку `uat-<запуск>@example.test`; AC-INS-02, 03, 04 — з тегом `@writes`;
+  - кожен прогін створює свою картку `uat-<запуск>@example.test`, тож усі AC-INS-01…06 — з тегом `@writes`;
+  - AC-INS-05: за винятком WS8 — UAT-крок показує на екрані незмінний статус («Insurance: Not accepted» у
+    scheduler1), саму пряму спробу доводить тест бази;
   - AC-INS-04: scheduler1 утримує за цією карткою майбутній слот therapist1 («Held», без підтвердження);
   - `deleteUatClients()` у `tests/e2e/support/admin.ts`: видалити утримання й картки `uat-%@example.test` і
     перевірити, що їх 0; виклик в `afterAll` і `cleanup.teardown.ts`. Ключ — лише `.env.local`.
 - [ ] 3.2 Прогін на проді `npm run uat -- --url <прод>`, рецензент наосліп, звіт у `docs/qa/uat/<дата>/`
   (`report.md`, `manifest.json`, `frames/`), відео — в описі PR.
-- [ ] 3.3 Негативний контроль `npm run uat:nc` → FAIL.
+- [ ] 3.3 Негативний контроль `npm run uat:nc -- --url <прод>` → FAIL.
 - [ ] 3.4 `docs/qa/proof-pack.md` за шаблоном WS9: рядок на кожен AC-INS і розділ «Не перевірено».
 - [ ] 3.5 `docs/qa/retro-ws9.md`: до 10 рядків «що б ми взяли з фабрики».
 - [ ] 3.6 Archive `impl-insurance-status` (`npx openspec archive impl-insurance-status -y`).
