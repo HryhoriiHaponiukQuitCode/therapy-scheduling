@@ -8,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 // Каркас картки клієнта: спільний для page.tsx і loading.tsx (DESIGN.md, розділ 6, «Завантаження розділу»).
 // name: undefined — картка ще вантажиться (ім'я — скелетоном). Пари «поле / значення» — CARD_GRID.
 export const CARD_GRID = "m-0 grid grid-cols-[minmax(0,180px)_minmax(0,1fr)] gap-x-6 gap-y-4";
+// Рядок статусу страхування під анкетою (AC-INS-01): той самий і на сторінці, і в скелетоні.
+export const INSURANCE_ROW = "mt-6 mb-0 border-t border-border pt-4";
 
 export function ClientCardShell({ name, children }: { name?: string; children: ReactNode }) {
   return (

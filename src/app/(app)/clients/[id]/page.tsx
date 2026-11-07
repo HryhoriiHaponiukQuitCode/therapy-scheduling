@@ -3,15 +3,17 @@ import { createClient } from "@/lib/supabase/server";
 import { getPageAccess } from "@/lib/request-user";
 import { APP_ROLES } from "@/lib/roles";
 import { isClientId, missingCardMessage, NOT_PROVIDED } from "@/lib/clients";
+import { INSURANCE_LABEL, insuranceStatusText } from "@/lib/insurance";
 import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
 import { NoAccess } from "@/components/no-access";
 import { PageHeader } from "@/components/page-header";
-import { CARD_GRID, ClientCardShell } from "./shell";
+import { CARD_GRID, ClientCardShell, INSURANCE_ROW } from "./shell";
 
-// Картка клієнта з усіма даними анкети (AC-CARD-01, AC-CARD-04, AC-CARD-10). Що видно — вирішує RLS: планувальник і
-// адміністратор — будь-яку картку, терапевт — лише свого клієнта. Немає рядка → для терапевта «You don't have access
-// to this client.» і для чужої, і для неіснуючої картки (AC-CARD-05, 08, 14, 16); для інших — «doesn't exist».
+// Картка клієнта з усіма даними анкети (AC-CARD-01, AC-CARD-04, AC-CARD-10) і статусом страхування (AC-INS-01).
+// Що видно — вирішує RLS: планувальник і адміністратор — будь-яку картку, терапевт — лише свого клієнта. Немає рядка →
+// для терапевта «You don't have access to this client.» і для чужої, і для неіснуючої картки (AC-CARD-05, 08, 14, 16);
+// для інших — «doesn't exist».
 export default async function ClientCardPage({ params }: PageProps<"/clients/[id]">) {
   const access = await getPageAccess(APP_ROLES);
   if (access.kind === "no-role") return <NoAccess />;
@@ -25,19 +27,23 @@ export default async function ClientCardPage({ params }: PageProps<"/clients/[id
   const supabase = await createClient();
   const { data: card, error } = await supabase
     .from("clients")
-    .select("full_name, client_type, birth_date, session_language, email, guardian_name, guardian_email")
+    .select(
+      "full_name, client_type, birth_date, session_language, email, guardian_name, guardian_email, insurance_status",
+    )
     .eq("id", id)
     .maybeSingle();
 
-  if (error) {
-    return (
-      <>
-        <PageHeader title="Client" />
-        <ActionMessage state={{ status: "error", message: "Could not load the client card. Try again later." }} />
-      </>
-    );
-  }
+  const loadError = (
+    <>
+      <PageHeader title="Client" />
+      <ActionMessage state={{ status: "error", message: "Could not load the client card. Try again later." }} />
+    </>
+  );
+  if (error) return loadError;
   if (!card) return missing;
+  // Невідоме значення статусу — розбіжність типів і бази: показуємо помилку, а не вигаданий «Not set».
+  const insurance = insuranceStatusText(card.insurance_status);
+  if (!insurance) return loadError;
 
   const child = card.client_type === "child";
   const rows: [string, string | null][] = [
@@ -64,6 +70,12 @@ export default async function ClientCardPage({ params }: PageProps<"/clients/[id
           </Fragment>
         ))}
       </dl>
+      {/* AC-INS-01: статус страхування одним рядком «Insurance: <статус>» (текст елемента — дослівно для e2e),
+          текстом, не кольором; підпис і значення — як у полів анкети вище. */}
+      <p className={INSURANCE_ROW} data-testid="insurance-status">
+        <span className="text-[13px] font-semibold text-muted-foreground">{INSURANCE_LABEL}</span>{" "}
+        <span className="font-semibold">{insurance}</span>
+      </p>
     </ClientCardShell>
   );
 }

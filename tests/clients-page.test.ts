@@ -32,6 +32,7 @@ const { default: ClientCardPage } = await import("@/app/(app)/clients/[id]/page"
 const { EmptyState } = await import("@/components/empty-state");
 const { AccessDenied } = await import("@/components/access-denied");
 const { ClientCardShell } = await import("@/app/(app)/clients/[id]/shell");
+const { ActionMessage } = await import("@/components/action-message");
 
 // Тексти «Тоді» з AC-CARD-16 (requirements/19-…): планувальник — «не існує», терапевт — «немає доступу».
 const AC_CARD_16_MESSAGES = [
@@ -166,6 +167,7 @@ describe("/clients/[id] — посилання на картку", () => {
         email: null,
         guardian_name: "Guardian Seven",
         guardian_email: "guardian7@example.test",
+        insurance_status: "not_set",
       },
       error: null,
     });
@@ -179,5 +181,40 @@ describe("/clients/[id] — посилання на картку", () => {
       expect(texts(card)).toEqual(expect.arrayContaining(["Guardian Seven", "guardian7@example.test"]));
     }
     expect(supabaseMock.clients).toHaveBeenCalledTimes(2);
+  });
+
+  const adultCard = (insurance_status: string) => ({
+    data: {
+      full_name: "Client One",
+      client_type: "adult",
+      birth_date: "1990-05-14",
+      session_language: "English",
+      email: "client1@example.test",
+      guardian_name: null,
+      guardian_email: null,
+      insurance_status,
+    },
+    error: null,
+  });
+
+  it("AC-INS-01: картка без позначки показує рядок «Insurance: Not set» кожній ролі, що бачить картку", async () => {
+    supabaseMock.clients.mockResolvedValue(adultCard("not_set"));
+    for (const role of ["scheduler", "admin", "therapist"]) {
+      signedIn(role);
+      const page = await ClientCardPage({ params: Promise.resolve({ id: CARD_ID }) } as never);
+      expect(texts(findTestId(page, "insurance-status")).join("")).toBe("Insurance: Not set");
+    }
+  });
+
+  it("невідоме значення статусу — помилка завантаження, а не вигаданий «Not set»", async () => {
+    supabaseMock.clients.mockResolvedValue(adultCard("pending"));
+    signedIn("scheduler");
+    const page = await ClientCardPage({ params: Promise.resolve({ id: CARD_ID }) } as never);
+    expect(find(page, ActionMessage)?.props.state).toEqual({
+      status: "error",
+      message: "Could not load the client card. Try again later.",
+    });
+    expect(find(page, ClientCardShell)).toBeUndefined();
+    expect(findTestId(page, "insurance-status")).toBeUndefined();
   });
 });
