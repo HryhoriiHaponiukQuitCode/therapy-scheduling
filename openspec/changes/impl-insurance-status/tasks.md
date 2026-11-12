@@ -10,7 +10,7 @@
 
 - [x] 1.1 Міграція `client_insurance_status`: колонка `insurance_status` з `default 'not_set'` і check на чотири
   значення.
-- [ ] 1.2 Типи БД: `database.types.ts` з Summary job `db-check` (або `npm run db:types`).
+- [x] 1.2 Типи БД: `database.types.ts` з Summary job `db-check` (або `npm run db:types`).
 - [x] 1.3 `src/lib/insurance.ts`: `INSURANCE_STATUSES`, `insuranceLine`, тексти; unit-тести.
 - [x] 1.4 `/clients/[id]`: рядок «Insurance: <статус>» (`data-testid="insurance-status"`) для всіх ролей, що бачать
   картку.
@@ -20,24 +20,24 @@
 
 ## 2. Зміна статусу
 
-- [ ] 2.1 Міграція `client_insurance_update`: `grant update (insurance_status)` і політика
+- [x] 2.1 Міграція `client_insurance_update`: `grant update (insurance_status)` і політика
   `clients_update_insurance_staff` (`using is_staff`, `with check is_staff and <> 'not_set'`).
-- [ ] 2.2 `parseInsuranceStatus`, `canChangeInsurance`; unit-тести.
-- [ ] 2.3 Дія `setInsuranceStatus(clientId, prevState, formData)` (форма — через `bind`): `getCurrentUser` →
+- [x] 2.2 `parseInsuranceStatus`, `canChangeInsurance`; unit-тести.
+- [x] 2.3 Дія `setInsuranceStatus(clientId, prevState, formData)` (форма — через `bind`): `getCurrentUser` →
   `isClientId(clientId)` → роль → значення → `update … select("id")` → «Insurance status saved.».
-- [ ] 2.4 Форма `insurance-status-form.tsx` (`Select` + `SubmitButton` + `ActionMessage`) лише для staff; поки
+- [x] 2.4 Форма `insurance-status-form.tsx` (`Select` + `SubmitButton` + `ActionMessage`) лише для staff; поки
   статус не вибрано, «Save» вимкнена з текстом «Choose a status to save.» поруч.
-- [ ] 2.5 Тести з AC ID (відмови — нова сесія агента або до коду):
+- [x] 2.5 Тести з AC ID (відмови — нова сесія агента або до коду):
   - AC-INS-02 — PGlite: scheduler1 ставить `verified`, повторне читання; повернення `not_set` → `42501`;
   - AC-INS-03 — PGlite: admin1 ставить `private_pay`, scheduler2 читає те саме;
   - AC-INS-04 — PGlite: therapist1 читає статус свого клієнта; unit `canChangeInsurance("therapist")` = false;
   - AC-INS-05 — PGlite `asUser(therapist1)`: `update` → 0 рядків без помилки, статус незмінний для scheduler1;
   - AC-INS-06 — PGlite `asAnon`: читання й зміна статусу → permission denied; після цього scheduler1 читає той самий
     `verified` (статус ставить `asService`).
-- [ ] 2.6 SQL-мутанти в `scripts/mutants.mjs`: «без ролі» — заміна всього блоку `using (…) with check (…)` на
+- [x] 2.6 SQL-мутанти в `scripts/mutants.mjs`: «без ролі» — заміна всього блоку `using (…) with check (…)` на
   `using (true) with check (insurance_status <> 'not_set')` (вбиває AC-INS-05); «без заборони Not set» — без
   `and insurance_status <> 'not_set'` (вбиває AC-INS-02); `npm run mutation:sql` → `KILLED`, таблиця в описі PR.
-- [ ] 2.7 `insurance` — у `FLOORED` (`vitest.coverage.config.mts`).
+- [x] 2.7 `insurance` — у `FLOORED` (`vitest.coverage.config.mts`).
   Done when: AC-INS-02, AC-INS-03, AC-INS-04, AC-INS-05, AC-INS-06.
 
 ## 3. UAT на проді й proof pack

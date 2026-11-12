@@ -35,9 +35,11 @@ describe("статус страхування в картці", () => {
   it("AC-INS-01: картка, створена до зрізу 3, після міграції має статус not_set", async () => {
     // Відтворюємо базу до міграції в одній транзакції: прибираємо колонку, вставляємо картку зрізу 2, застосовуємо
     // ту саму міграцію ще раз і відкочуємо все. Так перевіряємо саме default для наявних рядків.
+    // cascade: від колонки залежить політика clients_update_insurance_staff (20261112182017_client_insurance_update.sql);
+    // її теж повертає rollback.
     await t.db.exec("begin");
     try {
-      await t.db.exec("alter table public.clients drop column insurance_status");
+      await t.db.exec("alter table public.clients drop column insurance_status cascade");
       const inserted = await t.db.query<{ id: string }>(INSERT, ["Client Twelve", "client12@example.test"]);
       await t.db.exec(MIGRATION);
       const { rows } = await t.db.query<{ insurance_status: string }>(

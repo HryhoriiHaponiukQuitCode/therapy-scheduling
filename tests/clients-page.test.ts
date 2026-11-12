@@ -33,6 +33,7 @@ const { EmptyState } = await import("@/components/empty-state");
 const { AccessDenied } = await import("@/components/access-denied");
 const { ClientCardShell } = await import("@/app/(app)/clients/[id]/shell");
 const { ActionMessage } = await import("@/components/action-message");
+const { InsuranceStatusForm } = await import("@/app/(app)/clients/[id]/insurance-status-form");
 
 // Тексти «Тоді» з AC-CARD-16 (requirements/19-…): планувальник — «не існує», терапевт — «немає доступу».
 const AC_CARD_16_MESSAGES = [
@@ -203,6 +204,23 @@ describe("/clients/[id] — посилання на картку", () => {
       signedIn(role);
       const page = await ClientCardPage({ params: Promise.resolve({ id: CARD_ID }) } as never);
       expect(texts(findTestId(page, "insurance-status")).join("")).toBe("Insurance: Not set");
+    }
+  });
+
+  it("AC-INS-04: терапевт бачить «Insurance: Not accepted», а змінити статус йому не запропоновано", async () => {
+    supabaseMock.clients.mockResolvedValue(adultCard("not_accepted"));
+    signedIn("therapist");
+    const page = await ClientCardPage({ params: Promise.resolve({ id: CARD_ID }) } as never);
+    expect(texts(findTestId(page, "insurance-status")).join("")).toBe("Insurance: Not accepted");
+    expect(find(page, InsuranceStatusForm)).toBeUndefined();
+  });
+
+  it("AC-INS-02: планувальнику й адміністратору картка пропонує змінити статус", async () => {
+    supabaseMock.clients.mockResolvedValue(adultCard("verified"));
+    for (const role of ["scheduler", "admin"]) {
+      signedIn(role);
+      const page = await ClientCardPage({ params: Promise.resolve({ id: CARD_ID }) } as never);
+      expect(find(page, InsuranceStatusForm)?.props).toEqual({ clientId: CARD_ID, status: "verified" });
     }
   });
 
