@@ -1,9 +1,9 @@
 {
   "kind": "uat",
-  "generatedAt": "2026-11-12T18:59:11.273Z",
+  "generatedAt": "2026-11-12T19:03:19.017Z",
   "baseURL": "https://therapy-scheduling-two.vercel.app",
   "deployedSha": "d95aece19e75de0de9a60b327d899e9d6b3ef85b",
-  "testsCommit": "09673b96015a9ee68db452697cdcd4810b378986",
+  "testsCommit": "c62d8facf1757e2ae1001fd908278e1038790e1c",
   "reviewer": {
     "model": "claude-haiku-5-5",
     "disputes": "claude-sonnet-5-5"
@@ -21,7 +21,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "На кадрі сторінки /clients/… під заголовком «Client» видно картку з текстом «You don't have access to this client.», дані клієнта не показано. Апостроф у «don't» на цій роздільності виглядає прямим, як в критерії; дрібних розбіжностей у словах чи пунктуації не помітив."
+        "notes": "На кадрі сторінки /clients/… видно єдиний напис у картці: «You don't have access to this client.», що збігається з критерієм. Картки клієнта, його даних чи інших полів на кадрі немає, тож видимих порушень не знайдено. Апостроф у «don't» на кадрі виглядає прямим, як у критерії."
       },
       "agentModel": "claude-haiku-5-5",
       "agentVerdicts": {
@@ -38,9 +38,9 @@
       "verdict": "PASS",
       "factoryGate": "PASS",
       "rule": "R6: перевірки, агент і цитати збігаються",
-      "playwrightMs": 5466,
-      "reviewCostUsd": 0.00248,
-      "reviewWallMs": 11028
+      "playwrightMs": 5238,
+      "reviewCostUsd": 0.00187,
+      "reviewWallMs": 5338
     },
     {
       "id": "AC-CARD-06",
@@ -53,7 +53,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "На кадрі сторінки /clients/new видно повідомлення «Only schedulers and admins can create client cards.» точно за критерієм. Під заголовком «New client» немає жодного поля вводу чи кнопки створення, тобто форми не показано; цитата «New client» — це лише заголовок сторінки. Кількість карток у списку на цьому кадрі не видно, тож її не оцінюю."
+        "notes": "На кадрі сторінки /clients/new під заголовком «New client» видно лише один блок із повідомленням «Only schedulers and admins can create client cards.», текст збігається з критерієм посимвольно. Полів введення й кнопки створення на кадрі немає. Частину про кількість карток не оцінював, бо це перевіряють автоматичні перевірки."
       },
       "agentModel": "claude-haiku-5-5",
       "agentVerdicts": {
@@ -74,9 +74,9 @@
       "verdict": "PASS",
       "factoryGate": "PASS",
       "rule": "R6: перевірки, агент і цитати збігаються",
-      "playwrightMs": 4520,
-      "reviewCostUsd": 0.00272,
-      "reviewWallMs": 10481
+      "playwrightMs": 5287,
+      "reviewCostUsd": 0.00223,
+      "reviewWallMs": 7368
     },
     {
       "id": "AC-CARD-16",
@@ -89,7 +89,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "На frame-then-1.png (scheduler1) видно «This client card doesn't exist.» і в шапці лише scheduler1 @example.test. На frame-then-2.png (therapist1) видно «You don't have access to this client.» і в шапці лише therapist1 @example.test; картки клієнта на обох кадрах немає. Апостроф у кадрах виглядає як прямий, як у критерії, але при такій роздільності це перевірено лише візуально."
+        "notes": "На frame-then-1.png під заголовком «Client» видно рядок «This client card doesn't exist.», а акаунт у правому верхньому куті — scheduler1@example.test. На frame-then-2.png той самий макет містить рядок «You don't have access to this client.», а акаунт — therapist1@example.test. Жодної картки клієнта чи чужих email на кадрах не видно; це перевіряють автоматичні перевірки, я їх не оцінював."
       },
       "agentModel": "claude-haiku-5-5",
       "agentVerdicts": {
@@ -110,9 +110,9 @@
       "verdict": "PASS",
       "factoryGate": "PASS",
       "rule": "R6: перевірки, агент і цитати збігаються",
-      "playwrightMs": 4127,
-      "reviewCostUsd": 0.00273,
-      "reviewWallMs": 12497
+      "playwrightMs": 4045,
+      "reviewCostUsd": 0.00243,
+      "reviewWallMs": 6784
     },
     {
       "id": "AC-INS-01",
@@ -125,7 +125,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "На кадрі видно картку «Client Six 261112185641» (Client card) з рядком «Insurance: Not set» під розділом Intake form, який повністю збігається з критерієм. Під ним є поле «Insurance status» з «Choose a status» і неактивною кнопкою Save, що узгоджується зі станом «ще ніхто не позначав»."
+        "notes": "На кадрі видно сторінку картки «Client Six 261112190205» з рядком «Insurance: Not set» під блоком Intake form, текст збігається з критерієм посимвольно. Поле «Insurance status» показує «Choose a status», тобто статус ще не позначено, що відповідає передумові."
       },
       "agentModel": "claude-haiku-5-5",
       "agentVerdicts": {
@@ -142,22 +142,22 @@
       "verdict": "PASS",
       "factoryGate": "PASS",
       "rule": "R6: перевірки, агент і цитати збігаються",
-      "playwrightMs": 2249,
-      "reviewCostUsd": 0.00205,
-      "reviewWallMs": 5578
+      "playwrightMs": 2002,
+      "reviewCostUsd": 0.00183,
+      "reviewWallMs": 5052
     },
     {
       "id": "AC-INS-02",
       "proof": "AC-INS-02",
       "title": "AC-INS-02: scheduler1 позначає статус «Verified» у картці client6 — «Insurance status saved.» і «Insurance: Verified», зокрема після повторного відкриття",
       "screenshot": "docs/qa/uat/2026-11-12/frames/AC-INS-02-then-1.png",
-      "video": null,
+      "video": "test-results/artifacts/client-insurance-плануваль-37625--після-повторного-відкриття-chromium/video.webm",
       "trace": "test-results/artifacts/client-insurance-плануваль-37625--після-повторного-відкриття-chromium/trace.zip",
-      "asserted": false,
+      "asserted": true,
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "На кадрі frame-then-1 видно зелений напис «Insurance status saved.» і рядок «Insurance: Verified» у картці клієнта «Client Six 261112185641». На кадрі frame-then-2 картка знову показує «Insurance: Verified» з вибраним статусом Verified. Перевірка статусу в базі не з кадрів, тож не оцінювалась."
+        "notes": "На кадрі 1 видно повідомлення «Insurance status saved.» під полем статусу і рядок «Insurance: Verified» у картці клієнта Client Six. На кадрі 2 (картка відкрита знову) той самий рядок «Insurance: Verified» присутній, сторінка повністю відрендерена, без завантаження чи обрізання."
       },
       "agentModel": "claude-haiku-5-5",
       "agentVerdicts": {
@@ -179,12 +179,12 @@
           "onPage": true
         }
       ],
-      "verdict": "FAIL",
-      "factoryGate": "FAIL",
-      "rule": "R1: перевірка впала — FAIL завжди, агент не перекриває",
-      "playwrightMs": 66618,
-      "reviewCostUsd": 0.0026,
-      "reviewWallMs": 8264
+      "verdict": "PASS",
+      "factoryGate": "PASS",
+      "rule": "R6: перевірки, агент і цитати збігаються",
+      "playwrightMs": 9234,
+      "reviewCostUsd": 0.00247,
+      "reviewWallMs": 6591
     },
     {
       "id": "AC-INS-03",
@@ -197,7 +197,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "На frame-then-1.png у сесії admin1@example.test рядок картки читається як «Insurance: Private pay», поруч видно напис «Insurance status saved.». На frame-then-2.png у сесії scheduler2@example.test той самий рядок «Insurance: Private pay» з тим самим полем «Insurance status» з «Private pay». Обидва кадри показують ту саму картку (Client Seven, email uat-261112185641-ins03@example.test). Стан «Verified» до зміни на кадрах не видно, але він не є частиною «Тоді»."
+        "notes": "На кадрі frame-then-1 у шапці видно сесію admin1@example.test, а в картці клієнта Client Seven 261112190205 написано «Insurance: Private pay»; поруч є підтвердження «Insurance status saved.». На кадрі frame-then-2 у шапці сесія scheduler2@example.test, і в тій самій картці знову «Insurance: Private pay». Обидві видимі частини «Тоді» підтверджені; дані в базі за межами цієї перевірки."
       },
       "agentModel": "claude-haiku-5-5",
       "agentVerdicts": {
@@ -218,9 +218,9 @@
       "verdict": "PASS",
       "factoryGate": "PASS",
       "rule": "R6: перевірки, агент і цитати збігаються",
-      "playwrightMs": 5382,
-      "reviewCostUsd": 0.0025,
-      "reviewWallMs": 6887
+      "playwrightMs": 5352,
+      "reviewCostUsd": 0.00271,
+      "reviewWallMs": 7292
     },
     {
       "id": "AC-INS-04",
@@ -233,43 +233,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "На кадрі картка «Client Six 261112185641» (therapist1) показує «Insurance: Not accepted» як звичайний текст. Поля «Insurance status» чи кнопки «Save» у картці немає; єдина кнопка — «All clients». Для другої частини цитата — єдиний видимий рядок про страхування, бо відсутність елементів процитувати неможливо."
-      },
-      "agentModel": "claude-sonnet-5-5",
-      "agentVerdicts": {
-        "claude-haiku-5-5": "NEEDS-HUMAN",
-        "claude-sonnet-5-5": "PASS"
-      },
-      "escalated": true,
-      "quotesVerified": [
-        {
-          "quote": "Insurance: Not accepted",
-          "onPage": true
-        },
-        {
-          "quote": "Insurance: Not accepted",
-          "onPage": true
-        }
-      ],
-      "verdict": "PASS",
-      "factoryGate": "PASS",
-      "rule": "R6: перевірки, агент і цитати збігаються",
-      "playwrightMs": 3085,
-      "reviewCostUsd": 0.04102,
-      "reviewWallMs": 17869
-    },
-    {
-      "id": "AC-INS-05",
-      "proof": "AC-INS-05",
-      "title": "AC-INS-05: therapist1 напряму, оминаючи сторінки, пробує змінити статус client6 на «Verified» — статус не змінився, scheduler1 бачить «Insurance: Not accepted»",
-      "screenshot": "docs/qa/uat/2026-11-12/frames/AC-INS-05-then-1.png",
-      "video": "test-results/artifacts/client-insurance-терапевт--a1b1e-ть-«Insurance-Not-accepted»-chromium/video.webm",
-      "trace": "test-results/artifacts/client-insurance-терапевт--a1b1e-ть-«Insurance-Not-accepted»-chromium/trace.zip",
-      "asserted": true,
-      "vision": {
-        "met": true,
-        "readable": true,
-        "notes": "На кадрі сторінка «Client Six 261112185641» з карткою клієнта, а у верхньому правому куті видно сесію scheduler1@example.test (роль scheduler). У картці рядок «Insurance: Not accepted», і поле «Insurance status» теж показує «Not accepted». Кадр повний, без завантаження й обрізання, тому вирішення однозначне."
+        "notes": "На кадрі картка «Client Six 261112190205» (сторінка /clients/a7ac7665-…) показує рядок «Insurance: Not accepted» під розділом Intake form; повний текст картки видно, обрізання немає. Поля «Insurance status» і кнопки «Save» на кадрі немає: картка містить лише Client type, Date of birth, Session language, Email і рядок страхування. Друга частина підтверджена відсутністю елементів, тому цитата порожня."
       },
       "agentModel": "claude-haiku-5-5",
       "agentVerdicts": {
@@ -286,9 +250,41 @@
       "verdict": "PASS",
       "factoryGate": "PASS",
       "rule": "R6: перевірки, агент і цитати збігаються",
-      "playwrightMs": 3661,
-      "reviewCostUsd": 0.00191,
-      "reviewWallMs": 5268
+      "playwrightMs": 2914,
+      "reviewCostUsd": 0.00216,
+      "reviewWallMs": 7515
+    },
+    {
+      "id": "AC-INS-05",
+      "proof": "AC-INS-05",
+      "title": "AC-INS-05: therapist1 напряму, оминаючи сторінки, пробує змінити статус client6 на «Verified» — статус не змінився, scheduler1 бачить «Insurance: Not accepted»",
+      "screenshot": "docs/qa/uat/2026-11-12/frames/AC-INS-05-then-1.png",
+      "video": "test-results/artifacts/client-insurance-терапевт--a1b1e-ть-«Insurance-Not-accepted»-chromium/video.webm",
+      "trace": "test-results/artifacts/client-insurance-терапевт--a1b1e-ть-«Insurance-Not-accepted»-chromium/trace.zip",
+      "asserted": true,
+      "vision": {
+        "met": true,
+        "readable": true,
+        "notes": "На кадрі сторінка «Client Six 261112190205» з обліковим записом scheduler1@example.test у правому верхньому куті. У картці клієнта видно рядок «Insurance: Not accepted», і поле «Insurance status» теж показує «Not accepted», тобто статус не змінився на «Verified»."
+      },
+      "agentModel": "claude-haiku-5-5",
+      "agentVerdicts": {
+        "claude-haiku-5-5": "PASS",
+        "claude-sonnet-5-5": null
+      },
+      "escalated": false,
+      "quotesVerified": [
+        {
+          "quote": "Insurance: Not accepted",
+          "onPage": true
+        }
+      ],
+      "verdict": "PASS",
+      "factoryGate": "PASS",
+      "rule": "R6: перевірки, агент і цитати збігаються",
+      "playwrightMs": 3990,
+      "reviewCostUsd": 0.00214,
+      "reviewWallMs": 5995
     },
     {
       "id": "AC-INS-06",
@@ -301,7 +297,7 @@
       "vision": {
         "met": true,
         "readable": true,
-        "notes": "На кадрі frame-then-1.png видно сторінку входу «Practice scheduling» з полями Email і Password та кнопкою Sign in. На кадрі frame-then-2.png у картці клієнта Client Six (сесія scheduler1@example.test) видно рядок «Insurance: Verified», і він відповідає частині «Тоді» для scheduler1. Частини про відсутність даних client6 на сторінці входу та про статус у базі не оцінювались, бо вони не з кадрів."
+        "notes": "На кадрі frame-then-1 видно сторінку «Sign in» з полями Email і Password та кнопкою Sign in, без жодних даних client6. На кадрі frame-then-2 картка клієнта показує «Insurance: Verified», а у верхньому правому куті сесія scheduler1@example.test; кадр читабельний і не обрізаний."
       },
       "agentModel": "claude-haiku-5-5",
       "agentVerdicts": {
@@ -330,25 +326,25 @@
       "verdict": "PASS",
       "factoryGate": "PASS",
       "rule": "R6: перевірки, агент і цитати збігаються",
-      "playwrightMs": 4064,
-      "reviewCostUsd": 0.00299,
-      "reviewWallMs": 9285
+      "playwrightMs": 3847,
+      "reviewCostUsd": 0.00249,
+      "reviewWallMs": 7205
     }
   ],
   "negativeControls": [],
   "cleanup": {
-    "at": "2026-11-12T18:58:35.910Z",
+    "at": "2026-11-12T19:02:56.342Z",
     "deleted": [],
     "remaining": [],
     "leftoverRequests": 0,
     "clients": {
       "deleted": [
-        "uat-261112185641-ins01@example.test",
-        "uat-261112185641-ins02@example.test",
-        "uat-261112185641-ins03@example.test",
-        "uat-261112185641-ins04@example.test",
-        "uat-261112185641-ins05@example.test",
-        "uat-261112185641-ins06@example.test"
+        "uat-261112190205-ins01@example.test",
+        "uat-261112190205-ins02@example.test",
+        "uat-261112190205-ins03@example.test",
+        "uat-261112190205-ins04@example.test",
+        "uat-261112190205-ins05@example.test",
+        "uat-261112190205-ins06@example.test"
       ],
       "remaining": []
     }

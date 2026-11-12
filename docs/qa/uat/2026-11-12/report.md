@@ -1,23 +1,23 @@
 # Звіт UAT — 12.11.2026
 
 - **Застосунок:** https://therapy-scheduling-two.vercel.app (/api/health: коміт `d95aece`)
-- **Код тестів:** `task/uat-insurance` @ `09673b9`
-- **Прогін:** 12.11.2026, 20:56 (Київ), Playwright 115.3 с; AC: 9 — PASS 8, FAIL 1, NEEDS-HUMAN 0
-- **Рецензент:** `claude-haiku-5-5`; суперечки → `claude-sonnet-5-5`. Разом за розбір: $0.0610 (ціни API; за підпискою — у межах ліміту плану)
+- **Код тестів:** `task/uat-insurance` @ `c62d8fa`
+- **Прогін:** 12.11.2026, 21:02 (Київ), Playwright 51.4 с; AC: 9 — PASS 9, FAIL 0, NEEDS-HUMAN 0
+- **Рецензент:** `claude-haiku-5-5`; суперечки → `claude-sonnet-5-5`. Разом за розбір: $0.0203 (ціни API; за підпискою — у межах ліміту плану)
 - **Прибирання:** синтетичних uat-*@example.test видалено 0, лишилось 0, їхніх рядків, що лишились: 0; карток клієнтів UAT видалено 6, лишилось 0
 - **Відео й траси:** не в git — `test-results/` локально або артефакт CI; трасу відкриває `npx playwright show-trace <trace.zip>`
 
 | AC | Перевірки | Агент | Підсумок | Чому | Playwright | Розбір |
 |---|---|---|---|---|---|---|
-| AC-CARD-05 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 5.5 с | $0.0025, 11.0 с |
-| AC-CARD-06 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 4.5 с | $0.0027, 10.5 с |
-| AC-CARD-16 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 4.1 с | $0.0027, 12.5 с |
-| AC-INS-01 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 2.2 с | $0.0021, 5.6 с |
-| AC-INS-02 | впали | Haiku: PASS | **FAIL** | R1: перевірка впала — FAIL завжди, агент не перекриває | 66.6 с | $0.0026, 8.3 с |
-| AC-INS-03 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 5.4 с | $0.0025, 6.9 с |
-| AC-INS-04 | пройшли | Haiku: NEEDS-HUMAN, Sonnet: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 3.1 с | $0.0410, 17.9 с |
-| AC-INS-05 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 3.7 с | $0.0019, 5.3 с |
-| AC-INS-06 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 4.1 с | $0.0030, 9.3 с |
+| AC-CARD-05 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 5.2 с | $0.0019, 5.3 с |
+| AC-CARD-06 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 5.3 с | $0.0022, 7.4 с |
+| AC-CARD-16 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 4.0 с | $0.0024, 6.8 с |
+| AC-INS-01 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 2.0 с | $0.0018, 5.1 с |
+| AC-INS-02 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 9.2 с | $0.0025, 6.6 с |
+| AC-INS-03 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 5.4 с | $0.0027, 7.3 с |
+| AC-INS-04 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 2.9 с | $0.0022, 7.5 с |
+| AC-INS-05 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 4.0 с | $0.0021, 6.0 с |
+| AC-INS-06 | пройшли | Haiku: PASS | **PASS** | R6: перевірки, агент і цитати збігаються | 3.8 с | $0.0025, 7.2 с |
 
 ## AC-CARD-05 — PASS
 
@@ -31,7 +31,7 @@
 
 **Кроки:** ✔ Дано: клієнт — свій лише для therapist2 (є в списку therapist2, немає в списку therapist1) → ✔ Коли: therapist1 відкриває картку цього клієнта за прямим посиланням → ✔ Тоді: therapist1 бачить повідомлення «You don't have access to this client.», жодних даних client9 не показано, і картка client9 не змінилася
 
-**Агент (claude-haiku-5-5, PASS):** На кадрі сторінки /clients/… під заголовком «Client» видно картку з текстом «You don't have access to this client.», дані клієнта не показано. Апостроф у «don't» на цій роздільності виглядає прямим, як в критерії; дрібних розбіжностей у словах чи пунктуації не помітив.
+**Агент (claude-haiku-5-5, PASS):** На кадрі сторінки /clients/… видно єдиний напис у картці: «You don't have access to this client.», що збігається з критерієм. Картки клієнта, його даних чи інших полів на кадрі немає, тож видимих порушень не знайдено. Апостроф у «don't» на кадрі виглядає прямим, як у критерії.
 
 **Цитати агента, звірені зі сторінкою (aria):**
 - «You don't have access to this client.» — є на сторінці
@@ -54,7 +54,7 @@
 
 **Кроки:** ✔ Дано: therapist1 увійшов у застосунок → ✔ Коли: він відкриває форму нової картки клієнта за прямим посиланням → ✔ Тоді: форму не показано, therapist1 одразу бачить повідомлення «Only schedulers and admins can create client cards.», і кількість карток клієнтів не змінилася
 
-**Агент (claude-haiku-5-5, PASS):** На кадрі сторінки /clients/new видно повідомлення «Only schedulers and admins can create client cards.» точно за критерієм. Під заголовком «New client» немає жодного поля вводу чи кнопки створення, тобто форми не показано; цитата «New client» — це лише заголовок сторінки. Кількість карток у списку на цьому кадрі не видно, тож її не оцінюю.
+**Агент (claude-haiku-5-5, PASS):** На кадрі сторінки /clients/new під заголовком «New client» видно лише один блок із повідомленням «Only schedulers and admins can create client cards.», текст збігається з критерієм посимвольно. Полів введення й кнопки створення на кадрі немає. Частину про кількість карток не оцінював, бо це перевіряють автоматичні перевірки.
 
 **Цитати агента, звірені зі сторінкою (aria):**
 - «Only schedulers and admins can create client cards.» — є на сторінці
@@ -79,7 +79,7 @@
 
 **Кроки:** ✔ Дано: картки клієнта, на яку веде посилання, не існує → ✔ Коли: scheduler1 відкриває це посилання → ✔ Тоді: scheduler1 бачить повідомлення «This client card doesn't exist.» і не бачить жодних даних клієнтів → ✔ Коли: потім therapist1 відкриває це саме посилання → ✔ Тоді: therapist1 бачить повідомлення «You don't have access to this client.» і не бачить жодних даних клієнтів
 
-**Агент (claude-haiku-5-5, PASS):** На frame-then-1.png (scheduler1) видно «This client card doesn't exist.» і в шапці лише scheduler1 @example.test. На frame-then-2.png (therapist1) видно «You don't have access to this client.» і в шапці лише therapist1 @example.test; картки клієнта на обох кадрах немає. Апостроф у кадрах виглядає як прямий, як у критерії, але при такій роздільності це перевірено лише візуально.
+**Агент (claude-haiku-5-5, PASS):** На frame-then-1.png під заголовком «Client» видно рядок «This client card doesn't exist.», а акаунт у правому верхньому куті — scheduler1@example.test. На frame-then-2.png той самий макет містить рядок «You don't have access to this client.», а акаунт — therapist1@example.test. Жодної картки клієнта чи чужих email на кадрах не видно; це перевіряють автоматичні перевірки, я їх не оцінював.
 
 **Цитати агента, звірені зі сторінкою (aria):**
 - «This client card doesn't exist.» — є на сторінці
@@ -103,7 +103,7 @@
 
 **Кроки:** ✔ Дано: картку client6 створено, і статус перевірки страхування ще ніхто не позначав → ✔ Коли: scheduler1 відкриває картку client6 → ✔ Тоді: в картці показано «Insurance: Not set»
 
-**Агент (claude-haiku-5-5, PASS):** На кадрі видно картку «Client Six 261112185641» (Client card) з рядком «Insurance: Not set» під розділом Intake form, який повністю збігається з критерієм. Під ним є поле «Insurance status» з «Choose a status» і неактивною кнопкою Save, що узгоджується зі станом «ще ніхто не позначав».
+**Агент (claude-haiku-5-5, PASS):** На кадрі видно сторінку картки «Client Six 261112190205» з рядком «Insurance: Not set» під блоком Intake form, текст збігається з критерієм посимвольно. Поле «Insurance status» показує «Choose a status», тобто статус ще не позначено, що відповідає передумові.
 
 **Цитати агента, звірені зі сторінкою (aria):**
 - «Insurance: Not set» — є на сторінці
@@ -114,7 +114,7 @@
 
 **Рішення PM:** ☐ приймаю · ☐ відхилення від вимог (issue «Відхилення від вимог: AC-INS-01 — …») · @login: ____
 
-## AC-INS-02 — FAIL
+## AC-INS-02 — PASS
 
 **Тест:** AC-INS-02: scheduler1 позначає статус «Verified» у картці client6 — «Insurance status saved.» і «Insurance: Verified», зокрема після повторного відкриття
 
@@ -127,22 +127,16 @@
 
 **Кроки:** ✔ Дано: картка client6 показує «Insurance: Not set» → ✔ Коли: scheduler1 позначає статус перевірки страхування «Verified» → ✔ Тоді: scheduler1 бачить повідомлення «Insurance status saved.», а картка client6 показує «Insurance: Verified» → ✔ Коли: scheduler1 відкриває картку client6 знову → ✔ Тоді: картка client6 показує «Insurance: Verified» і після того, як scheduler1 відкриє її знову
 
-**Перевірка впала:**
-
-```
-Test timeout of 60000ms exceeded while running "afterEach" hook.
-```
-
-**Агент (claude-haiku-5-5, PASS):** На кадрі frame-then-1 видно зелений напис «Insurance status saved.» і рядок «Insurance: Verified» у картці клієнта «Client Six 261112185641». На кадрі frame-then-2 картка знову показує «Insurance: Verified» з вибраним статусом Verified. Перевірка статусу в базі не з кадрів, тож не оцінювалась.
+**Агент (claude-haiku-5-5, PASS):** На кадрі 1 видно повідомлення «Insurance status saved.» під полем статусу і рядок «Insurance: Verified» у картці клієнта Client Six. На кадрі 2 (картка відкрита знову) той самий рядок «Insurance: Verified» присутній, сторінка повністю відрендерена, без завантаження чи обрізання.
 
 **Цитати агента, звірені зі сторінкою (aria):**
 - «Insurance status saved.» — є на сторінці
 - «Insurance: Verified» — є на сторінці
 - «Insurance: Verified» — є на сторінці
 
-**Правило:** R1: перевірка впала — FAIL завжди, агент не перекриває
+**Правило:** R6: перевірки, агент і цитати збігаються
 
-**Відео:** `—` · **траса:** `test-results/artifacts/client-insurance-плануваль-37625--після-повторного-відкриття-chromium/trace.zip` (не в git)
+**Відео:** `test-results/artifacts/client-insurance-плануваль-37625--після-повторного-відкриття-chromium/video.webm` · **траса:** `test-results/artifacts/client-insurance-плануваль-37625--після-повторного-відкриття-chromium/trace.zip` (не в git)
 
 **Рішення PM:** ☐ приймаю · ☐ відхилення від вимог (issue «Відхилення від вимог: AC-INS-02 — …») · @login: ____
 
@@ -159,7 +153,7 @@ Test timeout of 60000ms exceeded while running "afterEach" hook.
 
 **Кроки:** ✔ Дано: картка client7 показує «Insurance: Verified» → ✔ Коли: admin1 змінює статус перевірки страхування на «Private pay» → ✔ Тоді: admin1 бачить у картці «Insurance: Private pay» → ✔ Коли: потім scheduler2 відкриває картку client7 → ✔ Тоді: scheduler2 бачить у картці «Insurance: Private pay»
 
-**Агент (claude-haiku-5-5, PASS):** На frame-then-1.png у сесії admin1@example.test рядок картки читається як «Insurance: Private pay», поруч видно напис «Insurance status saved.». На frame-then-2.png у сесії scheduler2@example.test той самий рядок «Insurance: Private pay» з тим самим полем «Insurance status» з «Private pay». Обидва кадри показують ту саму картку (Client Seven, email uat-261112185641-ins03@example.test). Стан «Verified» до зміни на кадрах не видно, але він не є частиною «Тоді».
+**Агент (claude-haiku-5-5, PASS):** На кадрі frame-then-1 у шапці видно сесію admin1@example.test, а в картці клієнта Client Seven 261112190205 написано «Insurance: Private pay»; поруч є підтвердження «Insurance status saved.». На кадрі frame-then-2 у шапці сесія scheduler2@example.test, і в тій самій картці знову «Insurance: Private pay». Обидві видимі частини «Тоді» підтверджені; дані в базі за межами цієї перевірки.
 
 **Цитати агента, звірені зі сторінкою (aria):**
 - «Insurance: Private pay» — є на сторінці
@@ -183,12 +177,9 @@ Test timeout of 60000ms exceeded while running "afterEach" hook.
 
 **Кроки:** ✔ Дано: client6 — свій клієнт therapist1, і картка client6 показує «Insurance: Not accepted» → ✔ Коли: therapist1 відкриває картку client6 → ✔ Тоді: він бачить «Insurance: Not accepted», а змінити статус перевірки страхування в картці йому не запропоновано
 
-**Агент (claude-sonnet-5-5, PASS):** На кадрі картка «Client Six 261112185641» (therapist1) показує «Insurance: Not accepted» як звичайний текст. Поля «Insurance status» чи кнопки «Save» у картці немає; єдина кнопка — «All clients». Для другої частини цитата — єдиний видимий рядок про страхування, бо відсутність елементів процитувати неможливо.
-
-Haiku сказав NEEDS-HUMAN, тож розбір повторив Sonnet; рішення агента — за Sonnet.
+**Агент (claude-haiku-5-5, PASS):** На кадрі картка «Client Six 261112190205» (сторінка /clients/a7ac7665-…) показує рядок «Insurance: Not accepted» під розділом Intake form; повний текст картки видно, обрізання немає. Поля «Insurance status» і кнопки «Save» на кадрі немає: картка містить лише Client type, Date of birth, Session language, Email і рядок страхування. Друга частина підтверджена відсутністю елементів, тому цитата порожня.
 
 **Цитати агента, звірені зі сторінкою (aria):**
-- «Insurance: Not accepted» — є на сторінці
 - «Insurance: Not accepted» — є на сторінці
 
 **Правило:** R6: перевірки, агент і цитати збігаються
@@ -209,7 +200,7 @@ Haiku сказав NEEDS-HUMAN, тож розбір повторив Sonnet; р�
 
 **Кроки:** ✔ Дано: client6 — свій клієнт therapist1, і картка client6 показує «Insurance: Not accepted» → ✔ Коли: therapist1 напряму, оминаючи сторінки застосунку, пробує змінити статус client6 на «Verified» → ✔ Коли: scheduler1 відкриває картку client6 → ✔ Тоді: статус не змінився: scheduler1 у картці client6 бачить «Insurance: Not accepted»
 
-**Агент (claude-haiku-5-5, PASS):** На кадрі сторінка «Client Six 261112185641» з карткою клієнта, а у верхньому правому куті видно сесію scheduler1@example.test (роль scheduler). У картці рядок «Insurance: Not accepted», і поле «Insurance status» теж показує «Not accepted». Кадр повний, без завантаження й обрізання, тому вирішення однозначне.
+**Агент (claude-haiku-5-5, PASS):** На кадрі сторінка «Client Six 261112190205» з обліковим записом scheduler1@example.test у правому верхньому куті. У картці клієнта видно рядок «Insurance: Not accepted», і поле «Insurance status» теж показує «Not accepted», тобто статус не змінився на «Verified».
 
 **Цитати агента, звірені зі сторінкою (aria):**
 - «Insurance: Not accepted» — є на сторінці
@@ -233,7 +224,7 @@ Haiku сказав NEEDS-HUMAN, тож розбір повторив Sonnet; р�
 
 **Кроки:** ✔ Дано: користувач не увійшов у застосунок, а картка client6 показує «Insurance: Verified» → ✔ Коли: він відкриває картку client6 за прямим посиланням → ✔ Тоді: він бачить лише сторінку входу, статусу страхування й інших даних client6 не показано → ✔ Коли: scheduler1 після цього відкриває картку client6 → ✔ Тоді: scheduler1 після цього бачить у картці client6 «Insurance: Verified»
 
-**Агент (claude-haiku-5-5, PASS):** На кадрі frame-then-1.png видно сторінку входу «Practice scheduling» з полями Email і Password та кнопкою Sign in. На кадрі frame-then-2.png у картці клієнта Client Six (сесія scheduler1@example.test) видно рядок «Insurance: Verified», і він відповідає частині «Тоді» для scheduler1. Частини про відсутність даних client6 на сторінці входу та про статус у базі не оцінювались, бо вони не з кадрів.
+**Агент (claude-haiku-5-5, PASS):** На кадрі frame-then-1 видно сторінку «Sign in» з полями Email і Password та кнопкою Sign in, без жодних даних client6. На кадрі frame-then-2 картка клієнта показує «Insurance: Verified», а у верхньому правому куті сесія scheduler1@example.test; кадр читабельний і не обрізаний.
 
 **Цитати агента, звірені зі сторінкою (aria):**
 - «Email» — є на сторінці
