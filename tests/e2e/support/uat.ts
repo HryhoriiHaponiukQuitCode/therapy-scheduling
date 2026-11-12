@@ -2,7 +2,7 @@
 // кадр екрана, aria-знімок сторінки і список частин «Тоді», які людина БАЧИТЬ (агент має їх процитувати з кадру).
 // Невидимі частини (буфер обміну, рядки в базі, «даних немає») вирішують лише автоматичні перевірки.
 // Джерело: демо-репо курсу, tests/e2e/support/uat.ts (тег ws8-03-uat). Змінюйте лише signIn (форма входу).
-import { test, type Locator, type Page } from "@playwright/test";
+import { test, type Locator, type Page, type Request } from "@playwright/test";
 
 export type ThenSpec = {
   /** Частина «Тоді» — дослівно з AC від PM. */
@@ -67,20 +67,42 @@ async function captureEvidence(page: Page, n: number, spec: ThenSpec, assertions
   await info.attach(`then-${n}.json`, { body: JSON.stringify(meta, null, 2), contentType: "application/json" });
 }
 
+const RESPONSE_WAIT_MS = 2_000;
+
+/** Статус відповіді; 0 — відповіді немає (запит перервано); null — відповідь не прийшла за RESPONSE_WAIT_MS. */
+async function responseStatus(request: Request): Promise<number | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<"pending">((resolve) => {
+    timer = setTimeout(() => resolve("pending"), RESPONSE_WAIT_MS);
+  });
+  try {
+    const response = await Promise.race([request.response().catch(() => null), timeout]);
+    return response === "pending" ? null : (response?.status() ?? 0);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** Помилки консолі, необроблені помилки сторінки й відповіді 5xx за час тесту (API Playwright 1.56+). */
 export async function attachRuntimeErrors(page: Page) {
   const consoleErrors = (await page.consoleMessages({ filter: "all" }))
     .filter((m) => m.type() === "error")
     .map((m) => m.text());
   const pageErrors = (await page.pageErrors({ filter: "all" })).map((e) => String(e));
+  // request.response() чекає відповіді без межі: запит, що так і не отримав її (prefetch посилань Next.js, перерваний
+  // переходом на іншу сторінку), вішав хук afterEach до таймауту тесту, і тест ставав червоним уже ПІСЛЯ всіх «Тоді»
+  // (UAT 12.11.2026, AC-INS-02). Тому чекаємо не довше RESPONSE_WAIT_MS і пишемо такі запити окремо — «pending».
   const responses = await Promise.all(
-    (await page.requests()).map(async (r) => ({ r, status: (await r.response())?.status() ?? 0 })),
+    (await page.requests()).map(async (r) => ({ r, status: await responseStatus(r) })),
   );
   const failed = responses
-    .filter(({ r, status }) => r.failure() !== null || status >= 500)
+    .filter(({ r, status }) => r.failure() !== null || (status !== null && status >= 500))
     .map(({ r, status }) => `${r.method()} ${new URL(r.url()).pathname} → ${r.failure()?.errorText ?? status}`);
+  const pending = responses
+    .filter(({ r, status }) => status === null && r.failure() === null)
+    .map(({ r }) => `${r.method()} ${new URL(r.url()).pathname}`);
   await test.info().attach("runtime-errors.json", {
-    body: JSON.stringify({ console: consoleErrors, pageErrors, failed }, null, 2),
+    body: JSON.stringify({ console: consoleErrors, pageErrors, failed, pending }, null, 2),
     contentType: "application/json",
   });
 }

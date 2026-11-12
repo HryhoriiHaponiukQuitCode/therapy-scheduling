@@ -10,6 +10,7 @@
 import { randomBytes } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { addDays, isoWeekday, practiceDate, practiceTimeToUtc } from "../../../src/lib/slots";
 
 /**
  * ВАШЕ: рядки синтетичного користувача, які треба видалити ДО deleteUser, — таблиці з FK на користувача без
@@ -108,4 +109,131 @@ export async function deleteUatUsers(onlyEmail?: string): Promise<CleanupResult>
     `${JSON.stringify({ at: new Date().toISOString(), scope: onlyEmail ?? "uat-*", deleted, remaining, leftoverRequests })}\n`,
   );
   return { deleted, remaining, leftoverRequests };
+}
+
+// ── Зріз 3 (статус страхування): синтетичні картки клієнтів і утримання для «Дано» ────────────────────────────
+// Картки клієнтів UAT мають email uat-<run>-<суфікс>@example.test (uatEmail): так прибирання знаходить їх і після
+// обірваних прогонів. Утримання видаляються разом з карткою (holds.client_id … on delete cascade).
+
+/** Картки клієнтів UAT: лише такі email прибирання має право видалити. */
+const UAT_CLIENT_EMAIL = "uat-%@example.test";
+
+async function profileId(supabase: SupabaseClient, email: string): Promise<string> {
+  const { data, error } = await supabase.from("profiles").select("id").eq("email", email).single();
+  if (error) throw error;
+  return data.id as string;
+}
+
+/**
+ * «Дано»: картка дорослого клієнта від імені scheduler1 (created_by) з потрібним статусом страхування.
+ * Статус ставимо секретним ключем — так «Дано» не залежить від дії, яку перевіряє тест.
+ */
+export async function createUatClient(opts: {
+  suffix: string;
+  name: string;
+  insuranceStatus?: "not_set" | "verified" | "not_accepted" | "private_pay";
+}): Promise<{ id: string; email: string; name: string }> {
+  const supabase = adminClient();
+  const email = uatEmail(opts.suffix);
+  const { data, error } = await supabase
+    .from("clients")
+    .insert({
+      client_type: "adult",
+      full_name: opts.name,
+      email,
+      birth_date: "1990-05-14",
+      session_language: "English",
+      created_by: await profileId(supabase, "scheduler1@example.test"),
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+  if (opts.insuranceStatus && opts.insuranceStatus !== "not_set") {
+    const { error: statusError } = await supabase
+      .from("clients")
+      .update({ insurance_status: opts.insuranceStatus })
+      .eq("id", data.id);
+    if (statusError) throw statusError;
+  }
+  return { id: data.id as string, email, name: opts.name };
+}
+
+/** Статус страхування картки в базі (секретним ключем) — для перевірок «що не змінилося». */
+export async function insuranceStatusOf(clientId: string): Promise<string> {
+  const { data, error } = await adminClient().from("clients").select("insurance_status").eq("id", clientId).single();
+  if (error) throw error;
+  return data.insurance_status as string;
+}
+
+/**
+ * Клієнт Supabase від імені синтетичного користувача (вхід паролем акаунта з supabase/demo-users.json) — запити
+ * «напряму, оминаючи сторінки застосунку», з правами й RLS цього користувача. Пароль — лише зі змінних середовища.
+ */
+export async function userClient(email: string): Promise<SupabaseClient> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const role = email.split("@")[0];
+  const password = process.env[`UAT_PASSWORD_${role.toUpperCase()}`] ?? process.env.DEMO_USER_PASSWORD;
+  if (!url || !key || !password) {
+    throw new Error(`Для входу ${email} потрібні NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY і пароль`);
+  }
+  const supabase = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(`Вхід ${email} не вдався: ${error.message}`);
+  return supabase;
+}
+
+/**
+ * «Дано»: scheduler1 утримує за клієнтом найближчий вільний слот терапевта («Held», без підтвердження) — тією самою
+ * функцією hold_slot, що й сторінка /slots, тож правила утримання ті самі. Слоти — будні 09:00–16:00 часу практики,
+ * від двох тижнів уперед у межах 8 тижнів доступності; зайнятий слот (SLOT_UNAVAILABLE) пропускаємо.
+ */
+export async function holdForTherapist(clientId: string, therapistEmail: string): Promise<string> {
+  const therapistId = await profileId(adminClient(), therapistEmail);
+  const scheduler = await userClient("scheduler1@example.test");
+  try {
+    const today = practiceDate(new Date());
+    for (let day = 14; day <= 50; day++) {
+      const date = addDays(today, day);
+      if (isoWeekday(date) > 5) continue;
+      for (let hour = 16; hour >= 9; hour--) {
+        const slot = practiceTimeToUtc(date, hour).toISOString();
+        const { error } = await scheduler.rpc("hold_slot", {
+          p_therapist_id: therapistId,
+          p_slot_start: slot,
+          p_client_id: clientId,
+        });
+        if (!error) return slot;
+        if (!/SLOT_UNAVAILABLE/.test(error.message)) throw error;
+      }
+    }
+    throw new Error(`У ${therapistEmail} немає вільного слоту на 2–7 тижнів уперед`);
+  } finally {
+    await scheduler.auth.signOut();
+  }
+}
+
+export type ClientsCleanupResult = { deleted: string[]; remaining: string[] };
+
+/** Видаляє ВСІ картки клієнтів UAT (разом з їхніми утриманнями) і перевіряє, що жодної не лишилось. */
+export async function deleteUatClients(): Promise<ClientsCleanupResult> {
+  const supabase = adminClient();
+  const { data, error } = await supabase.from("clients").delete().like("email", UAT_CLIENT_EMAIL).select("email");
+  if (error) throw error;
+  const { data: left, error: leftError } = await supabase.from("clients").select("email").like("email", UAT_CLIENT_EMAIL);
+  if (leftError) throw leftError;
+  const result = { deleted: data.map((r) => r.email as string), remaining: left.map((r) => r.email as string) };
+  mkdirSync("test-results", { recursive: true });
+  appendFileSync(CLEANUP_LOG, `${JSON.stringify({ at: new Date().toISOString(), scope: "clients uat-*", deleted: [], clients: result })}\n`);
+  return result;
+}
+
+/** Усі картки клієнтів UAT, які видалив цей прогін (за журналом). */
+export function deletedClientsThisRun(): string[] {
+  if (!existsSync(CLEANUP_LOG)) return [];
+  const entries = readFileSync(CLEANUP_LOG, "utf8")
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((l) => JSON.parse(l) as { clients?: ClientsCleanupResult });
+  return [...new Set(entries.flatMap((e) => e.clients?.deleted ?? []))];
 }

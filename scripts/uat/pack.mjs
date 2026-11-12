@@ -90,6 +90,11 @@ export function pack(resultsPath = RESULTS) {
         thens: thens.map((t) => ({ n: t.n, url: t.url, clause: t.clause, assertionsPassed: t.assertionsPassed, visible: t.visible, hidden: t.hidden })),
         runtime,
         video: rel(att("video")?.path),
+        // Відео всіх сесій тесту: сторінки фікстури page («video») і сесій інших ролей («video-<роль>», якщо тест їх
+        // прикріпив) — інакше AC, що проходить в інших сесіях, мав би у звіті лише порожнє відео сторінки page.
+        videos: result.attachments
+          .filter((a) => a.path && (a.name === "video" || a.name.startsWith("video-")))
+          .map((a) => ({ name: a.name, path: rel(a.path) })),
         trace: rel(att("trace")?.path),
         durationMs: result.duration,
         startTime: result.startTime,
