@@ -25,12 +25,21 @@ const OPTIONS = SETTABLE_INSURANCE_STATUSES.map((value) => ({ value, label: INSU
 export function InsuranceStatusForm({ clientId, status }: { clientId: string; status: string }) {
   const [state, formAction, pending] = useActionState(setInsuranceStatus.bind(null, clientId), initialState);
   const [chosen, setChosen] = useState(parseInsuranceStatus(status) ?? "");
+  // Картка оновилась (наше збереження чи зміна іншого працівника) — вибір іде за новим статусом, інакше «Save»
+  // записав би старий вибір поверх чужої зміни. Форму не перемонтовуємо: це скинуло б «Insurance status saved.»
+  // (useActionState); перемонтовуємо лише Select (key), бо його значення — внутрішній стан з defaultValue.
+  const [shownStatus, setShownStatus] = useState(status);
+  if (status !== shownStatus) {
+    setShownStatus(status);
+    setChosen(parseInsuranceStatus(status) ?? "");
+  }
 
   return (
     <form action={formAction} className="mt-4 flex flex-col gap-3" data-testid="insurance-form">
       <div className="flex flex-wrap items-end gap-3">
         <Field label="Insurance status" htmlFor="insurance-status-select" className="min-w-0 flex-[0_1_260px]">
           <Select
+            key={status}
             id="insurance-status-select"
             name={INSURANCE_FIELD}
             options={OPTIONS}

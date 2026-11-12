@@ -53,7 +53,7 @@ describe("parseInsuranceStatus", () => {
     expect(parseInsuranceStatus("not_set")).toBeNull();
   });
 
-  it("відхиляє все інше: інший регістр, тексти PM, порожнє, null, не-рядки, ключі Object.prototype", () => {
+  it("AC-INS-02: відхиляє все інше: інший регістр, тексти PM, порожнє, null, не-рядки, ключі Object.prototype", () => {
     for (const value of [
       "Verified",
       "VERIFIED",
