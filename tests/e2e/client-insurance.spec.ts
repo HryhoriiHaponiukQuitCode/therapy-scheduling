@@ -22,7 +22,7 @@ const auth = (role: Role) => `playwright/.auth/${role}.json`;
 const RUN = process.env.UAT_RUN ?? "manual";
 
 /**
- * Окрема сесія іншої ролі; закрити після використання (тоді Playwright дописує відео).
+ * Окрема сесія іншої ролі; закрити після використання — closeSession (тоді Playwright дописує відео).
  * Відео — і для цих сесій: налаштування video у playwright.config.ts пише лише сторінку фікстури page, а AC-INS-03
  * проходить цілком у сесіях admin1 і scheduler2 (у прогоні 3 його video.webm мав 1,6 КБ — порожній).
  */
@@ -31,7 +31,14 @@ async function sessionOf(browser: Browser, role: Role) {
     storageState: auth(role),
     recordVideo: { dir: test.info().outputPath(`video-${role}`), size: { width: 1280, height: 800 } },
   });
-  return { context, page: await context.newPage() };
+  return { role, context, page: await context.newPage() };
+}
+
+/** Закрити сесію й прикріпити її відео до результату тесту (video-<роль>): його бере в звіт scripts/uat/pack.mjs. */
+async function closeSession(session: Awaited<ReturnType<typeof sessionOf>>) {
+  const video = session.page.video();
+  await session.context.close();
+  if (video) await test.info().attach(`video-${session.role}`, { path: await video.path(), contentType: "video/webm" });
 }
 
 async function openCard(page: Page, clientId: string, name: string) {
@@ -178,8 +185,8 @@ test.describe("планувальник і адміністратор", () => {
           },
         );
       } finally {
-        await admin.context.close();
-        await scheduler2.context.close();
+        await closeSession(admin);
+        await closeSession(scheduler2);
       }
     },
   );
@@ -272,7 +279,7 @@ test.describe("терапевт", () => {
           },
         );
       } finally {
-        await scheduler.context.close();
+        await closeSession(scheduler);
       }
     },
   );
@@ -331,7 +338,7 @@ test.describe("без входу", () => {
           },
         );
       } finally {
-        await scheduler.context.close();
+        await closeSession(scheduler);
       }
     },
   );

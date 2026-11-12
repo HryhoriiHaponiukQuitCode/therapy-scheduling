@@ -54,6 +54,7 @@ export function report(rows = combine(), { out } = {}) {
     title: r.assertions.title,
     screenshot: rel(path.join(outDir, r.frameFiles[0] ?? "")),
     video: r.assertions.video, // не в git: test-results/… локально або артефакт CI
+    videos: r.assertions.videos ?? [],
     trace: r.assertions.trace,
     asserted: r.assertions.status === "passed",
     vision: r.agent ? { met: r.agent.verdict === "PASS", readable: r.agent.verdict !== "NEEDS-HUMAN", notes: r.agent.notes } : null,
@@ -128,7 +129,9 @@ export function report(rows = combine(), { out } = {}) {
         : []),
       `**Правило:** ${r.ruleText}`,
       "",
-      `**Відео:** \`${a.video ?? "—"}\` · **траса:** \`${a.trace ?? "—"}\` (не в git)`,
+      `**Відео:** ${
+        a.videos?.length > 1 ? a.videos.map((v) => `${v.name} \`${v.path}\``).join(", ") : `\`${a.video ?? "—"}\``
+      } · **траса:** \`${a.trace ?? "—"}\` (не в git)`,
       "",
       r.negativeControl
         ? "_Негативний контроль: навмисно хибне очікування. Очікуваний підсумок — FAIL або NEEDS-HUMAN, не PASS._"
