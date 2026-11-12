@@ -8,12 +8,15 @@
 //
 // Джерело: демо-репо курсу, tests/e2e/auth.setup.ts (тег ws8-03-uat). ROLES — ВАШІ: роль → адреса акаунта на проді
 // (D0.5, *@example.test). therapy-scheduling: акаунти з AC зрізу 2 (supabase/demo-users.json, створені на проді
-// npm run users:demo) — scheduler1 (AC-CARD-16), therapist1 (AC-CARD-05, 06, 16), therapist2 (власник клієнта, AC-CARD-05).
+// npm run users:demo) — scheduler1 (AC-CARD-16), therapist1 (AC-CARD-05, 06, 16), therapist2 (власник клієнта, AC-CARD-05);
+// зріз 3 — admin1 (AC-INS-03) і scheduler2 (AC-INS-03).
 import { expect, test as setup } from "@playwright/test";
 import { signIn } from "./support/uat";
 
 const ROLES = {
+  admin1: "admin1@example.test",
   scheduler1: "scheduler1@example.test",
+  scheduler2: "scheduler2@example.test",
   therapist1: "therapist1@example.test",
   therapist2: "therapist2@example.test",
 } as const;
