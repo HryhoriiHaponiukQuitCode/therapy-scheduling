@@ -15,6 +15,8 @@ const OWN_CLIENTS = "supabase/migrations/20261027192525_therapist_own_clients.sq
 const CLIENT_CARDS = "supabase/migrations/20261027190554_client_cards.sql";
 const CLIENT_ACCESS_DB = "tests/db/client-access.test.ts";
 const CLIENT_CARDS_DB = "tests/db/client-cards.test.ts";
+const INSURANCE_UPDATE = "supabase/migrations/20261112182017_client_insurance_update.sql";
+const INSURANCE_UPDATE_DB = "tests/db/client-insurance-update.test.ts";
 
 export const mutants = [
   {
@@ -40,6 +42,19 @@ export const mutants = [
     what: "clients_insert_staff: перевірку «лише admin і scheduler» послаблено до true — терапевт створює картку запитом",
     find: "    (select private.is_staff())\n    and created_by = (select auth.uid())",
     replace: "    true\n    and created_by = (select auth.uid())",
+  },
+  {
+    // Мутант лише в using вижив би: with check однаково не пустив би терапевта. Тому is_staff() зникає з обох частин.
+    id: "I1", kind: "sql", ac: "AC-INS-05", file: INSURANCE_UPDATE, tests: [INSURANCE_UPDATE_DB],
+    what: "clients_update_insurance_staff: умову «лише admin і scheduler» прибрано з using і with check — терапевт змінює статус запитом",
+    find: /using \(\(select private\.is_staff\(\)\)\)[^\n]*\n\s*with check \(\(select private\.is_staff\(\)\) and insurance_status <> 'not_set'\);/,
+    replace: "using (true)\n  with check (insurance_status <> 'not_set');",
+  },
+  {
+    id: "I2", kind: "sql", ac: "AC-INS-02", file: INSURANCE_UPDATE, tests: [INSURANCE_UPDATE_DB],
+    what: "clients_update_insurance_staff: прибрано заборону повернути «Not set» (and insurance_status <> 'not_set')",
+    find: " and insurance_status <> 'not_set');",
+    replace: ");",
   },
 ];
 

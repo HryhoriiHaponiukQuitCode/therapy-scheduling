@@ -3,14 +3,16 @@ import { createClient } from "@/lib/supabase/server";
 import { getPageAccess } from "@/lib/request-user";
 import { APP_ROLES } from "@/lib/roles";
 import { isClientId, missingCardMessage, NOT_PROVIDED } from "@/lib/clients";
-import { INSURANCE_LABEL, insuranceStatusText } from "@/lib/insurance";
+import { canChangeInsurance, INSURANCE_LABEL, insuranceStatusText } from "@/lib/insurance";
 import { AccessDenied } from "@/components/access-denied";
 import { ActionMessage } from "@/components/action-message";
 import { NoAccess } from "@/components/no-access";
 import { PageHeader } from "@/components/page-header";
+import { InsuranceStatusForm } from "./insurance-status-form";
 import { CARD_GRID, ClientCardShell, INSURANCE_ROW } from "./shell";
 
-// Картка клієнта з усіма даними анкети (AC-CARD-01, AC-CARD-04, AC-CARD-10) і статусом страхування (AC-INS-01).
+// Картка клієнта з усіма даними анкети (AC-CARD-01, AC-CARD-04, AC-CARD-10) і статусом страхування (AC-INS-01);
+// змінити статус форма пропонує лише admin і scheduler (AC-INS-02, 03), терапевту — ні (AC-INS-04).
 // Що видно — вирішує RLS: планувальник і адміністратор — будь-яку картку, терапевт — лише свого клієнта. Немає рядка →
 // для терапевта «You don't have access to this client.» і для чужої, і для неіснуючої картки (AC-CARD-05, 08, 14, 16);
 // для інших — «doesn't exist».
@@ -76,6 +78,7 @@ export default async function ClientCardPage({ params }: PageProps<"/clients/[id
         <span className="text-[13px] font-semibold text-muted-foreground">{INSURANCE_LABEL}</span>{" "}
         <span className="font-semibold">{insurance}</span>
       </p>
+      {canChangeInsurance(role) ? <InsuranceStatusForm clientId={id} status={card.insurance_status} /> : null}
     </ClientCardShell>
   );
 }

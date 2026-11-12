@@ -13,8 +13,8 @@ import base from "./vitest.config.mjs";
 // Загальний відсоток (у демо ≈32 %) не поріг: сторінки й server actions доводять тести бази (PGlite) та e2e, а не Vitest.
 // therapy-scheduling: доменні файли, які на 29.10.2026 вже тримають 90/85/90/90 (npm run coverage:summary).
 // Ще нижче підлоги (видно в Summary): holds (гілки 78 %), roles (гілки 80 %), request-user, pill-motion (гілки 50 %),
-// request-theme (функції 0 %).
-const FLOORED: string[] = ["clients", "guest-route", "slots", "stats", "theme"];
+// request-theme (функції 0 %). insurance — з 12.11.2026 (impl-insurance-status, задача 2: 100 % за всіма метриками).
+const FLOORED: string[] = ["clients", "guest-route", "insurance", "slots", "stats", "theme"];
 // Фігурні дужки glob розкриваються лише з комою всередині, тож один файл пишемо без них.
 const FLOORED_GLOB = FLOORED.length === 1 ? `src/lib/${FLOORED[0]}.ts` : `src/lib/{${FLOORED.join(",")}}.ts`;
 
