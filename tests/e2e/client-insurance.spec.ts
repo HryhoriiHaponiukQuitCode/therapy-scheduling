@@ -21,9 +21,16 @@ type Role = "admin1" | "scheduler1" | "scheduler2" | "therapist1";
 const auth = (role: Role) => `playwright/.auth/${role}.json`;
 const RUN = process.env.UAT_RUN ?? "manual";
 
-/** Окрема сесія іншої ролі; закрити після використання. */
+/**
+ * Окрема сесія іншої ролі; закрити після використання (тоді Playwright дописує відео).
+ * Відео — і для цих сесій: налаштування video у playwright.config.ts пише лише сторінку фікстури page, а AC-INS-03
+ * проходить цілком у сесіях admin1 і scheduler2 (у прогоні 3 його video.webm мав 1,6 КБ — порожній).
+ */
 async function sessionOf(browser: Browser, role: Role) {
-  const context = await browser.newContext({ storageState: auth(role) });
+  const context = await browser.newContext({
+    storageState: auth(role),
+    recordVideo: { dir: test.info().outputPath(`video-${role}`), size: { width: 1280, height: 800 } },
+  });
   return { context, page: await context.newPage() };
 }
 
