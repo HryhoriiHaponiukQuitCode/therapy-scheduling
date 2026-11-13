@@ -1,169 +1,82 @@
-# QA proof pack: зріз 2 — «Планувальник заповнює картку клієнта з анкети, а терапевт бачить картки лише своїх клієнтів»
+# QA proof pack: <назва зрізу 3>
 
-<!-- Шаблон: koldovsky/2026-quitcode-08-quality-hw/materials/templates/proof-pack.template.md. Заповнюється по кроках
-WS8 (A → B → C → D). Посилання — на коміти (…/blob/<sha>/…#L<N>), PR і прогони. Жодних паролів; акаунти — *@example.test. -->
+<!--
+Шаблон з koldovsky/2026-quitcode-09-software-factory-hw/materials/templates/proof-pack.template.md (уперше — у WS8).
+Покладіть у docs/qa/proof-pack.md вашого репо (proof pack WS8, якщо є, — у docs/qa/proof-pack-ws8.md).
+У WS9 — рядок на КОЖЕН AC зрізу 3. Чого довести не вдалося — у розділ «Не перевірено» з причиною, а не вигаданим доказом.
+Посилання — на файли на коміті (…/blob/<sha>/…#L<N>), на PR (…/pull/N) і на прогони (…/actions/runs/N).
+Жодних паролів і пароля від accounts.zip. Акаунти — лише адреси *@example.test.
+Бонус фабрики: цей файл — база для звіту порівняння «звичайно проти фабрики».
+-->
 
-- Прод-URL: https://therapy-scheduling-two.vercel.app
-- Вимоги: https://github.com/Sofiia-pm/therapy-scheduling-spec · джерело: issues · знімок 2026-10-27
-  (`requirements/19-planuvalnyk-zapovniuie-kartku-kliienta.md`)
-- `/api/health` на момент UAT (29.10.2026, 12:13 Київ): `ok`, коміт `482e07e` (= `main` на той момент), `db: ok`
+- Прод-URL: <!-- https://<проєкт>.vercel.app -->
+- Зріз 3: <!-- одне речення «що зможе користувач» — рядок roadmap PM -->
+- Вимоги: <!-- рядок «Вимоги:» з docs/conformance.md (репо PM і дата /requirements-sync) -->
+- Спека: <!-- …/blob/<sha>/openspec/specs/<область>/spec.md -->
+- `/api/health` на момент UAT: <!-- sha і db, напр. «sha 1a2b3c4, db ok, 10.11.2026» -->
 
-## 3 AC
+## Доказ на кожен AC зрізу 3
 
-Усі три — зрізу 2 (AC-CARD-*). Рядків `відкладено (e2e — WS8)` у `docs/conformance.md` на старті WS8 не було: усі 60 AC
-— «реалізовано» з тестами Vitest; обрано ті, де «Тоді» видно лише в браузері, а правило живе в SQL або TS.
+<!-- Рядок на кожен AC. Рівень: unit / база (PGlite) / e2e. «Здатен упасти»: червоний прогін, убитий мутант Stryker
+     чи SQL-мутант (KILLED) — для відмов обов'язково; для інших — якщо є. Вердикт — остаточний зі звіту UAT (R1–R6). -->
 
-| AC | Вид | «Тоді» (дослівно з вимоги PM) |
-|---|---|---|
-| AC-CARD-05 | відмова в браузері: чужі дані за прямим посиланням | therapist1 бачить повідомлення «You don't have access to this client.», жодних даних client9 не показано, і картка client9 не змінилася |
-| AC-CARD-06 | відмова в браузері: заборонена роль | форму не показано, therapist1 одразу бачить повідомлення «Only schedulers and admins can create client cards.», і кількість карток клієнтів не змінилася |
-| AC-CARD-16 | стан інтерфейсу: помилка з дослівним текстом за роллю | scheduler1 бачить повідомлення «This client card doesn't exist.», therapist1 — «You don't have access to this client.», і жоден із них не бачить жодних даних клієнтів |
+| AC | Вид | Тест (рівень, посилання) | Здатен упасти | Специфікація UAT | Вердикт UAT і кадр | PR і SHA злиття |
+|---|---|---|---|---|---|---|
+| AC-…-NN | <!-- відмова (заборонена роль / чужі дані / не увійшов) --> | <!-- база: …/blob/<sha>/tests/db/….test.ts#L<N> --> | <!-- SQL-мутант KILLED, …/pull/N --> | <!-- …/blob/<sha>/tests/e2e/….spec.ts#L<N> --> | <!-- PASS (R6), …/frames/AC-…-then-1.png --> | <!-- …/pull/N, <sha> --> |
+| AC-…-NN | <!-- стан інтерфейсу (порожній стан / помилка) --> | … | … | … | … | … |
+| AC-…-NN | <!-- основний сценарій --> | … | … | … | … | … |
 
-## A. Ворота
+## Не перевірено
 
-- PR воріт: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/43 (розбір знахідок — в описі PR)
-- Зелений `quality` на `main`: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40852708722
-- Обов'язкові перевірки в `solo-main` з 29.10.2026: `spec`, `app`, `conformance`, `db-check`, «Ворота: fallow audit»,
-  «Покриття: доменна підлога»; після злиття #46 і зеленого прогону на `main` — ще `e2e`. «Порада: вразливі
-  залежності» — дорадча.
+<!-- Чесно: що НЕ доведено і чому. Порожньо — лише якщо справді все доведено (тоді «немає»).
+     FAIL і NEEDS-HUMAN тут не ховаємо: вони — у таблиці вище з вердиктом. -->
 
-Розбір першого повного прогону `fallow` на `main` (той самий — в описі PR воріт): до —
-`dead-code (2 issues), dupes (5 clone groups), health (32 above threshold)`; після — `dead-code (1 issue), dupes (5), health (32)`.
-
-| Група знахідок | Скільки | Справжня / навмисна / хибна | Дія і причина |
+| AC чи частина | Чому не перевірено | Що зроблено замість | Ризик на проді |
 |---|---|---|---|
-| невикористаний експорт `AC_ID_GLOBAL` (`scripts/lib/spec-lib.mjs`) | 1 | справжня | виправлено: прибрано (жоден скрипт і тест не імпортує) |
-| невикористаний файл `src/lib/supabase/client.ts` | 1 | справжня для поточного коду | лишено з поясненням: браузерний клієнт шаблону, частина структури `AGENTS.md`; видалення — окремим PR за погодженням |
-| дублі `combobox` / `select` / `account-menu` | 3 | справжня | лишено: рефакторинг примітивів UI поза PR воріт; нові дублі ворота ловлять |
-| дубль `globals.css` `:root` ↔ `.dark` | 1 | навмисна | ті самі токени в двох темах (CSS без міксинів) |
-| дубль обходу файлів у `check-auth-boundary` / `check-design-tokens` | 1 | справжня, мала | лишено: перевірки WS7, не змінюються в PR воріт |
-| складність у коді застосунку (`SlotsPage`, `validateClientCard`, `Combobox`, `Select` …) | 24 | справжні сигнали; CRAP без покриття — оцінка | лишено: ворота валять лише нову складність |
-| складність у скриптах (шаблон: `check-spec`, `create-demo-users`; наші: `check-design-tokens`, `check-auth-boundary`) | 8 | навмисна / чужий код | лишено, у `health.ignore` не додано: нові зміни в них ворота мають бачити |
-| `@tailwindcss/turbopack`, `@vitest/coverage-v8` (з матеріалів) | 2 | хибна | `ignoreDependencies`: підключено рядком у `next.config.ts` / провайдер за назвою з конфігу |
+| <!-- AC-…-NN «що не змінилося» --> | <!-- напр. AC пише в базу, безпечного прибирання немає --> | <!-- тест бази …#L<N>, перевірено вручну 10.11 --> | <!-- … --> |
 
-Тестові правила лінтера (`@vitest/eslint-plugin` 1.6.27, `error`): перший прогін — 3 помилки, усі справжні, виправлено в
-PR воріт (мок власного модуля `@/lib/roles` у тесті AC-CARD-02; умовний `return` у двох тестах бази).
+## A. Вимоги й спека
 
-## B. Якість тестів
+- `/requirements-sync` — PR «Оновлення вимог»: <!-- …/pull/N (і після уточнень PM: …/pull/M або «Вимоги актуальні», дата) -->
+- Спека `add-<зріз3>` і план — PR «Специфікація»: <!-- …/pull/N -->
+- Зміна `clarify-<зріз3>` після уточнень: <!-- …/pull/N або «PM AC не змінював» -->
+- Питання PM: <!-- https://github.com/<pm>/<team-slug>-spec/issues/N, … або «питань не було» -->
 
-### Рівень для кожного AC
+## B. Реалізація
 
-Посилання — на коміт `dd1fdfd` гілки `task/test-quality`.
-
-| AC | Де живе правило | Рівень | Чому | Тест |
+| PR «Реалізація» | Задача з `tasks.md` | AC | Відповіді на знахідки CodeRabbit | `db-deploy` |
 |---|---|---|---|---|
-| AC-CARD-05 | політика RLS `clients_select_own_therapist` ([міграція](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/supabase/migrations/20261027192525_therapist_own_clients.sql#L11)); текст — `missingCardMessage` ([clients.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/src/lib/clients.ts#L158)); сторінка `/clients/[id]` | **база (PGlite)** + SQL-мутант; **e2e** для тексту на сторінці | відмову тримає RLS: лише справжній SQL доводить, що чужого рядка немає; TS-копія чи мок `from()` лишились би зеленими без правила | [client-access.test.ts#L78](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/db/client-access.test.ts#L78) (`asUser` therapist1 → 0 рядків; update → `permission denied`; `asService` — ім'я не змінилось) |
-| AC-CARD-06 | сторінка `/clients/new` → `pageAccess` ([roles.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/src/lib/roles.ts#L36)); дія `createClientCard`; RLS `clients_insert_staff` ([міграція](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/supabase/migrations/20261027190554_client_cards.sql#L89)) | **база (PGlite)** для «кількість не змінилась» + SQL-мутант; **unit** ядра дії (роль → без insert); **e2e** для сценарію «форму не показано» | три шари можуть втратити правило окремо: сторінка (форма), дія (запит в обхід сторінки), RLS (запит в обхід застосунку) | [client-cards.test.ts#L61](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/db/client-cards.test.ts#L61), [clients.test.ts#L235](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients.test.ts#L235) |
-| AC-CARD-16 | `isClientId` / `UUID_PATTERN` і `missingCardMessage` ([clients.ts#L158-L167](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/src/lib/clients.ts#L158-L167)); сторінка `/clients/[id]` | **unit** сторінки з підміненим клієнтом Supabase + Stryker; **база** — рядка немає ні для кого; **e2e** | вибір тексту за роллю й розпізнавання посилання — чистий TS з межами (схожі на UUID посилання); сам рядок вирішує RLS | [clients-page.test.ts#L113](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients-page.test.ts#L113), [#L131](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients-page.test.ts#L131), [#L147](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients-page.test.ts#L147), [client-access.test.ts#L137](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/db/client-access.test.ts#L137) |
+| <!-- …/pull/N --> | <!-- 1. … --> | <!-- AC-…-NN, AC-…-NN --> | <!-- усі: виправлено / аргумент у треді --> | <!-- …/actions/runs/N --> |
 
-### Покриття
-
-`npm run test:coverage` на `dd1fdfd` (усього: рядки 39,3 % — 472 з 1201; гілки 38,85 %; поріг на загальний відсоток не
-ставимо). Підлога 90/85/90/90 — на `clients`, `guest-route`, `slots`, `stats`, `theme`.
-
-| Файл за AC | Рядки | Гілки | Чим доведено, якщо не покрито |
-|---|---|---|---|
-| `src/lib/clients.ts` (AC-CARD-05, 06, 16 — тексти, `isClientId`) | 97 % | 88 % | — (у підлозі) |
-| `src/lib/roles.ts` (`pageAccess`, AC-CARD-06) | 100 % | 80 % | — |
-| `src/app/(app)/clients/[id]/page.tsx` (AC-CARD-05, 16) | 93 % (було 50 % на `main`) | 61 % (було 16 %) | гілка «помилка запиту» — не з цих AC |
-| `src/app/(app)/clients/actions.ts` (AC-CARD-06) | 94 % | 80 % | — |
-| `src/app/(app)/clients/new/page.tsx` (AC-CARD-06) | 0 % | 0 % | e2e (`tests/e2e/client-access.spec.ts`, PR кроку C) і тест бази `client-cards.test.ts#L61` |
-| політики RLS `clients_select_own_therapist`, `clients_insert_staff` | — (JS-покриття не бачить SQL) | — | SQL-мутації C1, C3 нижче |
-
-### Доказ мутацією
-
-TS — Stryker 10.1.1, `npm run mutation:ts -- --mutate src/lib/clients.ts,src/lib/roles.ts`:
-
-| Мутант (файл:рядок, що змінено) | AC під загрозою | До | Тест, посилений з тексту AC | Після |
-|---|---|---|---|---|
-| `clients.ts:162` `UUID_PATTERN` без `^` (посилання `x<uuid>` — «картка») | AC-CARD-16 | вижив | [clients-page.test.ts#L131](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients-page.test.ts#L131): «зайвий символ перед UUID» — текст за роллю, без даних, без запиту | убитий |
-| `clients.ts:162` без `$` (`<uuid>x`) | AC-CARD-16 | вижив | той самий тест, «зайвий символ після UUID» | убитий |
-| `clients.ts:162` група без квантора (`[0-9a-f]` замість `{4}`, ×5) | AC-CARD-16 | вижили | «укорочена третя група» (#L131) і «правильне посилання, але картки немає» ([#L147](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients-page.test.ts#L147)) | убиті |
-| `clients.ts:162` група `[^0-9a-f]` (×5) — справжнє посилання не розпізнається | AC-CARD-16 (і AC-CARD-10) | вижили | «правильне посилання, але картки немає» (запит до бази є) + AC-CARD-10 «наявну картку дитини» | убиті |
-| `clients.ts:165` `isClientId` з порожнім тілом | AC-CARD-16 (і AC-CARD-10) | вижив | ті самі два тести | убитий |
-
-- Stryker `src/lib/clients.ts`: **75,74 % → 83,43 %** (вижилих на рядках 162 і 165: **13 → 0** — 12 `Regex` і 1
-  `BlockStatement`; у повідомленні коміту `3b267ee` помилково написано «9 → 0»). `roles.ts`: 72,00 % → 72,00 % —
-  мутанти `pageAccess` (рядки 36–47, AC-CARD-06) убиті ще до WS8; вижилі в `roles.ts` — `isAppRole` і
-  `isStaff`, `getCurrentUser` (рядки 11, 18, 51–66), поза цими 3 AC. Тести писала окрема сесія агента з тексту AC (maker ≠ checker),
-  кожен мутант перевірено вручну: тест червоний на мутанті, зелений на коді.
-- Решта вижилих у `clients.ts` — `validateClientCard`, межі довжини, `NOT_PROVIDED` — поза цими 3 AC; не прибрано й
-  не вимкнено.
-- SQL-мутації (`npm run mutation:sql -- --markdown`):
-
-| Мутант | AC | Що зламано | Вердикт | Який тест упав |
-|---|---|---|---|---|
-| C1 | AC-CARD-05 | `clients_select_own_therapist`: «роль therapist і є власне утримання» → `true` (терапевт бачить будь-яку картку) | KILLED | AC-CARD-05, а також AC-CARD-04, 08, 09, 11, 14 (`tests/db/client-access.test.ts`) |
-| C2 | AC-CARD-05 | прибрано `h.therapist_id = (select auth.uid())` | SURVIVED (еквівалентний, прийнято) | — |
-| C3 | AC-CARD-06 | `clients_insert_staff`: `private.is_staff()` → `true` (терапевт створює картку запитом) | KILLED | AC-CARD-06: терапевт не створює картку навіть запитом в обхід сторінки |
-
-- Еквівалентні мутанти: **C2** — підзапит до `holds` виконується під RLS того, хто дивиться; для терапевта єдина
-  політика select на `holds` — `holds_select_own_therapist` «using (therapist_id = (select auth.uid()))»
-  (`20261019105344_availability_and_holds.sql:111`), тож без умови в `clients_select_own_therapist` результат той
-  самий. Умова лишається як захист на випадок зміни RLS `holds`. Причина — у `scripts/mutants.mjs` (`expect: "survive"`).
-- P1/P2 з матеріалів не взято: свій PGlite-гарнес з WS6–WS7, `tests/db/profiles-db.test.ts` немає.
+- Ворота на `main` (`quality`): <!-- …/actions/runs/N -->
+- Мутації: <!-- Stryker до → після, SQL-мутації (npm run mutation:sql -- --markdown) — посилання на PR з виводом -->
 
 ## C. UAT на проді
 
-`npm run uat -- --url https://therapy-scheduling-two.vercel.app` — запускав розробник у своєму терміналі; PR кроку C:
-https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/46.
-
-| AC | Специфікація | Тест (твердження) | Агент | Вердикт | Кадр |
-|---|---|---|---|---|---|
-| AC-CARD-05 | [client-access.spec.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/22aa4bd/tests/e2e/client-access.spec.ts) | passed | Haiku: PASS | **PASS** — R6 | [AC-CARD-05-then-1.png](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-05-then-1.png) |
-| AC-CARD-06 | [client-access.spec.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/22aa4bd/tests/e2e/client-access.spec.ts) | passed | Haiku: PASS | **PASS** — R6 | [AC-CARD-06-then-1.png](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-06-then-1.png) |
-| AC-CARD-16 | [client-access.spec.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/22aa4bd/tests/e2e/client-access.spec.ts) | passed | Haiku: PASS | **PASS** — R6 | [then-1 (scheduler1)](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-16-then-1.png), [then-2 (therapist1)](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-16-then-2.png) |
-
-- Звіт: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md (прогін 29.10.2026 12:13 Київ, код тестів `task/uat` @ `22aa4bd`; перший прогін 12:04 дав те саме).
-- Відео: вкладення в описі https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/46 (розділ «Відео»: AC-CARD-05, AC-CARD-06, AC-CARD-16).
-- Рецензент: `claude-haiku-5-5`, суперечки — `claude-sonnet-5-5` (в основному прогоні суперечок не було); разом
-  $0.0072.
-- Негативний контроль (`npm run uat:nc`, https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/46, розділ «Негативний контроль»): **NC-1** (AC-CARD-06) — у
-  твердженні навмисно інший текст «Only admins can create client cards.» → перевірка впала, Haiku на кадрі каже PASS,
-  вердикт **FAIL** (R1: агент не перекриває впале твердження). **NC-2** (AC-CARD-06) — у анотації `ac-text` «Тоді» з
-  іншим повідомленням, тест і застосунок без змін → перевірки пройшли, Haiku: NEEDS-HUMAN, Sonnet: FAIL, вердикт
-  **NEEDS-HUMAN** (R3).
-- Дані: **лише читання** — ні `@writes`, ні синтетичних `uat-*` («Прибирання»: видалено 0, лишилось 0). «Дано»
-  AC-CARD-05 (client9 — свій клієнт лише therapist2) підготовлено один раз через інтерфейс від scheduler1; для CI —
-  фікстура `tests/e2e/fixtures/card-05-given.sql`.
-- Бонус: `.github/workflows/e2e.yml` — ті самі специфікації на одноразовій базі. Зелені прогони: на гілці
-  https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40866217260, на `main` (push) https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40907026242, `workflow_dispatch` на `main`
-  https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40907043406. `e2e` — обов'язкова перевірка `solo-main`.
-- Після звіту специфікацію змінено в одному місці (`client-access.spec.ts`, крок «Дано» AC-CARD-05): `innerText` →
-  `textContent` і додатково `expect(before).toContain("client9@example.test")` — заради стабільності в CI.
-  «Коли» і «Тоді» не змінилися. Повторний UAT на проді з кодом `main` ще не проводився: звіт вище — на `22aa4bd`, а
-  код `main` у CI e2e зелений.
+- Звіт: <!-- …/blob/<sha>/docs/qa/uat/<YYYY-MM-DD>/report.md -->
+- Відео: <!-- вкладення в описі PR …/pull/N -->
+- Рецензент: <!-- моделі зі звіту і вартість прогону -->
+- Негативний контроль: <!-- NC-1 (npm run uat:nc): що навмисно хибне, вердикт FAIL, …/pull/N -->
+- Дані: <!-- «лише читання» або «@writes: uat-<запуск>@example.test, рядок «Прибирання» зі звіту» -->
 
 ### Приймання PM
 
+<!-- Оцінки 0–3 — у таблиці приймання PM (її адресу сюди не пишемо). Тут — публічні коментарі PM. -->
+
 | AC | Рішення PM | Посилання |
 |---|---|---|
-| AC-CARD-05 | очікує рішення PM | [звіт, розділ AC-CARD-05](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md#ac-card-05--pass) |
-| AC-CARD-06 | очікує рішення PM | [звіт, розділ AC-CARD-06](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md#ac-card-06--pass) |
-| AC-CARD-16 | очікує рішення PM | [звіт, розділ AC-CARD-16](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md#ac-card-16--pass) |
+| AC-…-NN | <!-- ✅ / ❌ → issue / NEEDS-HUMAN → … --> | <!-- коментар-підпис або issue «Відхилення від вимог» і «Виправлено: …» --> |
 
-## D. Eval рецензента
+## D. Прод і ретро
 
-- PR з вадами (не злитий, закритий): https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/47
-- Ключ і таблиця: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/47#issuecomment-6495311989
+- `/api/health` після злиття всіх задач: <!-- sha і db -->
+- Нові ролі й акаунти: <!-- роль — адреса@example.test; accounts.zip …/blob/<sha>/accounts.zip -->
+- `docs/conformance.md`: <!-- …/blob/<sha>/docs/conformance.md -->
 
-| # | Вада (ключ) | CodeRabbit | `/code-review high` |
-|---|---|---|---|
-| 1 | права в даних: `supabase/migrations/20261029085645_staff_profiles_select.sql:9` — політика читання профілів без `private.is_staff()` (умови на того, хто читає) | **частково**: лише в тексті pre-merge («нова дозволяє кожному `authenticated` читати профілі…»), а перевірка міграцій — Passed; inline немає | **знайшов**: «The recreated policy drops the `(select private.is_staff())` condition. Any authenticated user can now read every therapist, scheduler and admin profile, including email, full_name and role.» |
-| 2 | авторизація: `src/lib/roles.ts:70` `getCurrentUser` — роль спершу з `claims.user_metadata.role` | **знайшов, Minor** (`roles.ts:76`): «`user_metadata` може змінювати автентифікований користувач…» | **знайшов**: «Any signed-in user can write user_metadata, so this is a privilege escalation.» |
-| 3 | логіка AC-HOLD-06: `src/lib/slots.ts:168` `buildDaySlots` — прибрано фільтр `"Expired"` | **пропустив**: Walkthrough — «Прострочені записи, як і раніше, не вибираються як активне утримання.» | **знайшов**: «The `active` set no longer filters out Expired holds…» + «This breaks AC-HOLD-06» |
-| П | приманка: `canCreateClientCards(role) = isStaff(role)` (поведінка та сама) | без хибної тривоги | без хибної тривоги; зауваження про підтримуваність: «canCreateClientCards is a pass-through wrapper around isStaff…» |
+### Ретро: що б ми взяли з фабрики у свій звичайний процес
 
-- Інші знахідки: `/code-review` `roles.ts:77` (роль з токена перекриває пониження, AC-CARD-11) — слушна, корінь V2;
-  `slots.ts:168` (немає тесту на прострочене утримання) — слушна; `staff_profiles_select.sql:3` (назва й опис ховають
-  зміну доступу) — слушна; `roles.ts:59` (зайвий запит `profiles`) — шум. CodeRabbit pre-merge «AC ID у тестах і
-  матриці» — слушна.
-- Правило, що закриває пропуск: рядок «Рев'ю (CodeRabbit, `/code-review`)…» в `AGENTS.md` — зміна, що прибирає чи
-  послаблює умову (фільтр статусу чи межа в `src/lib/**`, `using` / `with check` політики RLS), — must fix без тесту з
-  AC ID у тому самому PR: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/48, https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/commit/7a7016e9b1af3fcffbdf42d3fdec7940cc10c9e5
-- Повторний прогін (після `git merge main` у PR вад, код вад без змін): https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/47#issuecomment-6498319349.
-  CodeRabbit (`full review`) — **V1 і V3 знайшов, обидві Major**. V3: «Якщо `input.holds` містить утримання зі
-  статусом `Expired`, цей рядок додає його час до `active`. … така година стає `Free` з `canHold: true`.» і «Підстава:
-  правило для `src/lib/slots.ts`…». V1: «Умова перевіряє роль профілю, але не того, хто виконує запит.» V2 —
-  тред першого рев'ю лишився. Разом 3 з 3. `/code-review high` — знову 3 з 3, плюс окрема знахідка з цитатою нового правила. Межа
-  висновку: по одному прогону до й після.
+<!-- До 10 рядків. По станціях фабрики: допуск, захищені тести, приховані сценарії, мутації й повтор,
+     рев'ю-спростування, пакет доказів з «Не перевірено», рівні автономії, бюджети.
+     Для кожної — «уже є», «візьмемо: <конкретний крок і файл чи налаштування>» або «не потрібно, бо …». -->
+
+- <!-- Допуск: … -->
