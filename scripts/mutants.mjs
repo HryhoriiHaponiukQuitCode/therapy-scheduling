@@ -56,6 +56,12 @@ export const mutants = [
     find: " and insurance_status <> 'not_set');",
     replace: ");",
   },
+  {
+    id: "I3", kind: "sql", ac: "AC-INS-06", file: INSURANCE_UPDATE, tests: [INSURANCE_UPDATE_DB],
+    what: "права authenticated на картку (select і update статусу) видано й anon — відвідувач без входу читає картку й пробує змінити статус",
+    find: "grant update (insurance_status) on public.clients to authenticated;",
+    replace: "grant select, update (insurance_status) on public.clients to authenticated, anon;",
+  },
 ];
 
 // Приклади з демо (інша схема — у вашому репо цих файлів немає, тож не розкоментовуйте як є):

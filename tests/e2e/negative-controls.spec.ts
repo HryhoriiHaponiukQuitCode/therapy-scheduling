@@ -3,6 +3,7 @@
 // (проєкт chromium має grepInvert @negative-control); запуск: npm run uat:nc. Лише читання: безпечно на проді.
 // Що мають показати:
 //   NC-1 — у тесті неправильний очікуваний текст → перевірка падає → FAIL, хоч би що сказав агент (R1);
+//   NC-3 — те саме, що NC-1, для зрізу 3 (AC-INS-06) → FAIL (R1);
 //   NC-2 — текст «Тоді» у вимозі «уточнено», а тест і застосунок ні → перевірки зелені, агент звіряє кадр із НОВИМ
 //          текстом і не погоджується → NEEDS-HUMAN (R3).
 import { expect, test } from "@playwright/test";
@@ -73,3 +74,39 @@ test(
     );
   },
 );
+
+// NC-3 — зріз 3: те саме, що NC-1, але для AC-INS-06. Лише читання: посилання на картку, якої немає (UUID без рядка
+// в базі) — відвідувача без входу proxy однаково веде на /login, тож картка не потрібна. Хибне очікування: тест чекає,
+// що відкриється сама картка (рядок «Insurance: Verified»), а не сторінка входу → перевірка падає → FAIL (R1).
+test.describe("NC-3", () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  test(
+    "NC-3 (AC-INS-06, навмисно хибне очікування в тесті: без входу показано картку)",
+    {
+      tag: ["@negative-control"],
+      annotation: [
+        { type: "ac", description: "AC-INS-06" },
+        { type: "case", description: "NC-3" },
+      ],
+    },
+    async ({ page }) => {
+      await given("користувач не увійшов у застосунок", async () => {
+        await page.goto("/login");
+      });
+      await when("він відкриває картку клієнта за прямим посиланням", async () => {
+        await page.goto("/clients/00000000-0000-4000-8000-000000000000");
+      });
+      await thenStep(
+        page,
+        {
+          clause: "він бачить лише сторінку входу, статусу страхування й інших даних client6 не показано",
+          visible: ["сторінка входу: поля «Email» і «Password», кнопка «Sign in»"],
+        },
+        async () => {
+          await expect(page.getByTestId("insurance-status")).toHaveText("Insurance: Verified", { timeout: 5_000 });
+        },
+      );
+    },
+  );
+});
