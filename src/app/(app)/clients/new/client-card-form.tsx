@@ -16,7 +16,7 @@ import {
   type ClientCardField,
   type ClientCardValues,
 } from "@/lib/clients";
-import { INTAKE_HINT, type IntakeState } from "@/lib/intake";
+import { INTAKE_EMPTY_MESSAGE, INTAKE_HINT, type IntakeState } from "@/lib/intake";
 import { createClientCard, type ClientCardState } from "../actions";
 import { requestIntakeDraft } from "../intake-actions";
 
@@ -46,15 +46,32 @@ function cardMessage(state: ClientCardState): ActionResult {
   return { status: "idle" };
 }
 
+// Неповна чернетка — не помилка: поля заповнено, бракує лише частини (AC-INTAKE-04), тож тон довідковий, не destructive.
 function draftMessage(draft: IntakeState): ActionResult {
   if (draft.status === "idle") return { status: "idle" };
-  return draft.status === "draft" && draft.complete
-    ? { status: "success", message: draft.message }
-    : { status: "error", message: draft.message };
+  if (draft.status === "draft") return { status: draft.complete ? "success" : "info", message: draft.message };
+  return { status: "error", message: draft.message };
+}
+
+// Текст поля «Client request» і чи воно порожнє. Поле перемонтовується з кожною відповіддю дії (key за draft.at),
+// тож і ознаку «порожньо» скидаємо за тим самим draft.at (оновлення стану під час рендеру, без ефекту).
+function useRequestField(draft: IntakeState) {
+  const shown = draft.status === "idle" ? "" : draft.request;
+  const at = draft.status === "idle" ? 0 : draft.at;
+  const [empty, setEmpty] = useState(!shown.trim());
+  const [seenAt, setSeenAt] = useState(at);
+  if (seenAt !== at) {
+    setSeenAt(at);
+    setEmpty(!shown.trim());
+  }
+  return { shown, key: `request-${at}`, empty, onText: (text: string) => setEmpty(!text.trim()) };
 }
 
 // Окрема форма «Client request» (зріз 4): дія чернетки не надсилає й не скидає форму картки.
+// Без тексту «Draft card» вимкнена з причиною поруч (DESIGN.md, 6a).
 function DraftRequestForm({ draft, action, pending }: { draft: IntakeState; action: (data: FormData) => void; pending: boolean }) {
+  const field = useRequestField(draft);
+  const reason = field.empty && !pending;
   return (
     <form action={action} className="flex flex-col gap-3" aria-label="Draft from a client request">
       <Field label="Client request" htmlFor="client-request">
@@ -63,17 +80,23 @@ function DraftRequestForm({ draft, action, pending }: { draft: IntakeState; acti
           name="request"
           maxLength={INTAKE_REQUEST_MAX}
           aria-describedby="client-request-hint"
-          defaultValue={draft.status === "idle" ? "" : draft.request}
-          key={draft.status === "idle" ? "request" : `request-${draft.at}`}
+          defaultValue={field.shown}
+          key={field.key}
+          onChange={(event) => field.onText(event.currentTarget.value)}
         />
       </Field>
       <p id="client-request-hint" className="m-0 text-xs text-muted-foreground">
         {INTAKE_HINT}
       </p>
-      <div>
-        <Button type="submit" variant="glass" pending={pending}>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" variant="glass" pending={pending} disabled={field.empty}>
           {pending ? "Drafting…" : "Draft card"}
         </Button>
+        {reason ? (
+          <p className="m-0 text-sm text-muted-foreground" data-testid="draft-request-reason">
+            {INTAKE_EMPTY_MESSAGE}
+          </p>
+        ) : null}
       </div>
       <ActionMessage state={draftMessage(draft)} />
     </form>

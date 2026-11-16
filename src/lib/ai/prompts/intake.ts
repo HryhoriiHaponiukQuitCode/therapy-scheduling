@@ -39,6 +39,7 @@ export const INTAKE_INSTRUCTIONS = [
 export function wrapRequest(text: string): string {
   const clean = text
     .slice(0, INTAKE_REQUEST_MAX)
-    .replace(new RegExp(`</?\\s*${REQUEST_TAG}\\s*>`, "gi"), "");
+    // Будь-який варіант тегу межі: `< /client_request>`, з атрибутами, з переносом рядка, без `>`.
+    .replace(new RegExp(`<\\s*/?\\s*${REQUEST_TAG}[^>]*>?`, "gi"), "");
   return `<${REQUEST_TAG}>\n${clean}\n</${REQUEST_TAG}>`;
 }

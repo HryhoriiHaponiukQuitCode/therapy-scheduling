@@ -37,6 +37,9 @@ test.describe("планувальник", () => {
 
       await when("scheduler1 у формі нової картки просить скласти чернетку з тексту звернення", async () => {
         await page.goto("/clients/new");
+        // Порожнє поле: «Draft card» вимкнена з причиною поруч (DESIGN.md, 6a), запиту до моделі немає.
+        await expect(page.getByRole("button", { name: "Draft card", exact: true })).toBeDisabled();
+        await expect(page.getByTestId("draft-request-reason")).toHaveText("Paste the client's request first.");
         await requestDraft(page, AC01_TEXT);
         await expect(page.getByText(DRAFT_READY)).toBeVisible({ timeout: 30_000 });
       });
