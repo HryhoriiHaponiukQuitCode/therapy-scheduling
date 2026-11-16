@@ -1,16 +1,13 @@
 // UAT за AC зрізу 4 «Планувальник отримує чернетку картки клієнта з тексту звернення й сам створює картку»
 // (requirements/36-…): один AC — один test, «Тоді» — дослівно з вимоги PM, частини «Тоді» — окремими кадрами.
 // AC-INTAKE-01, 03, 06 викликають модель: лише на розгорнутому застосунку (UAT_BASE_URL, ключ ANTHROPIC_API_KEY у
-// Vercel). Локальна збірка й CI ключа не мають — там ці тести пропускаються; код навколо моделі доводять офлайн-тести
+// Vercel), тег @model. Локальна збірка й CI ключа не мають — playwright.config.ts їх там не бере; код навколо моделі доводять офлайн-тести
 // (tests/golden.test.ts, tests/intake*.test.ts). Нічого не пишуть у базу: картку не створюємо (тег @writes не потрібен).
 // Ролі — з tests/e2e/auth.setup.ts (scheduler1, therapist1).
 import { expect, test, type Page } from "@playwright/test";
 import { attachRuntimeErrors, given, thenStep, when } from "./support/uat";
 
 const auth = (role: "scheduler1" | "therapist1") => `playwright/.auth/${role}.json`;
-// Пропуск — лише без UAT_BASE_URL (CI, локальна збірка без ключа моделі); на проді тест іде завжди.
-// eslint-disable-next-line playwright/no-skipped-test -- умовний пропуск: без ключа моделі «Тоді» недосяжне
-const needsModel = () => test.skip(!process.env.UAT_BASE_URL, "потрібна модель: лише на розгорнутому застосунку (UAT_BASE_URL)");
 
 const AC01_TEXT =
   "Hi, my name is Client Ten, I was born on May 14, 1990. I'd like individual sessions in English. My email is client10@example.test.";
@@ -31,9 +28,8 @@ test.describe("планувальник", () => {
 
   test(
     "AC-INTAKE-01: scheduler1 просить скласти чернетку з тексту звернення Client Ten — форма заповнена, «Draft ready. Check the fields and create the card.»",
-    { tag: ["@uat"], annotation: { type: "ac", description: "AC-INTAKE-01" } },
+    { tag: ["@uat", "@model"], annotation: { type: "ac", description: "AC-INTAKE-01" } },
     async ({ page }) => {
-      needsModel();
       await given("сьогодні 2026-11-13, і клієнта з email client10@example.test ще немає", async () => {
         await page.goto("/clients");
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -74,9 +70,8 @@ test.describe("планувальник", () => {
 
   test(
     "AC-INTAKE-03: чернетку з тексту AC-INTAKE-01 заповнено, scheduler1 не створює картку — «Client Ten» у списку клієнтів немає",
-    { tag: ["@uat"], annotation: { type: "ac", description: "AC-INTAKE-03" } },
+    { tag: ["@uat", "@model"], annotation: { type: "ac", description: "AC-INTAKE-03" } },
     async ({ page }) => {
-      needsModel();
       await given("чернетку за текстом з AC-INTAKE-01 заповнено у формі нової картки", async () => {
         await page.goto("/clients/new");
         await requestDraft(page, AC01_TEXT);
@@ -105,9 +100,8 @@ test.describe("планувальник", () => {
 
   test(
     "AC-INTAKE-06: у формі вже введено Name «Client Fifteen», scheduler1 просить чернетку з тексту «Can you recommend a good book about anxiety?» — поля не змінено, повідомлення відмови",
-    { tag: ["@uat"], annotation: { type: "ac", description: "AC-INTAKE-06" } },
+    { tag: ["@uat", "@model"], annotation: { type: "ac", description: "AC-INTAKE-06" } },
     async ({ page }) => {
-      needsModel();
       await given("у формі нової картки вже введено Name «Client Fifteen»", async () => {
         await page.goto("/clients/new");
         await page.getByLabel("Name", { exact: true }).fill("Client Fifteen");

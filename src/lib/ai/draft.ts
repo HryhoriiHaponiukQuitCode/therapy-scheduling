@@ -37,22 +37,25 @@ export async function proposeIntake(
   }
 }
 
+// Код помилки API: HTTP-статус або, для HTTP 200 з тілом помилки, data.code.
+function apiErrorCode(error: APICallError): unknown {
+  return error.statusCode === 200 ? (error.data as { code?: unknown } | undefined)?.code : error.statusCode;
+}
+
+const isTimeout = (error: unknown) => error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
+
 export function classifyError(error: unknown): Extract<IntakeModelResult, { ok: false }> {
   const cause = RetryError.isInstance(error) ? error.lastError : error;
   if (NoObjectGeneratedError.isInstance(cause)) {
     return { ok: false, reason: "invalid_output", message: "model output did not match the schema" };
   }
   if (APICallError.isInstance(cause)) {
-    // HTTP 200 з тілом помилки: код — у data.
-    const code = cause.statusCode === 200 ? (cause.data as { code?: unknown } | undefined)?.code : cause.statusCode;
-    if (code === 429 || code === "429") {
-      return { ok: false, reason: "rate_limited", message: "model rate limit reached" };
-    }
-    return { ok: false, reason: "provider_error", message: `provider error ${String(code ?? "")}`.trim() };
+    const code = apiErrorCode(cause);
+    return String(code) === "429"
+      ? { ok: false, reason: "rate_limited", message: "model rate limit reached" }
+      : { ok: false, reason: "provider_error", message: `provider error ${String(code ?? "")}`.trim() };
   }
-  if (cause instanceof Error && (cause.name === "TimeoutError" || cause.name === "AbortError")) {
-    return { ok: false, reason: "timeout", message: "model did not answer in time" };
-  }
+  if (isTimeout(cause)) return { ok: false, reason: "timeout", message: "model did not answer in time" };
   // Текст помилки постачальника не повертаємо: у ньому може бути службова інформація.
   return { ok: false, reason: "provider_error", message: "provider error" };
 }

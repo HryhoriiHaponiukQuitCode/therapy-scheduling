@@ -40,38 +40,47 @@ export function draftBirthDate(value: string | null, today: string): string {
 
 export type IntakeDraft = { values: ClientCardValues; missing: string[]; message: string };
 
+type RequiredField = [keyof ClientCardValues, string];
+const ADULT_REQUIRED: RequiredField[] = [
+  ["full_name", "Name"],
+  ["birth_date", "Date of birth"],
+  ["session_language", "Session language"],
+  ["email", "Email"],
+];
+const CHILD_REQUIRED: RequiredField[] = [
+  ["full_name", "Name"],
+  ["birth_date", "Date of birth"],
+  ["session_language", "Session language"],
+  ["guardian_name", "Guardian name"],
+  ["guardian_email", "Guardian email"],
+];
+
+const draftName = (value: string | null) => (value ? (normalizeName(value) ?? "") : "");
+const draftEmail = (value: string | null) => (value ? (normalizeEmail(value) ?? "") : "");
+
+// Тип клієнта рахує код: Child, якщо пише опікун або клієнту за датою з тексту менше 18 років (GC-03, GC-05).
+function isChildClient(extraction: IntakeExtraction, birthDate: string, today: string): boolean {
+  return extraction.writer_is_guardian || (birthDate !== "" && ageOn(birthDate, today) < ADULT_AGE);
+}
+
 // Відповідь моделі (status ok / needs_info) → значення форми й повідомлення. Модель не вирішує тип клієнта,
 // дату й email — це робить код.
 export function buildIntakeDraft(extraction: IntakeExtraction, today: string): IntakeDraft {
   const birthDate = draftBirthDate(extraction.birth_date, today);
-  const isChild = extraction.writer_is_guardian || (birthDate !== "" && ageOn(birthDate, today) < ADULT_AGE);
-  const name = (value: string | null) => (value ? (normalizeName(value) ?? "") : "");
-  const email = (value: string | null) => (value ? (normalizeEmail(value) ?? "") : "");
-
+  const isChild = isChildClient(extraction, birthDate, today);
+  const guardian = isChild && extraction.writer_is_guardian;
   const values: ClientCardValues = {
     ...EMPTY_CLIENT_CARD,
     client_type: isChild ? "child" : "adult",
-    full_name: name(extraction.client_name),
+    full_name: draftName(extraction.client_name),
     birth_date: birthDate,
     session_language: extraction.session_language ?? "",
     // Для дорослого — email клієнта; для дитини — лише email опікуна (GC-05: email клієнта не стає email опікуна).
-    email: isChild ? "" : email(extraction.client_email),
-    guardian_name: isChild && extraction.writer_is_guardian ? name(extraction.guardian_name) : "",
-    guardian_email: isChild && extraction.writer_is_guardian ? email(extraction.guardian_email) : "",
+    email: isChild ? "" : draftEmail(extraction.client_email),
+    guardian_name: guardian ? draftName(extraction.guardian_name) : "",
+    guardian_email: guardian ? draftEmail(extraction.guardian_email) : "",
   };
-
-  const required: [keyof ClientCardValues, string][] = [
-    ["full_name", "Name"],
-    ["birth_date", "Date of birth"],
-    ["session_language", "Session language"],
-    ...(isChild
-      ? ([
-          ["guardian_name", "Guardian name"],
-          ["guardian_email", "Guardian email"],
-        ] as [keyof ClientCardValues, string][])
-      : ([["email", "Email"]] as [keyof ClientCardValues, string][])),
-  ];
-  const missing = required.filter(([field]) => values[field] === "").map(([, label]) => label);
+  const missing = (isChild ? CHILD_REQUIRED : ADULT_REQUIRED).filter(([field]) => values[field] === "").map(([, label]) => label);
   return { values, missing, message: missing.length ? incompleteMessage(missing) : DRAFT_READY_MESSAGE };
 }
 
