@@ -26,7 +26,6 @@ export async function proposeIntake(
       instructions: INTAKE_INSTRUCTIONS,
       messages: [{ role: "user", content: [{ type: "text", text: wrapRequest(text) }] }],
       output: Output.object({ name: "client_intake", schema: IntakeExtractionSchema }),
-      temperature: 0,
       // Без повторів у циклі: ліміт чи збій постачальника повтором не виправити (AC-INTAKE-08).
       maxRetries: opts.maxRetries ?? 0,
       timeout: opts.timeoutMs ?? INTAKE_TIMEOUT_MS,

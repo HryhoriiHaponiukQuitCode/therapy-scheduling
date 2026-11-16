@@ -1,6 +1,9 @@
-import type { IntakeModelResult } from "@/lib/ai/draft";
+import type { LanguageModel } from "ai";
+import { proposeIntake, type IntakeModelResult } from "@/lib/ai/draft";
+import { INTAKE_REQUEST_MAX } from "@/lib/ai/prompts/intake";
 import type { IntakeExtraction } from "@/lib/ai/schema";
-import { EMPTY_CLIENT_CARD, normalizeEmail, normalizeName, type ClientCardValues } from "@/lib/clients";
+import { CLIENT_FORBIDDEN_MESSAGE, EMPTY_CLIENT_CARD, normalizeEmail, normalizeName, type ClientCardValues } from "@/lib/clients";
+import { isStaff } from "@/lib/roles";
 import { isPracticeDate } from "@/lib/slots";
 
 // Чернетка картки клієнта з тексту звернення (зріз 4). Модель лише витягує дані; правила, які можна перевірити
@@ -88,4 +91,21 @@ export function intakeOutcome(
   if (result.extraction.status === "refused") return { status: "refused", message: DRAFT_REFUSED_MESSAGE, request, at };
   const draft = buildIntakeDraft(result.extraction, today);
   return { status: "draft", values: draft.values, complete: draft.missing.length === 0, message: draft.message, request, at };
+}
+
+// Чернетка для користувача, що вже увійшов (дія requestIntakeDraft перевіряє сесію через getClaims). Роль — ДО
+// виклику моделі (AC-INTAKE-09); без моделі (немає ключа) — «недоступний» (AC-INTAKE-08). Нічого не пише в базу
+// (AC-INTAKE-03): повертає значення у форму. Модель — параметром, тож тести передають записану відповідь.
+export async function draftIntakeFor(
+  role: string | null,
+  rawRequest: string,
+  model: LanguageModel | null,
+  today: string,
+  at: number = Date.now(),
+): Promise<Exclude<IntakeState, { status: "idle" }>> {
+  const request = rawRequest.slice(0, INTAKE_REQUEST_MAX);
+  if (!isStaff(role)) return { status: "forbidden", message: CLIENT_FORBIDDEN_MESSAGE, request: "", at };
+  if (!request.trim()) return { status: "invalid", message: INTAKE_EMPTY_MESSAGE, request, at };
+  if (!model) return { status: "unavailable", message: ASSISTANT_UNAVAILABLE_MESSAGE, request, at };
+  return intakeOutcome(await proposeIntake(request, model), today, request, at);
 }

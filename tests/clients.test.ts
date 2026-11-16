@@ -112,7 +112,7 @@ describe("картка дорослого", () => {
     const state = await run(values);
 
     expect(supabaseMock.insert).not.toHaveBeenCalled();
-    expect(state).toEqual({ status: "error", message: null, errors: { full_name: CLIENT_INVALID_MESSAGE }, values });
+    expect(state).toEqual({ status: "error", at: expect.any(Number), message: null, errors: { full_name: CLIENT_INVALID_MESSAGE }, values });
   });
 
   it("AC-HOLD-15: email без знака @ — картку не створено, повідомлення PM", async () => {
@@ -151,7 +151,7 @@ describe("картка дорослого", () => {
     const values = adult("Client One Again", "client1@example.test");
     const state = await run(values);
 
-    expect(state).toEqual({ status: "error", message: CLIENT_DUPLICATE_MESSAGE, errors: {}, values });
+    expect(state).toEqual({ status: "error", at: expect.any(Number), message: CLIENT_DUPLICATE_MESSAGE, errors: {}, values });
     expect(CLIENT_DUPLICATE_MESSAGE).toBe("A client with this email already exists.");
   });
 
@@ -203,6 +203,7 @@ describe("картка дитини", () => {
     expect(supabaseMock.insert).not.toHaveBeenCalled();
     expect(state).toEqual({
       status: "error",
+      at: expect.any(Number),
       message: null,
       errors: {
         full_name: "Enter the client's name.",
@@ -226,7 +227,7 @@ describe("картка дитини", () => {
     const state = await run(values);
 
     expect(supabaseMock.insert).toHaveBeenCalledWith("clients", expect.objectContaining({ full_name: "client seven" }));
-    expect(state).toEqual({ status: "error", message: "A client with these details already exists.", errors: {}, values });
+    expect(state).toEqual({ status: "error", at: expect.any(Number), message: "A client with these details already exists.", errors: {}, values });
     expect(CHILD_DUPLICATE_MESSAGE).toBe("A client with these details already exists.");
   });
 });
@@ -241,7 +242,7 @@ describe("права", () => {
     const state = await run(values);
 
     expect(supabaseMock.insert).not.toHaveBeenCalled();
-    expect(state).toEqual({ status: "error", message: CLIENT_FORBIDDEN_MESSAGE, errors: {}, values });
+    expect(state).toEqual({ status: "error", at: expect.any(Number), message: CLIENT_FORBIDDEN_MESSAGE, errors: {}, values });
     expect(CLIENT_FORBIDDEN_MESSAGE).toBe("Only schedulers and admins can create client cards.");
   });
 });
