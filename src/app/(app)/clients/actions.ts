@@ -17,7 +17,7 @@ import { practiceDate } from "@/lib/slots";
 
 export type ClientCardState =
   | { status: "idle" }
-  | { status: "error"; message: string | null; errors: ClientCardErrors; values: ClientCardValues }
+  | { status: "error"; at: number; message: string | null; errors: ClientCardErrors; values: ClientCardValues }
   | { status: "success"; message: string; at: number };
 
 // Створення картки клієнта з анкети (AC-CARD-01, 02, 03, 06, 12, 13; AC-HOLD-10, 11, 15, 16, 34, 35, 39, 41).
@@ -36,17 +36,17 @@ export async function createClientCard(_prevState: ClientCardState, formData: Fo
   ) as ClientCardValues;
 
   if (!isStaff(user.role)) {
-    return { status: "error", message: CLIENT_FORBIDDEN_MESSAGE, errors: {}, values };
+    return { status: "error", at: Date.now(), message: CLIENT_FORBIDDEN_MESSAGE, errors: {}, values };
   }
 
   const result = validateClientCard(values, practiceDate(new Date()));
   if (!result.ok) {
-    return { status: "error", message: null, errors: result.errors, values };
+    return { status: "error", at: Date.now(), message: null, errors: result.errors, values };
   }
 
   const { error } = await supabase.from("clients").insert(result.value);
   if (error) {
-    return { status: "error", message: clientInsertErrorMessage(error), errors: {}, values };
+    return { status: "error", at: Date.now(), message: clientInsertErrorMessage(error), errors: {}, values };
   }
 
   revalidatePath("/clients");

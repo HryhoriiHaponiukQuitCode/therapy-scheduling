@@ -5,11 +5,11 @@
 
 ## 1. Чернетка картки (AI-функція)
 
-- [ ] 1.1 ADR 0003 і залежності `ai`, `@ai-sdk/anthropic`, `zod`, `server-only` (точні версії); `.env.example`.
-- [ ] 1.2 `src/lib/ai/`: схема, промпт з версією, `proposeIntake` з мапінгом збоїв, `anthropic.ts` (server-only).
-- [ ] 1.3 `src/lib/intake.ts`: `buildIntakeDraft` — правила коду (дата, тип, email, Missing); unit-тести.
-- [ ] 1.4 Дія `requestIntakeDraft` (роль до виклику моделі) і форма «Client request» на `/clients/new`.
-- [ ] 1.5 `tests/fixtures/golden/cases.json` (GC-01…10 PM), живий `RECORD=1 npm run eval` → `recorded.json` і звіт
+- [x] 1.1 ADR 0003 і залежності `ai`, `@ai-sdk/anthropic`, `zod`, `server-only` (точні версії); `.env.example`.
+- [x] 1.2 `src/lib/ai/`: схема, промпт з версією, `proposeIntake` з мапінгом збоїв, `anthropic.ts` (server-only).
+- [x] 1.3 `src/lib/intake.ts`: `buildIntakeDraft` — правила коду (дата, тип, email, Missing); unit-тести.
+- [x] 1.4 Дія `requestIntakeDraft` (роль до виклику моделі) і форма «Client request» на `/clients/new`.
+- [x] 1.5 `tests/fixtures/golden/cases.json` (GC-01…10 PM), живий `RECORD=1 npm run eval` → `recorded.json` і звіт
   `evals/reports/`; `tests/golden.test.ts`, тести збоїв і ін'єкції, `tests/ai-key.test.ts`.
   Done when: AC-INTAKE-01, 02, 04, 05, 06, 07, 08, 09 — тести зелені, рядки «реалізовано».
 

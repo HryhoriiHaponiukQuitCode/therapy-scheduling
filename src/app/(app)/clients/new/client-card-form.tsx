@@ -5,6 +5,8 @@ import { ActionMessage, type ActionResult } from "@/components/action-message";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { INTAKE_REQUEST_MAX } from "@/lib/ai/prompts/intake";
 import {
   CLIENT_EMAIL_MAX,
   CLIENT_NAME_MAX,
@@ -14,9 +16,12 @@ import {
   type ClientCardField,
   type ClientCardValues,
 } from "@/lib/clients";
+import { INTAKE_HINT, type IntakeState } from "@/lib/intake";
 import { createClientCard, type ClientCardState } from "../actions";
+import { requestIntakeDraft } from "../intake-actions";
 
 const initialState: ClientCardState = { status: "idle" };
+const initialDraft: IntakeState = { status: "idle" };
 
 const TYPE_OPTIONS = [
   { value: "adult", label: "Adult" },
@@ -24,30 +29,78 @@ const TYPE_OPTIONS = [
 ];
 const LANGUAGE_OPTIONS = SESSION_LANGUAGES.map((language) => ({ value: language, label: language }));
 
-// Повна форма картки з анкети (AC-CARD-01, 02, 03, 12, 13): тип, ім'я, дата народження, мова; для дорослого — email,
-// для дитини — ім'я та email опікуна. Помилки — усі одразу, кожна біля свого поля; введене лишається у формі.
-export function ClientCardForm({ today }: { today: string }) {
-  const [state, formAction, pending] = useActionState(createClientCard, initialState);
-  // Після успіху — нова порожня форма (key), після помилки — введені значення.
-  const values = state.status === "error" ? state.values : EMPTY_CLIENT_CARD;
-  const errors = state.status === "error" ? state.errors : {};
-  const message: ActionResult =
-    state.status === "success"
-      ? { status: "success", message: state.message }
-      : state.status === "error" && state.message
-        ? { status: "error", message: state.message }
-        : { status: "idle" };
+// Що показати у формі картки: нова чернетка замінює всю форму (новий key); після успіху — порожня форма;
+// після помилки — введені значення. Відмова й «недоступний» форму картки не змінюють (AC-INTAKE-06, 07, 08).
+function cardView(state: ClientCardState, draft: IntakeState) {
+  const cardAt = state.status === "idle" ? 0 : state.at;
+  if (draft.status === "draft" && draft.at > cardAt) {
+    return { values: draft.values, errors: {}, key: `draft-${draft.at}` };
+  }
+  if (state.status === "error") return { values: state.values, errors: state.errors, key: "form" };
+  return { values: EMPTY_CLIENT_CARD, errors: {}, key: state.status === "success" ? `created-${state.at}` : "form" };
+}
 
+function cardMessage(state: ClientCardState): ActionResult {
+  if (state.status === "success") return { status: "success", message: state.message };
+  if (state.status === "error" && state.message) return { status: "error", message: state.message };
+  return { status: "idle" };
+}
+
+function draftMessage(draft: IntakeState): ActionResult {
+  if (draft.status === "idle") return { status: "idle" };
+  return draft.status === "draft" && draft.complete
+    ? { status: "success", message: draft.message }
+    : { status: "error", message: draft.message };
+}
+
+// Окрема форма «Client request» (зріз 4): дія чернетки не надсилає й не скидає форму картки.
+function DraftRequestForm({ draft, action, pending }: { draft: IntakeState; action: (data: FormData) => void; pending: boolean }) {
   return (
-    <form action={formAction} className="flex flex-col gap-4" noValidate>
-      <CardFields key={state.status === "success" ? state.at : "form"} values={values} errors={errors} today={today} />
-      <ActionMessage state={message} />
+    <form action={action} className="flex flex-col gap-3" aria-label="Draft from a client request">
+      <Field label="Client request" htmlFor="client-request">
+        <Textarea
+          id="client-request"
+          name="request"
+          maxLength={INTAKE_REQUEST_MAX}
+          aria-describedby="client-request-hint"
+          defaultValue={draft.status === "idle" ? "" : draft.request}
+          key={draft.status === "idle" ? "request" : `request-${draft.at}`}
+        />
+      </Field>
+      <p id="client-request-hint" className="m-0 text-xs text-muted-foreground">
+        {INTAKE_HINT}
+      </p>
       <div>
-        <Button type="submit" variant="primary" pending={pending}>
-          {pending ? "Creating…" : "Create client"}
+        <Button type="submit" variant="glass" pending={pending}>
+          {pending ? "Drafting…" : "Draft card"}
         </Button>
       </div>
+      <ActionMessage state={draftMessage(draft)} />
     </form>
+  );
+}
+
+// Повна форма картки з анкети (AC-CARD-01, 02, 03, 12, 13): тип, ім'я, дата народження, мова; для дорослого — email,
+// для дитини — ім'я та email опікуна. Помилки — усі одразу, кожна біля свого поля; введене лишається у формі.
+// Над нею — чернетка з тексту звернення: заповнює поля, але картку створює лише «Create client» (AC-INTAKE-03).
+export function ClientCardForm({ today }: { today: string }) {
+  const [state, formAction, pending] = useActionState(createClientCard, initialState);
+  const [draft, draftAction, drafting] = useActionState(requestIntakeDraft, initialDraft);
+  const view = cardView(state, draft);
+
+  return (
+    <div className="flex flex-col gap-6">
+      <DraftRequestForm draft={draft} action={draftAction} pending={drafting} />
+      <form action={formAction} className="flex flex-col gap-4 border-t border-border pt-6" noValidate>
+        <CardFields key={view.key} values={view.values} errors={view.errors} today={today} />
+        <ActionMessage state={cardMessage(state)} />
+        <div>
+          <Button type="submit" variant="primary" pending={pending}>
+            {pending ? "Creating…" : "Create client"}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
 

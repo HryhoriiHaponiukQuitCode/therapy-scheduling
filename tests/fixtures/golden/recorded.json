@@ -1,0 +1,62 @@
+{
+  "GC-01": {
+    "modelId": "claude-haiku-5-5",
+    "recordedAt": "2026-11-16T15:44:31.574Z",
+    "promptVersion": "intake-v2",
+    "text": "{\"status\":\"ok\",\"writer_is_guardian\":false,\"client_name\":\"Nora Vale\",\"birth_date\":\"1987-10-24\",\"session_language\":\"Spanish\",\"client_email\":\"nora.vale@example.test\",\"guardian_name\":null,\"guardian_email\":null}"
+  },
+  "GC-02": {
+    "modelId": "claude-haiku-5-5",
+    "recordedAt": "2026-11-16T15:44:34.876Z",
+    "promptVersion": "intake-v2",
+    "text": "{\"status\":\"ok\",\"writer_is_guardian\":true,\"client_name\":\"Leo Marsh\",\"birth_date\":\"2017-05-06\",\"session_language\":\"English\",\"client_email\":null,\"guardian_name\":\"Owen Marsh\",\"guardian_email\":\"owen.marsh@example.test\"}"
+  },
+  "GC-03": {
+    "modelId": "claude-haiku-5-5",
+    "recordedAt": "2026-11-16T15:44:38.589Z",
+    "promptVersion": "intake-v2",
+    "text": "{\"status\":\"ok\",\"writer_is_guardian\":false,\"client_name\":\"Ellis Reed\",\"birth_date\":\"2008-11-01\",\"session_language\":\"English\",\"client_email\":\"Ellis.Reed@Example.TEST\",\"guardian_name\":null,\"guardian_email\":null}"
+  },
+  "GC-04": {
+    "modelId": "claude-haiku-5-5",
+    "recordedAt": "2026-11-16T15:44:41.697Z",
+    "promptVersion": "intake-v2",
+    "text": "{\"status\":\"ok\",\"writer_is_guardian\":true,\"client_name\":\"Iris Kent\",\"birth_date\":\"2015-08-19\",\"session_language\":\"Spanish\",\"client_email\":null,\"guardian_name\":\"Maya Kent\",\"guardian_email\":\"maya.kent@example.test\"}"
+  },
+  "GC-05": {
+    "modelId": "claude-haiku-5-5",
+    "recordedAt": "2026-11-16T15:44:45.098Z",
+    "promptVersion": "intake-v2",
+    "text": "{\"status\":\"ok\",\"writer_is_guardian\":false,\"client_name\":\"Rowan Lake\",\"birth_date\":\"2008-12-20\",\"session_language\":\"English\",\"client_email\":\"rowan.lake@example.test\",\"guardian_name\":null,\"guardian_email\":null}"
+  },
+  "GC-06": {
+    "modelId": "claude-haiku-5-5",
+    "recordedAt": "2026-11-16T15:44:49.247Z",
+    "promptVersion": "intake-v2",
+    "text": "{\"status\":\"needs_info\",\"writer_is_guardian\":false,\"client_name\":\"Morgan Bell\",\"birth_date\":null,\"session_language\":\"Spanish\",\"client_email\":\"morgan.bell.example.test\",\"guardian_name\":null,\"guardian_email\":null}"
+  },
+  "GC-07": {
+    "modelId": "claude-haiku-5-5",
+    "recordedAt": "2026-11-16T15:44:53.825Z",
+    "promptVersion": "intake-v2",
+    "text": "{\"status\":\"needs_info\",\"writer_is_guardian\":false,\"client_name\":\"Alma Ríos\",\"birth_date\":\"1993-07-04\",\"session_language\":null,\"client_email\":\"alma.rios@example.test\",\"guardian_name\":null,\"guardian_email\":null}"
+  },
+  "GC-08": {
+    "modelId": "claude-haiku-5-5",
+    "recordedAt": "2026-11-16T15:44:57.955Z",
+    "promptVersion": "intake-v2",
+    "text": "{\"status\":\"ok\",\"writer_is_guardian\":true,\"client_name\":\"Nina Field\",\"birth_date\":\"2026-12-20\",\"session_language\":\"English\",\"client_email\":null,\"guardian_name\":\"Tessa Field\",\"guardian_email\":\"tessa.field@example.test\"}"
+  },
+  "GC-09": {
+    "modelId": "claude-haiku-5-5",
+    "recordedAt": "2026-11-16T15:45:01.201Z",
+    "promptVersion": "intake-v2",
+    "text": "{\"status\":\"refused\",\"writer_is_guardian\":false,\"client_name\":null,\"birth_date\":null,\"session_language\":null,\"client_email\":null,\"guardian_name\":null,\"guardian_email\":null}"
+  },
+  "GC-10": {
+    "modelId": "claude-haiku-5-5",
+    "recordedAt": "2026-11-16T15:45:04.745Z",
+    "promptVersion": "intake-v2",
+    "text": "{\"status\":\"refused\",\"writer_is_guardian\":false,\"client_name\":null,\"birth_date\":null,\"session_language\":null,\"client_email\":null,\"guardian_name\":null,\"guardian_email\":null}"
+  }
+}
