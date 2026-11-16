@@ -61,13 +61,13 @@ export const EMPTY_CLIENT_CARD: ClientCardValues = {
 };
 
 // AC-HOLD-35: email малими літерами без пробілів по краях; null — некоректний.
-function normalizeEmail(value: string): string | null {
+export function normalizeEmail(value: string): string | null {
   const email = value.trim().toLowerCase();
   return email.length <= CLIENT_EMAIL_MAX && EMAIL_PATTERN.test(email) ? email : null;
 }
 
 // AC-HOLD-41: ім'я без пробілів по краях; лише з пробілів — порожнє (null).
-function normalizeName(value: string): string | null {
+export function normalizeName(value: string): string | null {
   const name = value.trim();
   return name && name.length <= CLIENT_NAME_MAX ? name : null;
 }
