@@ -1,169 +1,131 @@
-# QA proof pack: зріз 2 — «Планувальник заповнює картку клієнта з анкети, а терапевт бачить картки лише своїх клієнтів»
-
-<!-- Шаблон: koldovsky/2026-quitcode-08-quality-hw/materials/templates/proof-pack.template.md. Заповнюється по кроках
-WS8 (A → B → C → D). Посилання — на коміти (…/blob/<sha>/…#L<N>), PR і прогони. Жодних паролів; акаунти — *@example.test. -->
+# QA proof pack: зріз 3 — «Планувальник позначає статус перевірки страхування клієнта»
 
 - Прод-URL: https://therapy-scheduling-two.vercel.app
-- Вимоги: https://github.com/Sofiia-pm/therapy-scheduling-spec · джерело: issues · знімок 2026-10-27
-  (`requirements/19-planuvalnyk-zapovniuie-kartku-kliienta.md`)
-- `/api/health` на момент UAT (29.10.2026, 12:13 Київ): `ok`, коміт `482e07e` (= `main` на той момент), `db: ok`
+- Зріз 3: планувальник позначає статус перевірки страхування клієнта (перевірено, не приймається, приватна оплата) —
+  рядок roadmap PM у [`requirements/product.md#L76`](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/requirements/product.md?plain=1#L76)
+  («WS8 … WS9 — конвеєр (зріз 3)»); вимога — [`requirements/33-planuvalnyk-status-strakhuvannia.md`](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/requirements/33-planuvalnyk-status-strakhuvannia.md)
+  (issue PM https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling-spec/issues/33)
+- Вимоги: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling-spec · джерело: issues · знімок 2026-11-06
+  ([`docs/conformance.md#L32`](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/conformance.md?plain=1#L32))
+- Спека: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/openspec/specs/client-insurance/spec.md
+- `/api/health` на момент UAT: sha `d95aece` (прогін 5, 12.11.2026, 22:22 Київ; `deployedSha` у `manifest.json`). `d95aece` —
+  коміт злиття #55; #56 додав лише тести, скрипти UAT і звіти (`git diff --stat d95aece d90ac89` — без `src/` і
+  `supabase/`), тож код застосунку й міграції на проді під час UAT ті самі, що й на `main` після #56. Поле `db` звіт UAT
+  не записує (`scripts/uat/run.mjs` бере з `/api/health` лише `sha`).
 
-## 3 AC
+Усі посилання на файли нижче — на `origin/main` `d90ac89` (повний SHA `d90ac890e2a0481c2255522f4d6b886f2c33e6f0`), якщо не
+сказано інше.
 
-Усі три — зрізу 2 (AC-CARD-*). Рядків `відкладено (e2e — WS8)` у `docs/conformance.md` на старті WS8 не було: усі 60 AC
-— «реалізовано» з тестами Vitest; обрано ті, де «Тоді» видно лише в браузері, а правило живе в SQL або TS.
+## Доказ на кожен AC зрізу 3
 
-| AC | Вид | «Тоді» (дослівно з вимоги PM) |
-|---|---|---|
-| AC-CARD-05 | відмова в браузері: чужі дані за прямим посиланням | therapist1 бачить повідомлення «You don't have access to this client.», жодних даних client9 не показано, і картка client9 не змінилася |
-| AC-CARD-06 | відмова в браузері: заборонена роль | форму не показано, therapist1 одразу бачить повідомлення «Only schedulers and admins can create client cards.», і кількість карток клієнтів не змінилася |
-| AC-CARD-16 | стан інтерфейсу: помилка з дослівним текстом за роллю | scheduler1 бачить повідомлення «This client card doesn't exist.», therapist1 — «You don't have access to this client.», і жоден із них не бачить жодних даних клієнтів |
+| AC | Вид | Тест (рівень, посилання) | Здатен упасти | Специфікація UAT | Вердикт UAT і кадр | PR і SHA злиття |
+|---|---|---|---|---|---|---|
+| AC-INS-01 | стан за замовчуванням: «Insurance: Not set» | база (PGlite): [client-insurance.test.ts#L25](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance.test.ts#L25) «AC-INS-01: нова картка без позначки має статус not_set», [#L35](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance.test.ts#L35) «AC-INS-01: картка, створена до зрізу 3, після міграції має статус not_set»; unit: [insurance.test.ts#L14](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance.test.ts#L14); сторінка: [clients-page.test.ts#L201](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/clients-page.test.ts#L201) «AC-INS-01: картка без позначки показує рядок «Insurance: Not set» кожній ролі, що бачить картку» | мутанта немає; лише заява в описі [#53](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/53): «з `default 'verified'` обидва тести AC-INS-01 падають» (вручну, прогону не збережено) → «Не перевірено» | [client-insurance.spec.ts#L71](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/e2e/client-insurance.spec.ts#L71) | **PASS** (R6), Haiku: PASS; [рядок звіту L15](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L15), [розділ L96](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L96); кадр [then-1](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/frames/AC-INS-01-then-1.png) | [#53](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/53), `7324284` (база); [#54](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/54), `159d2ae` (сторінка); UAT — [#56](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56), `d90ac89` |
+| AC-INS-02 | основний сценарій: планувальник позначає «Verified» | база: [client-insurance-update.test.ts#L61](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L61) «AC-INS-02: scheduler1 позначає «Verified» у картці client6 зі статусом not_set — після повторного відкриття verified», [#L72](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L72) «AC-INS-02: позначений статус не можна повернути в «Not set» — відмова RLS (42501), статус не змінився»; дія (моки): [insurance-action.test.ts#L98](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L98) «AC-INS-02: scheduler1 позначає «Verified» у client6 — update лише insurance_status, «Insurance status saved.», кеш картки скинуто»; unit: [insurance.test.ts#L45](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance.test.ts#L45); сторінка: [clients-page.test.ts#L218](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/clients-page.test.ts#L218) (усі тести — у списку нижче) | SQL-мутант **I2 KILLED** (упав тест бази #L72) — [#55](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55), повторено 13.11.2026; червоний до міграції — опис #55 | [client-insurance.spec.ts#L95](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/e2e/client-insurance.spec.ts#L95) | **PASS** (R6), Haiku: PASS; [рядок L16](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L16), [розділ L119](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L119); кадри [then-1](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/frames/AC-INS-02-then-1.png), [then-2](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/frames/AC-INS-02-then-2.png). У прогоні 1 — **FAIL** (R1, [звіт `d17a355` L16](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d17a35571822ddc18ad7d54db36b97c57efd76b9/docs/qa/uat/2026-11-12/report.md?plain=1#L16)): таймаут хука `afterEach`, вада тесту, виправлено [`c62d8fa`](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56/commits/c62d8facf1757e2ae1001fd908278e1038790e1c) без зміни тверджень | [#55](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55), `d95aece`; UAT — [#56](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56), `d90ac89` |
+| AC-INS-03 | основний сценарій: адміністратор змінює, інший планувальник бачить | база: [client-insurance-update.test.ts#L88](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L88) «AC-INS-03: admin1 змінює «Verified» на «Private pay» у client7 — admin1 і scheduler2 бачать private_pay»; дія (моки): [insurance-action.test.ts#L109](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L109) «AC-INS-03: admin1 змінює статус client7 на «Private pay» — успіх» | мутанта немає; «червоний до міграції» — лише заява в описі #55 → «Не перевірено» | [client-insurance.spec.ts#L142](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/e2e/client-insurance.spec.ts#L142) | **PASS** (R6), Haiku: PASS; [рядок L17](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L17), [розділ L145](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L145); кадри [then-1 (admin1)](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/frames/AC-INS-03-then-1.png), [then-2 (scheduler2)](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/frames/AC-INS-03-then-2.png) | [#55](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55), `d95aece`; UAT — [#56](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56), `d90ac89` |
+| AC-INS-04 | відмова: заборонена роль (терапевту не запропоновано змінити) | база: [client-insurance-update.test.ts#L124](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L124) «AC-INS-04: therapist1 бачить «Not accepted» у картці свого клієнта client6»; unit: [insurance.test.ts#L89](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance.test.ts#L89) «AC-INS-04: therapist cannot change the insurance status — and neither can a user without a role»; сторінка: [clients-page.test.ts#L210](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/clients-page.test.ts#L210) «AC-INS-04: терапевт бачить «Insurance: Not accepted», а змінити статус йому не запропоновано» | мутанта немає; абляція «форма для всіх ролей → тест AC-INS-04 сторінки червоний» — лише заява в описі #55 → «Не перевірено» | [client-insurance.spec.ts#L199](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/e2e/client-insurance.spec.ts#L199) | **PASS** (R6), Haiku: PASS; [рядок L18](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L18), [розділ L170](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L170); кадр [then-1](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/frames/AC-INS-04-then-1.png). У прогоні 1 Haiku — NEEDS-HUMAN, Sonnet — PASS (опис #56) | [#55](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55), `d95aece` (рядок статусу — [#54](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/54), `159d2ae`); UAT — [#56](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56), `d90ac89` |
+| AC-INS-05 | відмова: заборонена роль, запит в обхід сторінок | база: [client-insurance-update.test.ts#L131](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L131) «AC-INS-05: therapist1 напряму змінює статус свого client6 на verified — 0 рядків без помилки, scheduler1 бачить not_accepted», [#L144](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L144) (therapist2, клієнт не свій); дія (моки): [insurance-action.test.ts#L163](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L163) «AC-INS-05: therapist1 викликає дію напряму — update не викликано, відмова PM», [#L174](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L174) (без ролі) | SQL-мутант **I1 KILLED** (упав тест бази #L131) — [#55](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55), повторено 13.11.2026; абляція перевірки ролі в дії → 2 тести дії червоні — заява в описі #55 | [client-insurance.spec.ts#L233](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/e2e/client-insurance.spec.ts#L233) (пряма спроба therapist1 через API Supabase з його сесією + кадр scheduler1) | **PASS** (R6), Haiku: PASS; [рядок L19](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L19), [розділ L198](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L198); кадр [then-1 (scheduler1)](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/frames/AC-INS-05-then-1.png) | [#55](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55), `d95aece`; UAT — [#56](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56), `d90ac89` |
+| AC-INS-06 | відмова: не увійшов | база: [client-insurance-update.test.ts#L156](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L156) «AC-INS-06: відвідувач без входу не читає й не змінює картку client6 — scheduler1 далі бачить verified»; дія (моки): [insurance-action.test.ts#L183](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L183) «AC-INS-06: без входу — переадресація на /login, до clients не звертаємось» | SQL-мутант **I3** KILLED (`scripts/mutants.mjs`: права authenticated видано й `anon` → тест бази AC-INS-06 падає; `node scripts/mutation-check.mjs --only I3`, 13.11.2026, цей PR) | [client-insurance.spec.ts#L293](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/e2e/client-insurance.spec.ts#L293) | **PASS** (R6), Haiku: PASS; [рядок L20](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L20), [розділ L221](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L221); кадри [then-1 (вхід)](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/frames/AC-INS-06-then-1.png), [then-2 (scheduler1)](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/frames/AC-INS-06-then-2.png) | [#55](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55), `d95aece` (сторінку закриває `src/proxy.ts` зі зрізу 2); UAT — [#56](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56), `d90ac89` |
 
-## A. Ворота
+Усі тести з AC ID зрізу 3 (Vitest; e2e — у стовпці «Специфікація UAT»):
 
-- PR воріт: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/43 (розбір знахідок — в описі PR)
-- Зелений `quality` на `main`: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40852708722
-- Обов'язкові перевірки в `solo-main` з 29.10.2026: `spec`, `app`, `conformance`, `db-check`, «Ворота: fallow audit»,
-  «Покриття: доменна підлога»; після злиття #46 і зеленого прогону на `main` — ще `e2e`. «Порада: вразливі
-  залежності» — дорадча.
+- `tests/db/client-insurance.test.ts` (PGlite): AC-INS-01 — [#L25](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance.test.ts#L25), [#L35](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance.test.ts#L35).
+- `tests/db/client-insurance-update.test.ts` (PGlite): AC-INS-02 — [#L61](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L61), [#L72](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L72), [#L98](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L98) («працівник може змінити лише insurance_status — інші колонки картки не змінюються»); AC-INS-03 — [#L88](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L88); AC-INS-04 — [#L124](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L124); AC-INS-05 — [#L131](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L131), [#L144](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L144); AC-INS-06 — [#L156](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L156).
+- `tests/insurance.test.ts` (unit): AC-INS-01 — [#L14](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance.test.ts#L14); AC-INS-02 — [#L45](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance.test.ts#L45), [#L52](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance.test.ts#L52), [#L56](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance.test.ts#L56), [#L84](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance.test.ts#L84); AC-INS-04 — [#L89](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance.test.ts#L89).
+- `tests/insurance-action.test.ts` (дія з моками): AC-INS-02 — [#L88](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L88), [#L98](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L98), [#L121](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L121), [#L130](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L130), [#L139](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L139), [#L149](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L149); AC-INS-03 — [#L109](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L109); AC-INS-05 — [#L163](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L163), [#L174](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L174); AC-INS-06 — [#L183](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L183).
+- `tests/clients-page.test.ts` (сторінка): AC-INS-01 — [#L201](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/clients-page.test.ts#L201); AC-INS-04 — [#L210](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/clients-page.test.ts#L210); AC-INS-02 — [#L218](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/clients-page.test.ts#L218).
 
-Розбір першого повного прогону `fallow` на `main` (той самий — в описі PR воріт): до —
-`dead-code (2 issues), dupes (5 clone groups), health (32 above threshold)`; після — `dead-code (1 issue), dupes (5), health (32)`.
+## Не перевірено
 
-| Група знахідок | Скільки | Справжня / навмисна / хибна | Дія і причина |
+| AC чи частина | Чому не перевірено | Що зроблено замість | Ризик на проді |
 |---|---|---|---|
-| невикористаний експорт `AC_ID_GLOBAL` (`scripts/lib/spec-lib.mjs`) | 1 | справжня | виправлено: прибрано (жоден скрипт і тест не імпортує) |
-| невикористаний файл `src/lib/supabase/client.ts` | 1 | справжня для поточного коду | лишено з поясненням: браузерний клієнт шаблону, частина структури `AGENTS.md`; видалення — окремим PR за погодженням |
-| дублі `combobox` / `select` / `account-menu` | 3 | справжня | лишено: рефакторинг примітивів UI поза PR воріт; нові дублі ворота ловлять |
-| дубль `globals.css` `:root` ↔ `.dark` | 1 | навмисна | ті самі токени в двох темах (CSS без міксинів) |
-| дубль обходу файлів у `check-auth-boundary` / `check-design-tokens` | 1 | справжня, мала | лишено: перевірки WS7, не змінюються в PR воріт |
-| складність у коді застосунку (`SlotsPage`, `validateClientCard`, `Combobox`, `Select` …) | 24 | справжні сигнали; CRAP без покриття — оцінка | лишено: ворота валять лише нову складність |
-| складність у скриптах (шаблон: `check-spec`, `create-demo-users`; наші: `check-design-tokens`, `check-auth-boundary`) | 8 | навмисна / чужий код | лишено, у `health.ignore` не додано: нові зміни в них ворота мають бачити |
-| `@tailwindcss/turbopack`, `@vitest/coverage-v8` (з матеріалів) | 2 | хибна | `ignoreDependencies`: підключено рядком у `next.config.ts` / провайдер за назвою з конфігу |
+| AC-INS-06 «статусу й інших даних client6 не показано» і «не змінювати цей статус» — на проді | перевірки [`#L316`–`#L319`](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/e2e/client-insurance.spec.ts#L316-L319) (немає рядка статусу, «Insurance:», імені й email) виконуються на сторінці `/login`, яка даних клієнта не рендерить, — вони тривіально істинні; на проді відвідувач без входу лише відкриває картку (GET), спроби змінити статус (API чи дія) не було | доказ на проді — переадресація на `/login` ([`#L313`](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/e2e/client-insurance.spec.ts#L313)) і незмінний статус у scheduler1 (кадр then-2, `insuranceStatusOf` у базі); заборону зміни — тест бази #L156 і тест дії [#L183](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L183) (моки) | низький |
+| AC-INS-05 — не кожен обхід на проді | на проді виконано одну пряму спробу: `update` через API Supabase з сесією therapist1 ([`#L245`–`#L258`](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/e2e/client-insurance.spec.ts#L245-L258)) → 0 рядків без помилки; виклик server action `setInsuranceStatus` від therapist1 на проді не пробували; therapist2 (клієнт не свій) і «інші колонки» — лише PGlite. Саму спробу кадр не показує (у кадрі — scheduler1, у PR #56 прикріплено лише відео scheduler1) | тест бази #L131, #L144 + SQL-мутант I1 KILLED; дія — тести з моками #L163, #L174; на проді — пряма спроба API і кадр scheduler1 «Insurance: Not accepted» | низький: правило в RLS `clients_update_insurance_staff`, мутант I1 убитий |
+| AC-INS-01, AC-INS-03, AC-INS-04 «здатен упасти» | мутантів для цих AC немає; червоний результат — лише заяви в описах PR: #53 (вручну, `default 'verified'` → обидва тести AC-INS-01 падають), #55 («до реалізації — 11 червоних», абляція форми для AC-INS-04); прогонів не збережено. результату Stryker для `src/lib/insurance.ts` у PR зрізу 3 немає | тести зелені в CI; `insurance` у підлозі покриття `FLOORED` ([`vitest.coverage.config.mts#L17`](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/vitest.coverage.config.mts#L17)); UAT PASS | низький для 01, 03; для відмови AC-INS-04 — середній: тест сторінки може лишитись зеленим, якщо зміниться спосіб показу форми |
+| Правило «повернути Not set не можна» | власного AC у PM немає (речення вимоги «Позначення статусу…» і «Припущення»); на проді не перевірено: у формі «Not set» немає, запиту в обхід із «not_set» UAT не робить | тести під ID AC-INS-02: база [#L72](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/db/client-insurance-update.test.ts#L72) (42501), unit [#L52](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance.test.ts#L52), дія [#L121](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/insurance-action.test.ts#L121); SQL-мутант I2 KILLED | низький |
+| «у розкладі терапевта статус не показувати» (речення вимоги «Терапевт лише бачить статус», без сценарію й AC) | тесту немає ні на якому рівні | лише читання коду: `private.my_schedule` повертає з картки лише `client_name` ([міграція, L4–L15](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/supabase/migrations/20261027201500_my_schedule.sql#L4-L15)), у `src/app/(app)/my-schedule/` немає звертань до `insurance` | низький зараз; регресію ніщо не зловить |
+| Стан форми на клієнті після оновлення картки (знахідка CodeRabbit у #55) | виправлено в `9e8b15e`, але unit-тесту немає: Vitest працює в `environment: "node"` без DOM ([`vitest.config.mts#L7`](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/vitest.config.mts#L7)); у відповіді CodeRabbit обіцяно перевірку UAT-специфікацією, але жоден e2e-тест не тримає форму відкритою, поки статус змінює інша сесія (в AC-INS-03 scheduler2 відкриває картку вже після зміни) | тест сторінки [#L218](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/tests/clients-page.test.ts#L218) перевіряє лише пропси форми (`status`) | середній: застарілий вибір у відкритій формі може перезаписати чужу зміну |
+| Негативний контроль для AC-INS | NC-1 і NC-2 (`npm run uat:nc`) — на AC-CARD-06, не на AC-INS-01…06; навмисно хибного очікування для AC-INS не запускали | справжній FAIL (R1) на AC-INS-02 у прогоні 1 показав, що перевірки специфікації `client-insurance.spec.ts` здатні повернути FAIL; NC-1 FAIL / NC-2 NEEDS-HUMAN — на тому самому конвеєрі й проді | низький |
+| Відео прогонів 1–2 і негативного контролю | не збережено: прогона 1 і NC — стер тимчасовий тест відтворення, прогону 2 — `npm run uat:nc` (Playwright чистить `test-results/` на старті), за описом #56; трасу FAIL прогону 1 теж не збережено | кадри «Тоді» й aria-знімки — у звітах ([прогін 1, `d17a355`](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d17a35571822ddc18ad7d54db36b97c57efd76b9/docs/qa/uat/2026-11-12/report.md), [NC](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/negative-controls/report.md)); відео фінального прогону 5 — у коментарі #56 | немає для проду; слабший доказ причини FAIL прогону 1 |
+| AC-INS-01 — рев'ю сторінки | PR [#54](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/54) CodeRabbit не переглянув («Review limit reached»), PR злито без рев'ю | тести сторінки й unit, UAT PASS | низький |
 
-Тестові правила лінтера (`@vitest/eslint-plugin` 1.6.27, `error`): перший прогін — 3 помилки, усі справжні, виправлено в
-PR воріт (мок власного модуля `@/lib/roles` у тесті AC-CARD-02; умовний `return` у двох тестах бази).
+## A. Вимоги й спека
 
-## B. Якість тестів
+- `/requirements-sync` — PR «Оновлення вимог»: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/50
+  (`595a1b0`, знімок 2026-11-06). Вимоги актуальні: issue PM #33 востаннє оновлено 2026-11-06T20:57:27Z — той самий час,
+  що в рядку `> Джерело:` знімка (перевірено 13.11.2026).
+- Спека `add-insurance-status` і план — PR «Специфікація»: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/51
+  (`1ec3ce6`, спека; archive `openspec/changes/archive/2026-11-06-add-insurance-status/`), https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/52
+  (`63cb56e`, план `impl-insurance-status`; ще не заархівовано — пункт 3.6 `tasks.md`)
+- Зміна `clarify-<зріз3>` після уточнень: не було — PM AC не змінював: «Журнал змін» вимоги має лише 2026-11-03
+  (створено) і 2026-11-06 (обсяг зрізу 3; «AC-INS-01…06 не змінено»)
+- Питання PM: питань не було — «Open questions: Немає» у
+  [`proposal.md#L80`](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/openspec/changes/archive/2026-11-06-add-insurance-status/proposal.md?plain=1#L80);
+  серед issues з міткою `question` у репо PM жодного про AC-INS (останнє — #35 від 03.11, про рух на тлі сторінок)
 
-### Рівень для кожного AC
+## B. Реалізація
 
-Посилання — на коміт `dd1fdfd` гілки `task/test-quality`.
-
-| AC | Де живе правило | Рівень | Чому | Тест |
+| PR «Реалізація» | Задача з `tasks.md` | AC | Відповіді на знахідки CodeRabbit | `db-deploy` |
 |---|---|---|---|---|
-| AC-CARD-05 | політика RLS `clients_select_own_therapist` ([міграція](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/supabase/migrations/20261027192525_therapist_own_clients.sql#L11)); текст — `missingCardMessage` ([clients.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/src/lib/clients.ts#L158)); сторінка `/clients/[id]` | **база (PGlite)** + SQL-мутант; **e2e** для тексту на сторінці | відмову тримає RLS: лише справжній SQL доводить, що чужого рядка немає; TS-копія чи мок `from()` лишились би зеленими без правила | [client-access.test.ts#L78](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/db/client-access.test.ts#L78) (`asUser` therapist1 → 0 рядків; update → `permission denied`; `asService` — ім'я не змінилось) |
-| AC-CARD-06 | сторінка `/clients/new` → `pageAccess` ([roles.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/src/lib/roles.ts#L36)); дія `createClientCard`; RLS `clients_insert_staff` ([міграція](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/supabase/migrations/20261027190554_client_cards.sql#L89)) | **база (PGlite)** для «кількість не змінилась» + SQL-мутант; **unit** ядра дії (роль → без insert); **e2e** для сценарію «форму не показано» | три шари можуть втратити правило окремо: сторінка (форма), дія (запит в обхід сторінки), RLS (запит в обхід застосунку) | [client-cards.test.ts#L61](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/db/client-cards.test.ts#L61), [clients.test.ts#L235](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients.test.ts#L235) |
-| AC-CARD-16 | `isClientId` / `UUID_PATTERN` і `missingCardMessage` ([clients.ts#L158-L167](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/src/lib/clients.ts#L158-L167)); сторінка `/clients/[id]` | **unit** сторінки з підміненим клієнтом Supabase + Stryker; **база** — рядка немає ні для кого; **e2e** | вибір тексту за роллю й розпізнавання посилання — чистий TS з межами (схожі на UUID посилання); сам рядок вирішує RLS | [clients-page.test.ts#L113](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients-page.test.ts#L113), [#L131](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients-page.test.ts#L131), [#L147](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients-page.test.ts#L147), [client-access.test.ts#L137](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/db/client-access.test.ts#L137) |
+| https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/53 (`7324284`) | 1. Статус у картці — 1.1–1.2 (база) | AC-INS-01 | **не всі**: 1 «Additional comment» (Minor, сам CodeRabbit позначив «Unverified finding») — додати `CHECK` з `NOT VALID` і `VALIDATE` окремо; відповіді в PR немає, не виправлено (міграцію застосовано як є). Попередження pre-merge «AC ID у тестах і матриці» — виправлено комітом `6d55dd3` (рядок AC-INS-01 у `docs/conformance.md`), окремої відповіді немає | https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/42402369147 («Apply migrations»: `Applying migration 20261107181916_client_insurance_status.sql`) |
+| https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/54 (`159d2ae`) | 1. Статус у картці — 1.3–1.5 (сторінка) | AC-INS-01 | рев'ю не було: на `@coderabbitai review` — «Review limit reached» ([коментар](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/54#issuecomment-6711509848)), PR злито через ~4 хв | міграцій немає; прогін `ci` на `main`: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/42403051070 |
+| https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55 (`d95aece`) | 2. Зміна статусу — 2.1–2.7 | AC-INS-02, AC-INS-03, AC-INS-04, AC-INS-05, AC-INS-06 | усі: 2 знахідки виправлено в `9e8b15e` з відповіддю в треді (обидва треди resolved) — [стан форми](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55#discussion_r4554681935), [AC ID у назві тесту](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55#discussion_r4554682259); попередження pre-merge — аргумент у [коментарі](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55#issuecomment-6832483915) і розділі опису «Поза межами типу» | https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/43281936922 («Apply migrations»: `Applying migration 20261112182017_client_insurance_update.sql`) |
+| https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56 (`d90ac89`) | 3. UAT на проді — 3.1–3.3 | AC-INS-01…06 | 1 знахідка Major (відео admin1 і scheduler2 в AC-INS-03) — виправлено в `2d14dd8`, [відповідь](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56#discussion_r4555864555); CodeRabbit не позначив виправленим до нового звіту, прогін 5 має `video-admin1`, `video-scheduler2` ([report.md#L166](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L166)), тред лишився unresolved. Попередження pre-merge — аргумент у [коментарі](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56#issuecomment-6834938026) | міграцій немає; прогін `ci` на `main`: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/43301666448 |
 
-### Покриття
-
-`npm run test:coverage` на `dd1fdfd` (усього: рядки 39,3 % — 472 з 1201; гілки 38,85 %; поріг на загальний відсоток не
-ставимо). Підлога 90/85/90/90 — на `clients`, `guest-route`, `slots`, `stats`, `theme`.
-
-| Файл за AC | Рядки | Гілки | Чим доведено, якщо не покрито |
-|---|---|---|---|
-| `src/lib/clients.ts` (AC-CARD-05, 06, 16 — тексти, `isClientId`) | 97 % | 88 % | — (у підлозі) |
-| `src/lib/roles.ts` (`pageAccess`, AC-CARD-06) | 100 % | 80 % | — |
-| `src/app/(app)/clients/[id]/page.tsx` (AC-CARD-05, 16) | 93 % (було 50 % на `main`) | 61 % (було 16 %) | гілка «помилка запиту» — не з цих AC |
-| `src/app/(app)/clients/actions.ts` (AC-CARD-06) | 94 % | 80 % | — |
-| `src/app/(app)/clients/new/page.tsx` (AC-CARD-06) | 0 % | 0 % | e2e (`tests/e2e/client-access.spec.ts`, PR кроку C) і тест бази `client-cards.test.ts#L61` |
-| політики RLS `clients_select_own_therapist`, `clients_insert_staff` | — (JS-покриття не бачить SQL) | — | SQL-мутації C1, C3 нижче |
-
-### Доказ мутацією
-
-TS — Stryker 10.1.1, `npm run mutation:ts -- --mutate src/lib/clients.ts,src/lib/roles.ts`:
-
-| Мутант (файл:рядок, що змінено) | AC під загрозою | До | Тест, посилений з тексту AC | Після |
-|---|---|---|---|---|
-| `clients.ts:162` `UUID_PATTERN` без `^` (посилання `x<uuid>` — «картка») | AC-CARD-16 | вижив | [clients-page.test.ts#L131](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients-page.test.ts#L131): «зайвий символ перед UUID» — текст за роллю, без даних, без запиту | убитий |
-| `clients.ts:162` без `$` (`<uuid>x`) | AC-CARD-16 | вижив | той самий тест, «зайвий символ після UUID» | убитий |
-| `clients.ts:162` група без квантора (`[0-9a-f]` замість `{4}`, ×5) | AC-CARD-16 | вижили | «укорочена третя група» (#L131) і «правильне посилання, але картки немає» ([#L147](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/dd1fdfd/tests/clients-page.test.ts#L147)) | убиті |
-| `clients.ts:162` група `[^0-9a-f]` (×5) — справжнє посилання не розпізнається | AC-CARD-16 (і AC-CARD-10) | вижили | «правильне посилання, але картки немає» (запит до бази є) + AC-CARD-10 «наявну картку дитини» | убиті |
-| `clients.ts:165` `isClientId` з порожнім тілом | AC-CARD-16 (і AC-CARD-10) | вижив | ті самі два тести | убитий |
-
-- Stryker `src/lib/clients.ts`: **75,74 % → 83,43 %** (вижилих на рядках 162 і 165: **13 → 0** — 12 `Regex` і 1
-  `BlockStatement`; у повідомленні коміту `3b267ee` помилково написано «9 → 0»). `roles.ts`: 72,00 % → 72,00 % —
-  мутанти `pageAccess` (рядки 36–47, AC-CARD-06) убиті ще до WS8; вижилі в `roles.ts` — `isAppRole` і
-  `isStaff`, `getCurrentUser` (рядки 11, 18, 51–66), поза цими 3 AC. Тести писала окрема сесія агента з тексту AC (maker ≠ checker),
-  кожен мутант перевірено вручну: тест червоний на мутанті, зелений на коді.
-- Решта вижилих у `clients.ts` — `validateClientCard`, межі довжини, `NOT_PROVIDED` — поза цими 3 AC; не прибрано й
-  не вимкнено.
-- SQL-мутації (`npm run mutation:sql -- --markdown`):
-
-| Мутант | AC | Що зламано | Вердикт | Який тест упав |
-|---|---|---|---|---|
-| C1 | AC-CARD-05 | `clients_select_own_therapist`: «роль therapist і є власне утримання» → `true` (терапевт бачить будь-яку картку) | KILLED | AC-CARD-05, а також AC-CARD-04, 08, 09, 11, 14 (`tests/db/client-access.test.ts`) |
-| C2 | AC-CARD-05 | прибрано `h.therapist_id = (select auth.uid())` | SURVIVED (еквівалентний, прийнято) | — |
-| C3 | AC-CARD-06 | `clients_insert_staff`: `private.is_staff()` → `true` (терапевт створює картку запитом) | KILLED | AC-CARD-06: терапевт не створює картку навіть запитом в обхід сторінки |
-
-- Еквівалентні мутанти: **C2** — підзапит до `holds` виконується під RLS того, хто дивиться; для терапевта єдина
-  політика select на `holds` — `holds_select_own_therapist` «using (therapist_id = (select auth.uid()))»
-  (`20261019105344_availability_and_holds.sql:111`), тож без умови в `clients_select_own_therapist` результат той
-  самий. Умова лишається як захист на випадок зміни RLS `holds`. Причина — у `scripts/mutants.mjs` (`expect: "survive"`).
-- P1/P2 з матеріалів не взято: свій PGlite-гарнес з WS6–WS7, `tests/db/profiles-db.test.ts` немає.
+- Ворота на `main` (`quality`): https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/43301666229
+  (`d90ac89`, success)
+- Мутації: SQL — `npm run mutation:sql`, вивід в описі [#55](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/55) —
+  **I1 KILLED** (AC-INS-05, з `clients_update_insurance_staff` прибрано «лише admin і scheduler» з `using` і `with check`),
+  **I2 KILLED** (AC-INS-02, прибрано заборону повернути «Not set»); разом із мутантами WS8 — 4 з 5 убито (з I3 — 5 з 6), C2 —
+  прийнятий еквівалентний. Повторено 13.11.2026 на `docs/proof-pack-ws9` (міграції й тести бази ті самі, що на
+  `d90ac89`): той самий результат, упали AC-INS-05 #L131 (I1) і AC-INS-02 #L72 (I2). У цьому PR додано **I3 KILLED** (AC-INS-06: права authenticated на картку видано й `anon` → упав AC-INS-06 #L156). Результату Stryker для `src/lib/insurance.ts` у PR зрізу 3 немає.
 
 ## C. UAT на проді
 
-`npm run uat -- --url https://therapy-scheduling-two.vercel.app` — запускав розробник у своєму терміналі; PR кроку C:
-https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/46.
-
-| AC | Специфікація | Тест (твердження) | Агент | Вердикт | Кадр |
-|---|---|---|---|---|---|
-| AC-CARD-05 | [client-access.spec.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/22aa4bd/tests/e2e/client-access.spec.ts) | passed | Haiku: PASS | **PASS** — R6 | [AC-CARD-05-then-1.png](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-05-then-1.png) |
-| AC-CARD-06 | [client-access.spec.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/22aa4bd/tests/e2e/client-access.spec.ts) | passed | Haiku: PASS | **PASS** — R6 | [AC-CARD-06-then-1.png](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-06-then-1.png) |
-| AC-CARD-16 | [client-access.spec.ts](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/22aa4bd/tests/e2e/client-access.spec.ts) | passed | Haiku: PASS | **PASS** — R6 | [then-1 (scheduler1)](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-16-then-1.png), [then-2 (therapist1)](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/frames/AC-CARD-16-then-2.png) |
-
-- Звіт: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md (прогін 29.10.2026 12:13 Київ, код тестів `task/uat` @ `22aa4bd`; перший прогін 12:04 дав те саме).
-- Відео: вкладення в описі https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/46 (розділ «Відео»: AC-CARD-05, AC-CARD-06, AC-CARD-16).
-- Рецензент: `claude-haiku-5-5`, суперечки — `claude-sonnet-5-5` (в основному прогоні суперечок не було); разом
-  $0.0072.
-- Негативний контроль (`npm run uat:nc`, https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/46, розділ «Негативний контроль»): **NC-1** (AC-CARD-06) — у
-  твердженні навмисно інший текст «Only admins can create client cards.» → перевірка впала, Haiku на кадрі каже PASS,
-  вердикт **FAIL** (R1: агент не перекриває впале твердження). **NC-2** (AC-CARD-06) — у анотації `ac-text` «Тоді» з
-  іншим повідомленням, тест і застосунок без змін → перевірки пройшли, Haiku: NEEDS-HUMAN, Sonnet: FAIL, вердикт
-  **NEEDS-HUMAN** (R3).
-- Дані: **лише читання** — ні `@writes`, ні синтетичних `uat-*` («Прибирання»: видалено 0, лишилось 0). «Дано»
-  AC-CARD-05 (client9 — свій клієнт лише therapist2) підготовлено один раз через інтерфейс від scheduler1; для CI —
-  фікстура `tests/e2e/fixtures/card-05-given.sql`.
-- Бонус: `.github/workflows/e2e.yml` — ті самі специфікації на одноразовій базі. Зелені прогони: на гілці
-  https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40866217260, на `main` (push) https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40907026242, `workflow_dispatch` на `main`
-  https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/actions/runs/40907043406. `e2e` — обов'язкова перевірка `solo-main`.
-- Після звіту специфікацію змінено в одному місці (`client-access.spec.ts`, крок «Дано» AC-CARD-05): `innerText` →
-  `textContent` і додатково `expect(before).toContain("client9@example.test")` — заради стабільності в CI.
-  «Коли» і «Тоді» не змінилися. Повторний UAT на проді з кодом `main` ще не проводився: звіт вище — на `22aa4bd`, а
-  код `main` у CI e2e зелений.
+- Звіт: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md
+  (прогін 5, 12.11.2026 22:22 Київ, код тестів `2d14dd8`, прод `d95aece`; AC-INS-01…06 — PASS, разом з AC-CARD-05, 06, 16
+  з WS8 — 9 PASS); `manifest.json` і `frames/` — поруч. Історія (опис #56): прогін 1 (`09673b9`) — AC-INS-02 FAIL (R1, хук
+  `afterEach`, виправлено `c62d8fa`); прогони 2–4 — усі AC-INS PASS (3 і 4 — заради відео сесій інших ролей).
+- Відео: прогону 5 — вкладення в [коментарі #56](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56#issuecomment-6835166282)
+  (AC-INS-01-scheduler1, AC-INS-02-scheduler1, AC-INS-03-admin1, AC-INS-03-scheduler2, AC-INS-04-therapist1,
+  AC-INS-05-scheduler1, AC-INS-06-no-login, AC-INS-06-scheduler1), а не в самому описі PR (пункт чекліста «Відео —
+  вкладенням у цей опис» не позначено); у git відео немає.
+- Рецензент: `claude-haiku-5-5`, суперечки — `claude-sonnet-5-5`; у прогоні 5 на всі AC-INS — Haiku PASS без ескалації.
+  Розбір: AC-INS-01…06 — $0.0146, увесь прогін (9 AC) — $0.0707.
+- Негативний контроль: `npm run uat:nc` 12.11.2026 21:03 (Київ), прод `d95aece`, код тестів `c62d8fa` (у звіті — «+ незакомічені зміни»: за описом #56, це щойно згенерований звіт прогону 2) —
+  [звіт](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/negative-controls/report.md):
+  NC-1 (хибний очікуваний текст у тесті AC-CARD-06) — **FAIL** (R1), NC-2 («уточнений» текст AC-CARD-06 у вимозі) —
+  **NEEDS-HUMAN** (R3); PR [#56](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/56). На AC-INS негативного
+  контролю немає (див. «Не перевірено»).
+- Дані: `@writes` — кожен тест створює свою картку `uat-<запуск>-ins<NN>@example.test` секретним ключем; рядок
+  «Прибирання» звіту ([L7](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/qa/uat/2026-11-12/report.md?plain=1#L7)):
+  «синтетичних uat-*@example.test видалено 0, лишилось 0, …; карток клієнтів UAT видалено 6, лишилось 0». Ролі в UAT:
+  admin1, scheduler1, scheduler2, therapist1 (`@example.test`).
 
 ### Приймання PM
 
+Публічних коментарів PM у #56 немає (перевірено ще й 13.11.2026), блоки «Рішення PM» у звіті UAT не заповнені. У цій
+команді PM і розробник — той самий акаунт GitHub `HryhoriiHaponiukQuitCode` (він автор issue вимоги #33 у репо PM і PR
+#50–#56), тож приймання було б самоприйманням; рішення PM ще не ухвалено.
+
 | AC | Рішення PM | Посилання |
 |---|---|---|
-| AC-CARD-05 | очікує рішення PM | [звіт, розділ AC-CARD-05](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md#ac-card-05--pass) |
-| AC-CARD-06 | очікує рішення PM | [звіт, розділ AC-CARD-06](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md#ac-card-06--pass) |
-| AC-CARD-16 | очікує рішення PM | [звіт, розділ AC-CARD-16](https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/0bf054d/docs/qa/uat/2026-10-29/report.md#ac-card-16--pass) |
+| AC-INS-01 | ще не прийнято (на 13.11.2026) | — |
+| AC-INS-02 | ще не прийнято (на 13.11.2026) | — |
+| AC-INS-03 | ще не прийнято (на 13.11.2026) | — |
+| AC-INS-04 | ще не прийнято (на 13.11.2026) | — |
+| AC-INS-05 | ще не прийнято (на 13.11.2026) | — |
+| AC-INS-06 | ще не прийнято (на 13.11.2026) | — |
 
-## D. Eval рецензента
+## D. Прод і ретро
 
-- PR з вадами (не злитий, закритий): https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/47
-- Ключ і таблиця: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/47#issuecomment-6495311989
+- `/api/health` після злиття всіх задач: sha `d90ac89` (злиття #56), `db: ok`, `env: production` — 13.11.2026
+- Нові ролі й акаунти: у зрізі 3 нових ролей немає; використано admin1@example.test, scheduler1@example.test,
+  scheduler2@example.test, therapist1@example.test; accounts.zip (востаннє змінено в #44, WS8):
+  https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/accounts.zip
+- `docs/conformance.md`: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/blob/d90ac890e2a0481c2255522f4d6b886f2c33e6f0/docs/conformance.md
+  (AC-INS-01…06 — «реалізовано», рядки 96–101)
 
-| # | Вада (ключ) | CodeRabbit | `/code-review high` |
-|---|---|---|---|
-| 1 | права в даних: `supabase/migrations/20261029085645_staff_profiles_select.sql:9` — політика читання профілів без `private.is_staff()` (умови на того, хто читає) | **частково**: лише в тексті pre-merge («нова дозволяє кожному `authenticated` читати профілі…»), а перевірка міграцій — Passed; inline немає | **знайшов**: «The recreated policy drops the `(select private.is_staff())` condition. Any authenticated user can now read every therapist, scheduler and admin profile, including email, full_name and role.» |
-| 2 | авторизація: `src/lib/roles.ts:70` `getCurrentUser` — роль спершу з `claims.user_metadata.role` | **знайшов, Minor** (`roles.ts:76`): «`user_metadata` може змінювати автентифікований користувач…» | **знайшов**: «Any signed-in user can write user_metadata, so this is a privilege escalation.» |
-| 3 | логіка AC-HOLD-06: `src/lib/slots.ts:168` `buildDaySlots` — прибрано фільтр `"Expired"` | **пропустив**: Walkthrough — «Прострочені записи, як і раніше, не вибираються як активне утримання.» | **знайшов**: «The `active` set no longer filters out Expired holds…» + «This breaks AC-HOLD-06» |
-| П | приманка: `canCreateClientCards(role) = isStaff(role)` (поведінка та сама) | без хибної тривоги | без хибної тривоги; зауваження про підтримуваність: «canCreateClientCards is a pass-through wrapper around isStaff…» |
+### Ретро: що б ми взяли з фабрики у свій звичайний процес
 
-- Інші знахідки: `/code-review` `roles.ts:77` (роль з токена перекриває пониження, AC-CARD-11) — слушна, корінь V2;
-  `slots.ts:168` (немає тесту на прострочене утримання) — слушна; `staff_profiles_select.sql:3` (назва й опис ховають
-  зміну доступу) — слушна; `roles.ts:59` (зайвий запит `profiles`) — шум. CodeRabbit pre-merge «AC ID у тестах і
-  матриці» — слушна.
-- Правило, що закриває пропуск: рядок «Рев'ю (CodeRabbit, `/code-review`)…» в `AGENTS.md` — зміна, що прибирає чи
-  послаблює умову (фільтр статусу чи межа в `src/lib/**`, `using` / `with check` політики RLS), — must fix без тесту з
-  AC ID у тому самому PR: https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/48, https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/commit/7a7016e9b1af3fcffbdf42d3fdec7940cc10c9e5
-- Повторний прогін (після `git merge main` у PR вад, код вад без змін): https://github.com/HryhoriiHaponiukQuitCode/therapy-scheduling/pull/47#issuecomment-6498319349.
-  CodeRabbit (`full review`) — **V1 і V3 знайшов, обидві Major**. V3: «Якщо `input.holds` містить утримання зі
-  статусом `Expired`, цей рядок додає його час до `active`. … така година стає `Free` з `canHold: true`.» і «Підстава:
-  правило для `src/lib/slots.ts`…». V1: «Умова перевіряє роль профілю, але не того, хто виконує запит.» V2 —
-  тред першого рев'ю лишився. Разом 3 з 3. `/code-review high` — знову 3 з 3, плюс окрема знахідка з цитатою нового правила. Межа
-  висновку: по одному прогону до й після.
+Окремим файлом — [`docs/qa/retro-ws9.md`](retro-ws9.md) (план `impl-insurance-status`, пункт 3.5).

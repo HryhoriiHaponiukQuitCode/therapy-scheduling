@@ -53,7 +53,7 @@
 - [x] 3.2 Прогін на проді `npm run uat -- --url <прод>`, рецензент наосліп, звіт у `docs/qa/uat/<дата>/`
   (`report.md`, `manifest.json`, `frames/`), відео — в описі PR.
 - [x] 3.3 Негативний контроль `npm run uat:nc -- --url <прод>` → FAIL.
-- [ ] 3.4 `docs/qa/proof-pack.md` за шаблоном WS9: рядок на кожен AC-INS і розділ «Не перевірено».
-- [ ] 3.5 `docs/qa/retro-ws9.md`: до 10 рядків «що б ми взяли з фабрики».
-- [ ] 3.6 Archive `impl-insurance-status` (`npx openspec archive impl-insurance-status -y`).
+- [x] 3.4 `docs/qa/proof-pack.md` за шаблоном WS9: рядок на кожен AC-INS і розділ «Не перевірено».
+- [x] 3.5 `docs/qa/retro-ws9.md`: до 10 рядків «що б ми взяли з фабрики».
+- [x] 3.6 Archive `impl-insurance-status` (`npx openspec archive impl-insurance-status -y`).
   Done when: AC-INS-01, AC-INS-02, AC-INS-03, AC-INS-04, AC-INS-05, AC-INS-06 — UAT-рядок і рядок proof pack.
