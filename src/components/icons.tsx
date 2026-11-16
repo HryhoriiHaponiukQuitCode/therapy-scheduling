@@ -128,6 +128,15 @@ export function ErrorIcon(props: IconProps) {
   );
 }
 
+export function InfoIcon(props: IconProps) {
+  return (
+    <svg {...base("0 0 18 18", props)} strokeWidth={1.6}>
+      <circle cx="9" cy="9" r="7.2" />
+      <path d="M9 8.2v4.3M9 5.5v.2" strokeWidth={1.8} />
+    </svg>
+  );
+}
+
 // Іконки статусів 12px (розділ 4): Free — коло, Held — годинник, Confirmed — галочка, Expired — перекреслене коло.
 export function FreeIcon(props: IconProps) {
   return (

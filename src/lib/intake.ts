@@ -41,16 +41,14 @@ export function draftBirthDate(value: string | null, today: string): string {
 export type IntakeDraft = { values: ClientCardValues; missing: string[]; message: string };
 
 type RequiredField = [keyof ClientCardValues, string];
-const ADULT_REQUIRED: RequiredField[] = [
+const COMMON_REQUIRED: RequiredField[] = [
   ["full_name", "Name"],
   ["birth_date", "Date of birth"],
   ["session_language", "Session language"],
-  ["email", "Email"],
 ];
+const ADULT_REQUIRED: RequiredField[] = [...COMMON_REQUIRED, ["email", "Email"]];
 const CHILD_REQUIRED: RequiredField[] = [
-  ["full_name", "Name"],
-  ["birth_date", "Date of birth"],
-  ["session_language", "Session language"],
+  ...COMMON_REQUIRED,
   ["guardian_name", "Guardian name"],
   ["guardian_email", "Guardian email"],
 ];
@@ -89,6 +87,19 @@ export type IntakeState =
   | { status: "draft"; values: ClientCardValues; complete: boolean; message: string; request: string; at: number }
   | { status: "refused" | "unavailable" | "invalid" | "forbidden"; message: string; request: string; at: number };
 
+// Модель не відмовила, але не знайшла жодного поля нової картки: це не звернення нового клієнта (AC-INTAKE-06).
+// Правило коду, а не лише промпту: інакше порожня «чернетка» замінила б уже введене у формі.
+export function hasNoClientData(extraction: IntakeExtraction): boolean {
+  return [
+    extraction.client_name,
+    extraction.birth_date,
+    extraction.session_language,
+    extraction.client_email,
+    extraction.guardian_name,
+    extraction.guardian_email,
+  ].every((value) => value === null || value.trim() === "");
+}
+
 // Результат моделі → стан форми. Відмова й «недоступний» форму картки не змінюють (AC-INTAKE-06, 07, 08).
 export function intakeOutcome(
   result: IntakeModelResult,
@@ -97,24 +108,38 @@ export function intakeOutcome(
   at: number,
 ): Exclude<IntakeState, { status: "idle" }> {
   if (!result.ok) return { status: "unavailable", message: ASSISTANT_UNAVAILABLE_MESSAGE, request, at };
-  if (result.extraction.status === "refused") return { status: "refused", message: DRAFT_REFUSED_MESSAGE, request, at };
+  if (result.extraction.status === "refused" || hasNoClientData(result.extraction)) {
+    return { status: "refused", message: DRAFT_REFUSED_MESSAGE, request, at };
+  }
   const draft = buildIntakeDraft(result.extraction, today);
   return { status: "draft", values: draft.values, complete: draft.missing.length === 0, message: draft.message, request, at };
 }
 
+// Залежності чернетки: модель (фабрика — її будують лише для працівника), денний ліміт і годинник.
+export type IntakeDeps = {
+  model: () => LanguageModel | null;
+  takeQuota: () => Promise<boolean>;
+  now?: () => number;
+};
+
 // Чернетка для користувача, що вже увійшов (дія requestIntakeDraft перевіряє сесію через getClaims). Роль — ДО
-// виклику моделі (AC-INTAKE-09); без моделі (немає ключа) — «недоступний» (AC-INTAKE-08). Нічого не пише в базу
-// (AC-INTAKE-03): повертає значення у форму. Модель — параметром, тож тести передають записану відповідь.
+// моделі й ліміту (AC-INTAKE-09); без моделі (немає ключа) чи з вичерпаним денним лімітом — «недоступний»
+// (AC-INTAKE-08). Нічого не пише в картки (AC-INTAKE-03): повертає значення у форму. `at` — час ВІДПОВІДІ: форма
+// порівнює його з часом дії «Create client», тож чернетка, що прийшла останньою, не губиться.
 export async function draftIntakeFor(
   role: string | null,
   rawRequest: string,
-  model: LanguageModel | null,
   today: string,
-  at: number = Date.now(),
+  deps: IntakeDeps,
 ): Promise<Exclude<IntakeState, { status: "idle" }>> {
+  const now = deps.now ?? Date.now;
   const request = rawRequest.slice(0, INTAKE_REQUEST_MAX);
-  if (!isStaff(role)) return { status: "forbidden", message: CLIENT_FORBIDDEN_MESSAGE, request: "", at };
-  if (!request.trim()) return { status: "invalid", message: INTAKE_EMPTY_MESSAGE, request, at };
-  if (!model) return { status: "unavailable", message: ASSISTANT_UNAVAILABLE_MESSAGE, request, at };
-  return intakeOutcome(await proposeIntake(request, model), today, request, at);
+  if (!isStaff(role)) return { status: "forbidden", message: CLIENT_FORBIDDEN_MESSAGE, request: "", at: now() };
+  if (!request.trim()) return { status: "invalid", message: INTAKE_EMPTY_MESSAGE, request, at: now() };
+  const model = deps.model();
+  if (!model || !(await deps.takeQuota())) {
+    return { status: "unavailable", message: ASSISTANT_UNAVAILABLE_MESSAGE, request, at: now() };
+  }
+  const result = await proposeIntake(request, model);
+  return intakeOutcome(result, today, request, now());
 }

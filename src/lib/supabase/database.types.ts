@@ -164,6 +164,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      take_intake_draft_quota: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
       hold_slot: {
         Args: {
           p_therapist_id: string;

@@ -33,8 +33,18 @@ export async function proposeIntake(
     // result.output уже перевірено за схемою (інакше — NoObjectGeneratedError).
     return { ok: true, extraction: result.output, modelId: result.response.modelId };
   } catch (error) {
-    return classifyError(error);
+    const failure = classifyError(error);
+    // Журнал сервера (Vercel): причина й код, щоб відрізнити 401 / 404 / 429 / 529 / таймаут. Тексту звернення,
+    // ключа й повідомлення постачальника тут немає.
+    console.error("[intake] model call failed", { reason: failure.reason, ...errorDetails(error) });
+    return failure;
   }
+}
+
+function errorDetails(error: unknown): { status?: unknown; name?: string } {
+  const cause = RetryError.isInstance(error) ? error.lastError : error;
+  if (APICallError.isInstance(cause)) return { status: apiErrorCode(cause), name: cause.name };
+  return { name: cause instanceof Error ? cause.name : typeof cause };
 }
 
 // Код помилки API: HTTP-статус або, для HTTP 200 з тілом помилки, data.code.

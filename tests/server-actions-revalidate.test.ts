@@ -7,6 +7,9 @@ import { describe, expect, it } from "vitest";
 // сторінок від будь-якого revalidatePath документація Next.js називає тимчасовим — на нього не покладаємось.
 const SRC = join(process.cwd(), "src");
 const MUTATION = /\.(insert|update|upsert|delete)\(|\.rpc\(/;
+// RPC, що змінює лише службовий лічильник у схемі private (денний ліміт чернеток, AC-INTAKE-08): жодна сторінка
+// його не показує, тож кеш скидати нічого.
+const PAGE_NEUTRAL = /\.rpc\("take_intake_draft_quota"\)/g;
 
 // Які сторінки показують дані, що змінює виклик: ці шляхи action має скинути.
 const DEPENDENT_PATHS: { call: RegExp; paths: string[] }[] = [
@@ -33,7 +36,7 @@ const actions = files(SRC)
       body: source.slice(match.index, starts[i + 1]?.index ?? source.length),
     }));
   });
-const mutating = actions.filter((action) => MUTATION.test(action.body));
+const mutating = actions.filter((action) => MUTATION.test(action.body.replace(PAGE_NEUTRAL, "")));
 
 describe("server actions скидають кеш навігації", () => {
   it("знаходить дії, що змінюють дані", () => {
