@@ -15,7 +15,7 @@
 
 ## 2. Прод і UAT
 
-- [ ] 2.1 `ANTHROPIC_API_KEY` у Vercel Production; прод на SHA `main`.
-- [ ] 2.2 UAT на проді: AC-INTAKE-03 (чернетка без дії людини не створює картку) і AC-INTAKE-06 (відмова);
-  звіт у `docs/qa/uat/<дата>/`.
+- [x] 2.1 `ANTHROPIC_API_KEY` у Vercel Production; прод на SHA `main`.
+- [x] 2.2 UAT на проді: AC-INTAKE-03 (чернетка без дії людини не створює картку) і AC-INTAKE-06 (відмова);
+  звіт у `docs/qa/uat/<дата>/` (зроблено `docs/qa/uat/2026-11-16/`: ще AC-INTAKE-01 і AC-INTAKE-09).
   Done when: AC-INTAKE-03 — тест зелений, рядок «реалізовано»; archive `impl-client-intake`.

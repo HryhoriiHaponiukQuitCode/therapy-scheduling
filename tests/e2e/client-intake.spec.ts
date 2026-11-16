@@ -19,12 +19,11 @@ async function requestDraft(page: Page, text: string) {
   await page.getByRole("button", { name: "Draft card", exact: true }).click();
 }
 
-const card = (page: Page) => page.locator("#client-card");
-
 test.afterEach(async ({ page }) => attachRuntimeErrors(page));
 
 test.describe("планувальник", () => {
-  test.use({ storageState: auth("scheduler1") });
+  // Висока сторінка: поле запиту й уся форма картки (до Email) мають бути в одному кадрі «Тоді».
+  test.use({ storageState: auth("scheduler1"), viewport: { width: 1280, height: 1500 } });
 
   test(
     "AC-INTAKE-01: scheduler1 просить скласти чернетку з тексту звернення Client Ten — форма заповнена, «Draft ready. Check the fields and create the card.»",
@@ -117,7 +116,7 @@ test.describe("планувальник", () => {
         { clause: "поля форми не змінено (Name лишається «Client Fifteen»)", visible: ["поле Name зі значенням Client Fifteen"] },
         async () => {
           await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Client Fifteen");
-          await expect(card(page).getByRole("combobox", { name: "Client type" })).toContainText("Select a client type");
+          await expect(page.getByRole("combobox", { name: "Client type" })).toContainText("Select a client type");
         },
       );
 
